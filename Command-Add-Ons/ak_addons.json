@@ -1,0 +1,16 @@
+{
+  "version": 2,
+  "commands": [
+    {
+        "id": "waapi_sortOriginals",
+        "displayName": "Sort Originals",
+        "program": "python",
+        "startMode": "MultipleSelectionSingleProcessSpaceSeparated",
+        "args": "\"D:/Git/WwiseHelpers/Command-Add-Ons/autosort originals/autosort_originals.py\" ${id}",
+        "redirectOutputs": false,
+        "contextMenu": {
+            "basePath": "WAAPI"
+        }
+    }
+  ]
+}
