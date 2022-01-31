@@ -1,9 +1,9 @@
-# Wwise Command Add Ons
+# Wwise Command DAdd Ons
 This is a small collection of Add-Ons, Scripts etc that can help improve your Workflow with Wwise and add functionality and features.
-Currently there are following projects that one could try out
+Currently there are following projects that one could try out:
 
 1. [Sort Originals](#sortOriginals)
-2. [Delete Empty Events]{#deleteEmptyEvents}
+2. [Delete Empty Events](#deleteEmptyEvents)
 
 ## Sort Originals <a name="sortOriginals"></a>
 There are 4 container inside Wwise, that can create a folder in the Originals Path.
@@ -16,11 +16,13 @@ There are 4 container inside Wwise, that can create a folder in the Originals Pa
 
 One could also use all Wwise Containers, but it would result in very long folder paths with often only one .wav file in it. Like that A folder could indicate a new feature and hence structure the originals accordingly.
 
-To start the process just "WAAPI->Sort Originals" 
+To start the process just go to the WAAPI Rider and click "Sort Originals".
 
 ![waapi](https://user-images.githubusercontent.com/40822700/151866644-43589973-9cdc-4bcf-a0f0-68310789bd8a.PNG)
 
 
 
 ## Delete empty Events <a name="deleteEmptyEvents"></a>
+With this command you delete every event that is empty. Go to the WAAPI Rider and just click "Delete empty events".
 
+![delete](https://user-images.githubusercontent.com/40822700/151884604-a4b48198-1e82-4a72-80ae-d77499ccb9f6.PNG)
