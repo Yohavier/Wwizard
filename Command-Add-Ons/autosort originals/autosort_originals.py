@@ -1,10 +1,7 @@
 import shutil
-from datetime import datetime
 import os
-import subprocess
 from pathlib import Path
 import xml.etree.ElementTree as ET
-import remove_dir
 from waapi import WaapiClient
 
 #Paths that are needed
@@ -17,8 +14,8 @@ interactiveMusicWwuPath = ""
 wavFileDic = {}
 SFXUseDic = {}
 
-actorMixerWwu = []
-interactiveMusicWwu = []
+actorMixerWwu = {}
+interactiveMusicWwu = {}
 
 def set_paths(client):
     global w_proj_path
@@ -41,6 +38,13 @@ def get_files_in_dir(result, dir, suffix):
             get_files_in_dir(result, path, suffix)
         elif path.suffix == suffix:
             result.append(str(path))
+
+def get_wwu_in_dir(result, dir, suffix):
+    for path in Path(dir).iterdir():
+        if path.is_dir():
+            get_wwu_in_dir(result, path, suffix)
+        elif path.suffix == suffix:
+            result[os.path.basename(path)] = path
 
 def create_sfxDic(dir):
     global audio_file_use_dic
@@ -67,29 +71,29 @@ def create_folders_from_wwu_hierarchy(directory, attachment):
                 new_attachment = "\\" + attachment + "\\" + str(os.path.basename(path)).replace(".wwu", "")
                 create_workspace_folder(originalsPath + new_attachment)
 
-def createFolderStructure(path, wwuXmlRoot, isinit):
+def createFolderStructure(path, wwuXmlRoot, isinit, wwuPhysicalPath):
     for child in wwuXmlRoot:
         if child.tag == 'WorkUnit':
             if child.attrib['PersistMode'] == 'Standalone':
                 isinit = False
                 newPath = path + "\\" + child.attrib['Name']
                 create_workspace_folder(newPath)
-                createFolderStructure(newPath, child, isinit)
+                createFolderStructure(newPath, child, isinit, wwuPhysicalPath)
 
             elif child.attrib['PersistMode'] == 'Reference' and not isinit:
-                referenceWwuTree = ET.parse(actorMixerWwuPath + '\\' + child.attrib['Name'] + '.wwu')
+                referenceWwuTree = ET.parse(wwuPhysicalPath + '\\' + child.attrib['Name'] + '.wwu')
                 referenceWwuXmlRoot = referenceWwuTree.getroot()
-                createFolderStructure(path, referenceWwuXmlRoot, isinit)
+                createFolderStructure(path, referenceWwuXmlRoot, isinit, wwuPhysicalPath)
 
             elif child.attrib['PersistMode'] == 'Nested' and not isinit:
                 newPath = path + "\\" + child.attrib['Name']
                 create_workspace_folder(newPath)
-                createFolderStructure(newPath, child, isinit)
+                createFolderStructure(newPath, child, isinit, wwuPhysicalPath)
 
         elif child.tag == 'Folder' or child.tag == 'ActorMixer':
             newPath = path + "\\" + child.attrib['Name']
             create_workspace_folder(newPath)
-            createFolderStructure(newPath, child, isinit)
+            createFolderStructure(newPath, child, isinit, wwuPhysicalPath)
 
         else:
             if child.tag == "Sound" or child.tag == "MusicTrack":
@@ -99,7 +103,7 @@ def createFolderStructure(path, wwuXmlRoot, isinit):
                 if child.text in wavFileDic.keys():
                     wavFileDic[child.text] = wavFileDic[child.text] + 1
 
-            createFolderStructure(path, child, isinit)
+            createFolderStructure(path, child, isinit, wwuPhysicalPath)
 
 def get_wwise_xml_sound_info(root, folder_path, sound_name):
     global SFXUseDic
@@ -148,6 +152,23 @@ def reorder_entry(path, sound):
         else:
             reorder_entry(child, sound)
 
+def createFoldersFromPath(path):
+    path = path[1:]
+    layers = path.split("\\")
+    currentPath = ''
+    for layer in layers:
+        currentPath += '\\'+layer
+        create_workspace_folder(originalsPath+currentPath)
+
+def checkStandalone(wwuToCheck):
+    wwuTree = ET.parse(wwuToCheck)
+    wwuXmlRoot = wwuTree.getroot()
+    for child in wwuXmlRoot:
+        for first in child:
+            if first.tag == "WorkUnit":
+                if first.attrib['PersistMode'] == "Standalone":
+                    return True
+    return False
 
 with WaapiClient() as client:
     #Set all needed paths
@@ -157,8 +178,8 @@ with WaapiClient() as client:
     create_sfxDic(originalsPath)
 
     #find all wwu`s
-    get_files_in_dir(actorMixerWwu, actorMixerWwuPath, ".wwu")
-    get_files_in_dir(interactiveMusicWwu, interactiveMusicWwuPath, ".wwu")
+    get_wwu_in_dir(actorMixerWwu, actorMixerWwuPath, ".wwu")
+    get_wwu_in_dir(interactiveMusicWwu, interactiveMusicWwuPath, ".wwu")
 
     #Create the three folders where we want to sort the files
     create_workspace_folder(originalsPath + "\\Actor-Mixer Hierarchy")
@@ -168,20 +189,37 @@ with WaapiClient() as client:
     #create wwu folder structure
     #3 types create new folders "wwu", "virtual folders", "Actor-Mixers"
     for wwu in actorMixerWwu:
-        wwuTree = ET.parse(wwu)
+        wwuTree = ET.parse(actorMixerWwu[wwu])
         wwuXmlRoot = wwuTree.getroot()
-        createFolderStructure(originalsPath + '\\Actor-Mixer Hierarchy', wwuXmlRoot, True)
+
+        path = str(actorMixerWwu[wwu]).replace(w_proj_path, "")
+
+        if checkStandalone(actorMixerWwu[wwu]):
+            createFoldersFromPath(path.replace('.wwu', ''))
+
+            path = str(originalsPath) + path.replace('\\' + wwu, '')
+
+            physicalWwuPath = str(actorMixerWwu[wwu]).replace('\\' + os.path.basename(str(actorMixerWwu[wwu])), "")
+            createFolderStructure(path, wwuXmlRoot, True, physicalWwuPath)
 
     for wwu in interactiveMusicWwu:
-        wwuTree = ET.parse(wwu)
+        wwuTree = ET.parse(interactiveMusicWwu[wwu])
         wwuXmlRoot = wwuTree.getroot()
-        createFolderStructure(originalsPath + '\\Interactive Music Hierarchy', wwuXmlRoot, True)
+
+        path = str(interactiveMusicWwu[wwu]).replace(w_proj_path, "")
+        createFoldersFromPath(path.replace('.wwu', ''))
+
+        path = str(originalsPath) + path.replace('\\' + wwu, '')
+
+        physicalWwuPath = str(interactiveMusicWwu[wwu]).replace('\\' + os.path.basename(str(interactiveMusicWwu[wwu])), "")
+
+        createFolderStructure(path, wwuXmlRoot, True, physicalWwuPath)
 
     #iterate through wwu xml and
     for wwu in actorMixerWwu:
-        wwu_tree = ET.parse(wwu)
+        wwu_tree = ET.parse(actorMixerWwu[wwu])
         wwu_xml_root = wwu_tree.getroot()
-        reorder(wwu_xml_root)
-        wwu_tree.write(wwu)
+        #reorder(wwu_xml_root)
+        #wwu_tree.write(actorMixerWwu[wwu])
 
 
