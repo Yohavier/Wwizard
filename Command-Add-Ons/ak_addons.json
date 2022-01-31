@@ -5,8 +5,8 @@
             "id": "waapi.sortOriginals",
             "displayName": "Sort Originals",
             "program": "python",
-            "startMode": "MultipleSelectionSingleProcessSpaceSeparated",
-            "args": "\"D:/Git/WwiseHelpers/Command-Add-Ons/autosort_originals/autosort_originals.py\"",
+ 
+            "args": "\"D:/Git/WwiseHelpers/Command-Add-Ons/autosort_originals.py\"",
             "redirectOutputs": false,
             "mainMenu": {
                 "basePath": "WAAPI"
