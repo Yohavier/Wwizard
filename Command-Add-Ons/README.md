@@ -15,6 +15,6 @@ There are 4 container inside Wwise, that can create a folder in the Originals Pa
 
 One could also use all Wwise Containers, but it would result in very long folder paths with often only one .wav file in it. Like that A folder could indicate a new feature and hence structure the originals accordingly.
 
-To start the process just rightclick somewhere and select "WAAPI->Sort Originals"
+To start the process just "WAAPI->Sort Originals" 
 
-![Sortpic](https://user-images.githubusercontent.com/40822700/151835812-0122faf5-c126-485a-b21b-490b822b89eb.PNG)
+![waapi](https://user-images.githubusercontent.com/40822700/151866644-43589973-9cdc-4bcf-a0f0-68310789bd8a.PNG)
