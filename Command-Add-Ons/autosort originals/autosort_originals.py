@@ -3,6 +3,7 @@ import os
 from pathlib import Path
 import xml.etree.ElementTree as ET
 from waapi import WaapiClient
+import remove_dir
 
 #Paths that are needed
 w_proj_path = ""
@@ -137,17 +138,19 @@ def reorder_entry(path, sound):
             for audioFileSource in child:
                 if audioFileSource.tag == 'AudioFile':
                     #wav file is used in multiple containers
-                    if wavFileDic[audioFileSource.text] > 1:
-                        try:
-                            shutil.move(originalsPath + '\\' + audioFileSource.text ,originalsPath+ '\\' + 'MultiUse' + '\\' + audioFileSource.text)
-                        except:
-                            print('was already moved')
-                        audioFileSource.text = 'MultiUse\\'+ sound + '.wav'
+                    if audioFileSource.text in wavFileDic.keys():
+                        if wavFileDic[audioFileSource.text] > 1:
+                            try:
+                                shutil.move(originalsPath + '\\' + audioFileSource.text, originalsPath + '\\' + 'MultiUse' + '\\' + os.path.basename(audioFileSource.text))
+                            except:
+                                print('was already moved')
 
-                    else:
-                        new_path = SFXUseDic[sound]["AudioFileSource"][0]['New_Path'] + "\\" + os.path.basename(audioFileSource.text)
-                        shutil.move(originalsPath + '\\' + audioFileSource.text, new_path)
-                        audioFileSource.text = new_path.replace(originalsPath + '\\', '')
+                            audioFileSource.text = 'MultiUse\\' + os.path.basename(audioFileSource.text)
+
+                        else:
+                            new_path = SFXUseDic[sound]["AudioFileSource"][0]['New_Path'] + "\\" + os.path.basename(audioFileSource.text)
+                            shutil.move(originalsPath + '\\' + audioFileSource.text, new_path)
+                            audioFileSource.text = new_path.replace(originalsPath + '\\', '')
 
         else:
             reorder_entry(child, sound)
@@ -169,6 +172,12 @@ def checkStandalone(wwuToCheck):
                 if first.attrib['PersistMode'] == "Standalone":
                     return True
     return False
+
+def deleteObsoleteWav():
+    for key in wavFileDic.keys():
+        if wavFileDic[key] == 0:
+            os.remove(originalsPath + '\\' + key)
+
 
 with WaapiClient() as client:
     #Set all needed paths
@@ -196,7 +205,6 @@ with WaapiClient() as client:
 
         if checkStandalone(actorMixerWwu[wwu]):
             createFoldersFromPath(path.replace('.wwu', ''))
-
             path = str(originalsPath) + path.replace('\\' + wwu, '')
 
             physicalWwuPath = str(actorMixerWwu[wwu]).replace('\\' + os.path.basename(str(actorMixerWwu[wwu])), "")
@@ -207,19 +215,26 @@ with WaapiClient() as client:
         wwuXmlRoot = wwuTree.getroot()
 
         path = str(interactiveMusicWwu[wwu]).replace(w_proj_path, "")
-        createFoldersFromPath(path.replace('.wwu', ''))
 
-        path = str(originalsPath) + path.replace('\\' + wwu, '')
+        if checkStandalone(actorMixerWwu[wwu]):
+            createFoldersFromPath(path.replace('.wwu', ''))
+            path = str(originalsPath) + path.replace('\\' + wwu, '')
 
-        physicalWwuPath = str(interactiveMusicWwu[wwu]).replace('\\' + os.path.basename(str(interactiveMusicWwu[wwu])), "")
-
-        createFolderStructure(path, wwuXmlRoot, True, physicalWwuPath)
+            physicalWwuPath = str(interactiveMusicWwu[wwu]).replace('\\' + os.path.basename(str(interactiveMusicWwu[wwu])), "")
+            createFolderStructure(path, wwuXmlRoot, True, physicalWwuPath)
 
     #iterate through wwu xml and
     for wwu in actorMixerWwu:
         wwu_tree = ET.parse(actorMixerWwu[wwu])
         wwu_xml_root = wwu_tree.getroot()
-        #reorder(wwu_xml_root)
-        #wwu_tree.write(actorMixerWwu[wwu])
+        reorder(wwu_xml_root)
+        wwu_tree.write(actorMixerWwu[wwu])
 
+    for wwu in interactiveMusicWwu:
+        wwu_tree = ET.parse(interactiveMusicWwu[wwu])
+        wwu_xml_root = wwu_tree.getroot()
+        reorder(wwu_xml_root)
+        wwu_tree.write(interactiveMusicWwu[wwu])
 
+    deleteObsoleteWav()
+    remove_dir.removeEmptyFolders(originalsPath)
