@@ -30,6 +30,16 @@ def walk_through_wwu(wwu_xml_root):
         if child.tag == "Event":
             if is_event_empty(child):
                 eventsToDelete.append(child.attrib['ID'])
+                continue
+            for eventAction in child:
+                if is_event_empty(eventAction):
+                    eventsToDelete.append(child.attrib['ID'])
+                for actionReference in eventAction:
+                    if is_event_empty(actionReference):
+                        eventsToDelete.append(child.attrib['ID'])
+                    else:
+                        if child.attrib['ID'] in eventsToDelete:
+                            eventsToDelete.remove(child.attrib['ID'])
         else:
             walk_through_wwu(child)
 
