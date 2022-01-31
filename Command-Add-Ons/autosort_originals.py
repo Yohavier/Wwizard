@@ -3,7 +3,7 @@ import os
 from pathlib import Path
 import xml.etree.ElementTree as ET
 from waapi import WaapiClient
-import remove_dir
+from helpers import remove_dir
 
 #Paths that are needed
 w_proj_path = ""
@@ -25,7 +25,6 @@ def set_paths(client):
     global interactiveMusicWwuPath
 
     query = {"from": {"path": ['\\Actor-Mixer Hierarchy']}}
-    #opt = {"return": ['type']}
     queryResult = client.call("ak.wwise.core.object.get", query, options={'return': ['filePath']})
 
     w_proj_path = os.path.dirname(queryResult['return'][0]['filePath'])

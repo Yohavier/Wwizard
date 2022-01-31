@@ -1,16 +1,26 @@
 {
-  "version": 2,
-  "commands": [
-    {
-        "id": "waapi_sortOriginals",
-        "displayName": "Sort Originals",
-        "program": "python",
-        "startMode": "MultipleSelectionSingleProcessSpaceSeparated",
-        "args": "\"D:/Git/WwiseHelpers/Command-Add-Ons/autosort originals/autosort_originals.py\" ${id}",
-        "redirectOutputs": false,
-        "contextMenu": {
-            "basePath": "WAAPI"
+    "version": 2,
+    "commands": [
+        {
+            "id": "waapi.sortOriginals",
+            "displayName": "Sort Originals",
+            "program": "python",
+            "startMode": "MultipleSelectionSingleProcessSpaceSeparated",
+            "args": "\"D:/Git/WwiseHelpers/Command-Add-Ons/autosort_originals/autosort_originals.py\"",
+            "redirectOutputs": false,
+            "mainMenu": {
+                "basePath": "WAAPI"
+            }
+        },
+        {
+            "id": "waapi.delete_empty_events",
+            "displayName": "Delete empty events",
+            "program": "python",
+            "args": "\"D:/Git/WwiseHelpers/Command-Add-Ons/delete_empty_events.py\"",
+            "redirectOutputs": true,
+            "mainMenu": {
+                "basePath": "WAAPI"
+            }
         }
-    }
-  ]
+    ]
 }
