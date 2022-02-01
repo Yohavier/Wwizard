@@ -1,14 +1,14 @@
 # Wwise Naming Convention
 
 ## Summary 
-- [Intention](#intention)
+- [Goals](#goals)
 - [Rules](#rules)
 - [Naming](#naming)
 - [Prefix](#prefix)
 
 
 
-## Intention <a name="intention"></a>
+## Goals <a name="goals"></a>
 A naming convention is a set of rules for choosing the character sequence to be used for identifiers. Inconsistencies lead to a lot of edge cases and context-specific convetions only turn into temporary solutions instead of a non-context-dependent design management tool.
 
 Solid naming convention promotes:
@@ -16,7 +16,7 @@ Solid naming convention promotes:
 - Easier understanding
 - Easier collaboration with others
 
-#### Goals
+The goal of this naming convention is that every name matches with the following 
 - Readable
 - Parsable
 - Explicit
