@@ -1,5 +1,11 @@
 # Wwise Naming Convention
 
+## Summary 
+- [Intention](#intention)
+- [Rules](#rules)
+- [Containers](#containers)
+
+## Intention <a name="intention"></a>
 A naming convention is a set of rules for choosing the character sequence to be used for identifiers. Inconsistencies lead to a lot of edge cases and context-specific convetions only turn into temporary solutions instead of a non-context-dependent design management tool.
 
 Solid naming convention promotes:
@@ -7,13 +13,14 @@ Solid naming convention promotes:
 - Easier understanding
 - Easier collaboration with others
 
-## Goals
+#### Goals
 - Readable
 - Parsable
 - Explicit
 - As long as necessary, as short as possible
 
-# Universal Rules
+
+## Rules <a name="rules"></a>
 - All lower case
 - snake_case is always a new layer of description
 - Acronyms can be 2/3 letters
@@ -25,10 +32,80 @@ Solid naming convention promotes:
   * Create custom words for example medical center = medcenter
   * Just write the words together 
 
-# Additional Rules 
+
+#### Additional Rules 
 - Eventsuffix can be _lp, _start, _stop
 - Versions 0 to 99
 
+
+## Containers <a name="containers"></a>
+First we want to get an overview of what containers there are and what can be named.
+
+#### Audio Tab
+| Master-Mixer Hierarchy | Actor-Mixer Hierarchy | Interactive Music Hierarchy | Audio Devices |
+| ---------------------- | --------------------- | --------------------------- | ------------- |
+| Physical Folder        | Physical Folder       | Physical Folder             | Physical Folder|
+| Virtual Folder         | Virtual Folder        | Virtual Folder              | Virtual Folder|
+| Audio Bus              | Work Unit             | Work Unit                   | Work Unit    |
+| Auxillary Bus          | Actor-Mixer           | Music Switch Container      | Audio Device |
+|                        | Random Container      | Music Playlist Container    |              |
+|                        | Sequence Container    | Music Segment               |              |
+|                        | Switch Container      | Music Track<ul><li>Cue</li></ul>|          |
+|                        | Blend Container<ul><li>Blend Track</li></ul>| Transitions|         |
+|                        | Sound SFX<ul><li>Source</li></ul>|                  |              |
+|                        | Sound Voice<ul><li>Source</li></ul>|                |              |
+|                        | Path (Position Editor)|                             |              |
+
+#### Events                                              
+| Events | Dynamic Dialogue |
+| ---------------------- | --------------------- | 
+| Physical Folder        | Physical Folder       |
+| Virtual Folder         | Virtual Fodler        |
+| Work Unit              | Work Unit             |
+| Event                  | Dialogue Event        |
+
+#### SoundBanks
+| SoundBanks | 
+| ---------------------- |
+| Physical Folder        |
+| Virtual Folder         | 
+| Work Unit              | 
+| SoundBank              | 
+
+#### Game Syncs
+| Switches | States | Game Parameters | Triggers |
+| -------- | ------ | --------------- | -------- |
+| Physical Folder| Physical Folder | Physical Folder | Physical Folder |
+| Virtual Folder| Virtual Folder | Virtual Fodler | Virtual Folder |
+| Work Unit| Work Unit | Work Unit | Work Unit |
+| Switch Group| State Group| Game Parameter | Trigger |
+| Switch   | State |                  |          |
+
+#### ShareSets
+| Effects | Attenuations | Conversion Settings | Modulators | Virtual Acoustics | Metadata |
+| ------- | ------------ | ------------------- | ---------- | ----------------- | -------- |
+| Physical Fodler | Physical Folder | Physical Folder | Physical Folder | Physical Folder | Physical Folder |
+| Virtual Folder | Virtual Folder | Virtual Folder | Virtual Folder | Virtual Folder | Virtual Folder |
+| Work Unit | Work Unit  | Work Unit           | Work Unit  | Work Unit         | Work Unit | 
+| Effect  | Attenuation  | Conversion Setting  | Modulator LFO | Acoustic Texture | Wwise System Output Settings |
+|         |              |                     | Modulator Envelope |           |           |
+|         |              |                     | Modulator Time |               |           |
+
+#### Sessions
+| Soundcaster Session | Mixing Session | Control Surface Session |
+| ------------------- | -------------- | ----------------------- |
+| Physical Folder     | Physical Folder | Physical Folder        | 
+| Virtual Folder      | Virtual Folder | Virtual Fodler          |
+| Work Unit           | Work Unit      | Work Unit               |
+| Soundcaster Session | Mixing Session | Control Surface Session<ul><li>Group</li></ul>|
+
+#### Queries
+| Queries |
+| ------- | 
+| Physical Folder |
+| Virtual Folder | 
+| Work Unit |
+| Query |
 
 ### Work Units
 - Master-Mixer Hierarchy = mxh_
@@ -52,158 +129,3 @@ Solid naming convention promotes:
 - Conversion Settings = con_
 - Attenuations = att_
 - Effects = fx_
-
-
-# Things that can be named in Wwise
-
-## Special Containers
-- Physical Folder
-
-### Actor-Mixer Hierarchy Containers
-- Virtual Folder
-- Actor-Mixer
-- Random Container
-- Sequence Container
-- Switch Container 
-- Blend Container
-  * Blend Track
-- Sound SFX
-  * Source
-- Sound Voice
-  * Source
-- Work Unit
-
-### Master-Mixer Hierarchy
-- Virtual Folder
-- Work Unit
-- Audio Bus
-- Auxillary Bus
-
-### Interactive Music Hierarchy
-- Virtual Folder
-- Work Unit
-- Music Switch Container 
-- Music Playlist Container
-- Music Segment
-- Music Track
-
-### Audio Devices
-- Physical Folder
-- Virtual Folder
-- Work Unit
-- Audio Device
-
-### Events
-- Physical Folder
-- Virtual Folder
-- Work Unit
-- Event
-
-### Dynamic Dialogue
-- Physical Folder
-- Virtual Folder
-- Work Unit
-- Dialogue Event
-
-### SoundBanks
-- Physical Folder
-- Virtual Folder
-- Work Unit
-- SoundBank
-
-### Switches
-- Physical Folder
-- Virtual Folder
-- Work Unit
-- Switch Group
-- Switch
-
-### States
-- Physical Folder
-- Virtual Folder
-- Work Unit
-- State Group
-- State
-
-### Game Parameters
-- Physical Folder
-- Virtual Folder
-- Work Unit
-- Game Parameter
-
-### Triggers
-- Physical Folder
-- Virtual Folder
-- Work Unit
-- Trigger
-
-### Queries 
-- Physical Folder
-- Virtual Folder
-- Work Unit
-- Query
-
-### Soundcaster Session
-- Physical Folder
-- Virtual Folder
-- Work Unit
-- Soundcaster Session 
-
-### Mixing Session
-- Physical Folder
-- Virtual Folder
-- Work Unit
-- Mixing Session
-
-### Control Surface Session
-- Physical Folder
-- Virtual Folder
-- Work Unit
-- Control Surface Session 
-  * group
-  * 
-
-### Effects 
-- Physical Folder
-- Virtual Folder
-- Work Unit
-- Effect
-
-### Attenuations
-- Physical Folder
-- Virtual Folder
-- Work Unit
-- Attenuation 
-
-### Conversion Settings
-- Physical Folder
-- Virtual Folder
-- Work Unit
-- Conversion Setting 
-
-### Modulators 
-- Physical Folder
-- Virtual Folder
-- Work Unit
-- Modulator LFO
-- Modulator Envelope
-- Modulator Time
-
-### Virtual Acoustics
-- Physical Folder
-- Virtual Folder
-- Work Unit
-- Acoustic Texture
-
-### Metadata
-- Physical Folder
-- Virtual Folder
-- Work Unit
-- Wwise System Output Settings 
-
-### Position Editor (3D Automation)
-- Path
-
-### Music 
-- Transitions
-- Cues
