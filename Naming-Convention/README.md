@@ -3,7 +3,10 @@
 ## Summary 
 - [Intention](#intention)
 - [Rules](#rules)
-- [Containers](#containers)
+- [Naming](#naming)
+- [Prefix](#prefix)
+
+
 
 ## Intention <a name="intention"></a>
 A naming convention is a set of rules for choosing the character sequence to be used for identifiers. Inconsistencies lead to a lot of edge cases and context-specific convetions only turn into temporary solutions instead of a non-context-dependent design management tool.
@@ -18,6 +21,7 @@ Solid naming convention promotes:
 - Parsable
 - Explicit
 - As long as necessary, as short as possible
+
 
 
 ## Rules <a name="rules"></a>
@@ -38,94 +42,67 @@ Solid naming convention promotes:
 - Versions 0 to 99
 
 
-## Containers <a name="containers"></a>
-First we want to get an overview of what containers there are and what can be named.
 
-#### Audio Tab
-| Master-Mixer Hierarchy | Actor-Mixer Hierarchy | Interactive Music Hierarchy | Audio Devices |
-| ---------------------- | --------------------- | --------------------------- | ------------- |
-| Physical Folder        | Physical Folder       | Physical Folder             | Physical Folder|
-| Virtual Folder         | Virtual Folder        | Virtual Folder              | Virtual Folder|
-| Audio Bus              | Work Unit             | Work Unit                   | Work Unit    |
-| Auxillary Bus          | Actor-Mixer           | Music Switch Container      | Audio Device |
-|                        | Random Container      | Music Playlist Container    |              |
-|                        | Sequence Container    | Music Segment               |              |
-|                        | Switch Container      | Music Track<ul><li>Cue</li></ul>|          |
-|                        | Blend Container<ul><li>Blend Track</li></ul>| Transitions|         |
-|                        | Sound SFX<ul><li>Source</li></ul>|                  |              |
-|                        | Sound Voice<ul><li>Source</li></ul>|                |              |
-|                        | Path (Position Editor)|                             |              |
+## Naming <a name="naming"></a>
+We can pretty much split up the naming convention into two parts. 
+- Hierarchical Naming
+- Non Hierarchical Naming
 
-#### Events                                              
-| Events | Dynamic Dialogue |
-| ---------------------- | --------------------- | 
-| Physical Folder        | Physical Folder       |
-| Virtual Folder         | Virtual Fodler        |
-| Work Unit              | Work Unit             |
-| Event                  | Dialogue Event        |
+There is a lot that we can name according to the Hierarchy and the Rules set in [Rules](#rules), those are handled in this [Chapter](#hierarchicalNaming).
+The rest is being discussed in [Non Hierarchical Naming](#nonHierarchicalNaming).
 
-#### SoundBanks
-| SoundBanks | 
-| ---------------------- |
-| Physical Folder        |
-| Virtual Folder         | 
-| Work Unit              | 
-| SoundBank              | 
+### Hierarchical Naming <a name="hierarchicalNaming"></a>
 
-#### Game Syncs
-| Switches | States | Game Parameters | Triggers |
-| -------- | ------ | --------------- | -------- |
-| Physical Folder| Physical Folder | Physical Folder | Physical Folder |
-| Virtual Folder| Virtual Folder | Virtual Fodler | Virtual Folder |
-| Work Unit| Work Unit | Work Unit | Work Unit |
-| Switch Group| State Group| Game Parameter | Trigger |
-| Switch   | State |                  |          |
+> Tipp: For things up high in the hierarchy use something short names or better an abbreviations, since the Hierarchy below will inherit that name. 
 
-#### ShareSets
-| Effects | Attenuations | Conversion Settings | Modulators | Virtual Acoustics | Metadata |
-| ------- | ------------ | ------------------- | ---------- | ----------------- | -------- |
-| Physical Fodler | Physical Folder | Physical Folder | Physical Folder | Physical Folder | Physical Folder |
-| Virtual Folder | Virtual Folder | Virtual Folder | Virtual Folder | Virtual Folder | Virtual Folder |
-| Work Unit | Work Unit  | Work Unit           | Work Unit  | Work Unit         | Work Unit | 
-| Effect  | Attenuation  | Conversion Setting  | Modulator LFO | Acoustic Texture | Wwise System Output Settings |
-|         |              |                     | Modulator Envelope |           |           |
-|         |              |                     | Modulator Time |               |           |
+|Physical Folder|Virtual Folder|Actor-Mixer|Random Container|Sequence Container|Switch Container|Blend Container|Sound SFX|Sound Voice|
+|--------------|-----------|----------------|------------------|----------------|---------------|---------|-----------|-|
+|Music Switch Container|Music Playlist Container|Music Segment Container|Music Track|Event|Dialogue Event|Sound SFX Source|Sound Voice Source|
 
-#### Sessions
-| Soundcaster Session | Mixing Session | Control Surface Session |
-| ------------------- | -------------- | ----------------------- |
-| Physical Folder     | Physical Folder | Physical Folder        | 
-| Virtual Folder      | Virtual Folder | Virtual Fodler          |
-| Work Unit           | Work Unit      | Work Unit               |
-| Soundcaster Session | Mixing Session | Control Surface Session<ul><li>Group</li></ul>|
 
-#### Queries
-| Queries |
-| ------- | 
-| Physical Folder |
-| Virtual Folder | 
-| Work Unit |
-| Query |
+|SoundBank|Game Parameter|Trigger|State Group|State|Switch Group|Switch|Attenuation|
+|---------|--------------|-------|-----------|-----|------------|------|-----------|
 
-### Work Units
-- Master-Mixer Hierarchy = mxh_
-- Actor-Mixer Hierarchy = amh_
-- Interactive Music Hierarchy = imh_
-- Events = evt_
-- Dynamic Dialogue = dde_
-- SoundBanks = bnk_
-- Switches = sw_
-- States = st_
-- Game Parameters = gp_
-- Triggers = tr_
-- Audio Devices = ad_
-- Virtual Acoustics = va_
-- Metadata = mtd_
-- Soundcaster Session scs_
-- Mixing Session = mxs_
-- Control Surface Session = css_
-- Queries = que_
-- Modulators = mod_
-- Conversion Settings = con_
-- Attenuations = att_
-- Effects = fx_
+### Non Hierarchical Naming
+All of these cases need individual names, so people can make sense of whats in there. A naming convention for these things is tedious, but makes it easier to find and understand certain things. 
+
+|Effect|Conversion Setting|Modulator LFO|Modulator Envelope|Modulator Time|Acoustic Texture| Wwise System Output Settings|
+|------|------------------|-------------|------------------|--------------|----------------|-----------------------------|
+|Query |Soundcaster Session|Mixing Session|Control Surface Session|
+
+|Control Surface Session Group|Blend Container Blend Track |Path (Position Editor)|Music Track Cue|Transitions|
+|-----------------------------|----------------------------|----------------------|---------------|-----------|
+
+
+
+
+
+
+## Prefix <a name="prefix"></a>
+Sometimes you want to copy the wwu structure from the Actor-Mixer Hierarchty for the Event Hierarchy. In that case it might be hard to differentiate which Work Unit belongs to which in your version control tool. Therefor I like to use a prefix for the Work Units. 
+
+>The prefix always should be set in front of the name that results out of the hierarchy depending on their workspace.
+
+| Workspace | Prefix |
+| --------- | ------ | 
+| Master-Mixer Hierarchy | mxh_ |
+| Actor-Mixer Hierarchry | amh_ |
+| Interactive Music Hierarchy | imh_ |
+| Events | evt_ |
+| Dynamic Dialogue | dde_ |
+| Soundbanks | bnk_ | 
+| Switches | sw_ |
+| States | st_ |
+| Game Parameters | gp_ |
+| Triggers | tr_ | 
+| Audio Devices | ad_ | 
+| Virtual Acoustics | va_ | 
+| Metadata | mtd_ |
+| Soundcaster Session | scs_ |
+| Mixing Session | mxs_ |
+| Control Surface Session | css_ |
+| Queries | que_ | 
+| Conversion Settings | con_ |
+| Attenuations | att_ | 
+| Effects | fx_ |
+
