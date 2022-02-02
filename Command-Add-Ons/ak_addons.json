@@ -5,7 +5,6 @@
             "id": "waapi.sortOriginals",
             "displayName": "Sort Originals",
             "program": "python",
- 
             "args": "\"D:/Git/WwiseHelpers/Command-Add-Ons/autosort_originals.py\"",
             "redirectOutputs": false,
             "mainMenu": {
@@ -19,6 +18,17 @@
             "args": "\"D:/Git/WwiseHelpers/Command-Add-Ons/delete_empty_events.py\"",
             "redirectOutputs": true,
             "mainMenu": {
+                "basePath": "WAAPI"
+            }
+        },
+        {
+            "id": "waapi.reset_volume_faders",
+            "displayName": "Reset volume faders",
+            "program": "python",
+            "startMode": "SingleSelectionSingleProcess",
+            "args": "\"D:/Git/WwiseHelpers/Command-Add-Ons/reset_volume_faders.py\" ${id}",
+            "redirectOutputs": true,
+            "contextMenu": {
                 "basePath": "WAAPI"
             }
         }
