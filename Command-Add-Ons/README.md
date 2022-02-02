@@ -4,6 +4,7 @@ Currently there are following projects that one could try out:
 
 1. [Sort Originals](#sortOriginals)
 2. [Delete Empty Events](#deleteEmptyEvents)
+3. [Revers Faders](#reverseFaders)
 
 ## Sort Originals <a name="sortOriginals"></a>
 There are 4 container inside Wwise, that can create a folder in the Originals Path.
@@ -26,3 +27,14 @@ To start the process just go to the WAAPI Rider and click "Sort Originals".
 With this command you delete every event that is empty. Go to the WAAPI Rider and just click "Delete empty events".
 
 ![delete](https://user-images.githubusercontent.com/40822700/151884604-a4b48198-1e82-4a72-80ae-d77499ccb9f6.PNG)
+
+
+## Reverse Faders <a name="reverseFaders"></a>
+This is a command which is helpful for mixing and revesing that without damaging previous mixes. 
+You can revert the volume faders in the MasterMixer, Actor-Mixer or Interactive Music Hierarchy. Simply right click an object select "WAAPI->Reset volume faders".
+
+![resetfader](https://user-images.githubusercontent.com/40822700/152076544-26c7efd0-cb65-4319-a496-72a2bf79676a.PNG)
+
+>This will set all of the faders in the hierarchy to 0!
+
+If you write "@ignore" into the notes of a container, thats where the process will be interrupted and that objects and its hierarchy is safe from the reverse process.
