@@ -44,12 +44,9 @@ The goal of this naming convention is that every name matches with the following
 
 
 ## Naming <a name="naming"></a>
-We can pretty much split up the naming convention into two parts. 
-- Hierarchical Naming
-- Non Hierarchical Naming
-
-There is a lot that we can name according to the Hierarchy and the Rules set in [Rules](#rules), those are handled in this [Chapter](#hierarchicalNaming).
-The rest is being discussed in [Non Hierarchical Naming](#nonHierarchicalNaming).
+We can pretty much split up the naming convention into two parts. One that can be named after their hierarchy and the other one cant.
+1. [Hierarchical Naming](#hierarchicalNaming)
+2. [Non Hierarchical Naming](#nonHierarchicalNaming)
 
 ### Hierarchical Naming <a name="hierarchicalNaming"></a>
 
@@ -63,7 +60,7 @@ The rest is being discussed in [Non Hierarchical Naming](#nonHierarchicalNaming)
 |SoundBank|Game Parameter|Trigger|State Group|State|Switch Group|Switch|Attenuation|
 |---------|--------------|-------|-----------|-----|------------|------|-----------|
 
-### Non Hierarchical Naming
+### Non Hierarchical Naming <a name="nonHierarchicalNaming"></a>
 All of these cases need individual names, so people can make sense of whats in there. A naming convention for these things is tedious, but makes it easier to find and understand certain things. 
 
 |Effect|Conversion Setting|Modulator LFO|Modulator Envelope|Modulator Time|Acoustic Texture| Wwise System Output Settings|
