@@ -1,6 +1,6 @@
 # Wwise Best Practices
 
-##General 
+## General 
 - Dont overuse the Source Editor. Dont use it as a cutting tool to cut a 10min sfx to 10sec.
 - Only push stuff that is finished and not some hard work in progress stuff. Having empty container structures are not useful to anyone.
 
