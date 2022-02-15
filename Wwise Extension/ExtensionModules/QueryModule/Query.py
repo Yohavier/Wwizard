@@ -1,4 +1,4 @@
-class myQuery():
+class cQuery():
     def __init__(self, query_type, query_info, name, uuid):
         self.query_type = query_type
         self.query_info = query_info

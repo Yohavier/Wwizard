@@ -1,15 +1,14 @@
 import datetime
 import os
-
-import MyQuery as q
+import waapi.wamp.interface
+from ExtensionModules.QueryModule import Query as q
 from waapi import WaapiClient
-import GUI
+from GUI import GUI
 import json
-import keyboard
 import uuid
 import win32gui
 from datetime import datetime
-import subprocess
+from Settings import Settings
 
 # TODO
 # 1. Hardcoded Queries readable from json
@@ -21,28 +20,13 @@ import subprocess
 # 7. Settings to select directory etc.
 # 8. failed to connect screen
 
-is_connected = False
-# Connect (default URL)
-try:
-    client = WaapiClient()
-    myGUI = GUI.GUI_Connected()
-    is_connected = True
-except:
-    try:
-        os.popen('"YourPath\\Wwise\\Authoring\\x64\Release\\bin\\WwiseConsole.exe" waapi-server "PathToYourWwiseProject\\YourWwiseProject.wproj" --allow-migration --wamp-port 8080')
-        client = WaapiClient()
-        myGUI = GUI.GUI_Connected()
-        is_connected = True
-    except:
-        myGUI = GUI.GUI_NotFound()
+# Global Variables
+appSettings = Settings.cSettings()
+client = None
 
-
-
-w = win32gui
-
-all_query_dictionary = {}
-custom_query_dictionary = {}
-hardcoded_queries = []
+queryDictionary = {}
+waqlQueries = {}
+waapiQueries = []
 
 active_query_dictionary = {}
 marked_files_dictionary = {}
@@ -51,54 +35,92 @@ hardcoded_query_uuid = str(uuid.uuid4())
 custom_query_uuid = str(uuid.uuid4())
 wwise_query_uuid = str(uuid.uuid4())
 
+# Load Settings for the application
+def LoadSettings():
+    global appSettings
+    file = open('Data/Settings.json')
+    settings = json.load(file)
+    appSettings.SetSettings(settings['Settings']['WwiseProjectPath'], settings['Settings']['WwiseAuthoringPath'], settings['Settings']['CustomQueryPath'])
+    file.close()
 
-# create all treeview structure
-def set_all_query_tree():
-    myGUI.all_tv.insert(parent='', index='end', iid=wwise_query_uuid, values=("Wwise Queries").replace(" ","\ "))
-    get_all_wwise_queries('\\Queries', wwise_query_uuid)
 
-    myGUI.all_tv.insert(parent='', index='end', iid=custom_query_uuid, values=("Custom Queries").replace(" ","\ "))
-    get_all_custom_queries(custom_query_uuid)
+# Connect or open a Wwise Instance
+def ConnectToWwise():
+    global client
+    global appSettings
 
-    myGUI.all_tv.insert(parent='', index='end', iid=hardcoded_query_uuid, values=("Hardcoded Queries").replace(" ", "\ "))
-    get_all_hardcoded_queries(hardcoded_query_uuid)
+    try:
+        client = WaapiClient()
+    except waapi.wamp.interface.CannotConnectToWaapiException:
+        try:
+            commandline = '%s waapi-server %s --allow-migration --wamp-port 8080' % ('"' + appSettings.wwiseAuthoringPath + '"', '"' + appSettings.wwiseProjectPath + '"')
+            os.popen(commandline)
+            client = WaapiClient()
 
-def get_all_wwise_queries(path, list_parent):
-    wwise_queries = q.myQuery(0, {"from": {"path": [path]}, "transform": [{"select": ['children']}]}, "wwise_query_collector", str(uuid.uuid4()))
+        except waapi.wamp.interface.CannotConnectToWaapiException:
+            print("Somethings wrong with the Settings. Console could not be opened")
 
-    for output in wwise_queries.run_query(client)['return']:
+
+# Load Queries and other stats from Wwise and Json files
+def QueryLoadingHandler():
+    #myGUI.all_tv.insert(parent='', index='end', iid=wwise_query_uuid, values=("Wwise Queries").replace(" ", "\ "))
+    GetWwiseQueries('\\Queries', wwise_query_uuid)
+
+    #myGUI.all_tv.insert(parent='', index='end', iid=custom_query_uuid, values=("Custom Queries").replace(" ", "\ "))
+    GetCustomQueries(custom_query_uuid)
+
+
+def GetWwiseQueries(path, list_parent):
+    wwiseQueries = q.cQuery(0, {"from": {"path": [path]}, "transform": [{"select": ['children']}]}, "wwise_query_collector", str(uuid.uuid4()))
+
+    for output in wwiseQueries.run_query(client)['return']:
         if str(output['type']) == 'WorkUnit':
             unique_id = str(uuid.uuid4())
-            myGUI.all_tv.insert(parent=list_parent, index='end', iid=unique_id, values=output['name'].replace(" ","\ "))
-            get_all_wwise_queries(path + '\\' + output['name'], unique_id)
+            #myGUI.all_tv.insert(parent=list_parent, index='end', iid=unique_id, values=output['name'].replace(" ","\ "))
+            GetWwiseQueries(path + '\\' + output['name'], unique_id)
 
         elif str(output['type']) == 'Folder':
             unique_id = str(uuid.uuid4())
-            myGUI.all_tv.insert(parent=list_parent, index='end', iid=unique_id, values=output['name'].replace(" ","\ "))
-            get_all_wwise_queries(path + '\\' + output['name'], unique_id)
+            #myGUI.all_tv.insert(parent=list_parent, index='end', iid=unique_id, values=output['name'].replace(" ","\ "))
+            GetWwiseQueries(path + '\\' + output['name'], unique_id)
 
-        elif str(output['type'] == 'Query'):
+        elif str(output['type'] == 'QueryModule'):
             unique_id = str(uuid.uuid4())
-            myGUI.all_tv.insert(parent=list_parent, index='end', iid=unique_id, values=(output['name'].replace(" ", "\ "), unique_id))
-            #all incoming wwise queries
-            all_query_dictionary[unique_id] = q.myQuery(1, output['path'], output['name'], unique_id)
+            #myGUI.all_tv.insert(parent=list_parent, index='end', iid=unique_id, values=(output['name'].replace(" ", "\ "), unique_id))
+            queryDictionary[unique_id] = q.cQuery(1, output['path'], output['name'], unique_id)
 
-def get_all_custom_queries(list_parent):
-    with open('custom_query_data.json', 'r') as json_file:
+
+def GetCustomQueries(list_parent):
+    with open(appSettings.customQueryPath, 'r') as json_file:
         data = json.load(json_file)
-        for query in data['queries']:
-            query_uuid = str(uuid.uuid4())
-            new_query = q.myQuery(2, query['query_info'], query['query_name'], query_uuid)
-            myGUI.all_tv.insert(parent=list_parent, index='end', iid=query_uuid, values=((new_query.query_name).replace(" ", "\ "), query_uuid))
-            all_query_dictionary[query_uuid] = new_query
-            custom_query_dictionary[query_uuid] = new_query
+        for queryType in data:
+            # WAQL Queries
+            for waqlQuery in data['waqlQueries']:
+                query_uuid = str(uuid.uuid4())
+                newWaqlQuery = q.cQuery(2, waqlQuery['query_info'], waqlQuery['query_name'], query_uuid)
+                #myGUI.all_tv.insert(parent=list_parent, index='end', iid=query_uuid, values=((newWaqlQuery.query_name).replace(" ", "\ "), query_uuid))
+                queryDictionary[query_uuid] = newWaqlQuery
+                waqlQueries[query_uuid] = newWaqlQuery
+            # WAAPI Queries
+            for waapiQuery in data['waapiQueries']:
+                query_uuid = str(uuid.uuid4())
+                newWaapiQuery = q.cQuery(0, waapiQuery['query_info'], waapiQuery['query_name'], query_uuid)
+                queryDictionary[query_uuid] = newWaapiQuery
+                waapiQueries[query_uuid] = newWaapiQuery
+        json_file.close()
 
-def get_all_hardcoded_queries(list_parent):
-    hardcoded_queries.append(q.myQuery(0, {"from": {"path": ['\\Queries\\Default Work Unit']},"transform": [{"select": ['descendants']},{"where": ['type:isIn', ['Query']]}]}, "example", str(uuid.uuid4())))
-    for hardcoded_query in hardcoded_queries:
-        all_query_dictionary[hardcoded_query.query_uuid] = hardcoded_query
-        myGUI.all_tv.insert(parent=list_parent, index='end', iid=hardcoded_query.query_uuid, values=((hardcoded_query.query_name).replace(" ", "\ "), hardcoded_query.query_uuid))
 
+def InitializeGUI():
+    pass
+
+#Start Up Chain
+LoadSettings()
+ConnectToWwise()
+QueryLoadingHandler()
+InitializeGUI()
+
+myGUI = GUI.GUI_Connected()
+w = win32gui
 
 # Update GUI
 def update_triggered_by_all(event):
@@ -125,9 +147,9 @@ def update_options(event):
         elif event == "file":
             key = "file"
 
-        query_type = get_query_type_name(all_query_dictionary[key].query_type)
+        query_type = get_query_type_name(queryDictionary[key].query_type)
 
-        myGUI.set_option("name: " + str(all_query_dictionary[key].query_name), "type: " + query_type, "info: " + str(all_query_dictionary[key].query_info))
+        myGUI.set_option("name: " + str(queryDictionary[key].query_name), "type: " + query_type, "info: " + str(queryDictionary[key].query_info))
     except:
         myGUI.set_option("name: ", "type: ", "info: ")
 
@@ -192,7 +214,7 @@ def handle_all_selection(event):
     try:
         all_key = str(myGUI.all_tv.item(myGUI.all_tv.focus())['values'][1])
         if all_key not in active_query_dictionary.keys():
-            active_query_dictionary[all_key] = all_query_dictionary[all_key]
+            active_query_dictionary[all_key] = queryDictionary[all_key]
             update_active_treeview()
             update_file_treeview()
     except:
@@ -218,14 +240,14 @@ def handle_cross_selection(event):
     for item in myGUI.file_tv.selection():
         myGUI.file_tv.selection_remove(myGUI.file_tv.selection()[0])
 
-# Custom Query Handling
+# Custom QueryModule Handling
 def delete_custom_query():
     try:
         all_key = str(myGUI.all_tv.item(myGUI.all_tv.focus())['values'][1])
 
-        if all_query_dictionary[all_key].query_type == 2:
-            del all_query_dictionary[all_key]
-            del custom_query_dictionary[all_key]
+        if queryDictionary[all_key].query_type == 2:
+            del queryDictionary[all_key]
+            del waqlQueries[all_key]
 
             if all_key in active_query_dictionary.keys():
                 del active_query_dictionary[all_key]
@@ -245,17 +267,17 @@ def rename_custom_query():
     all_key = str(myGUI.all_tv.item(myGUI.all_tv.focus())['values'][1])
     is_key_in_dic = False
 
-    for key in all_query_dictionary.keys():
+    for key in queryDictionary.keys():
         if all_key == key:
             is_key_in_dic = True
 
     if is_key_in_dic:
         unique_id = str(uuid.uuid4())
-        updated_query = q.myQuery(2, all_query_dictionary[all_key].query_info, str(myGUI.rename_entry.get()), unique_id)
-        del all_query_dictionary[all_key]
-        del custom_query_dictionary[all_key]
-        custom_query_dictionary[unique_id] = updated_query
-        all_query_dictionary[unique_id] = updated_query
+        updated_query = q.cQuery(2, queryDictionary[all_key].query_info, str(myGUI.rename_entry.get()), unique_id)
+        del queryDictionary[all_key]
+        del waqlQueries[all_key]
+        waqlQueries[unique_id] = updated_query
+        queryDictionary[unique_id] = updated_query
         save_to_json()
 
         myGUI.all_tv.delete(all_key)
@@ -274,15 +296,15 @@ def create_new_custom_query():
     is_key_in_dic = False
 
     if myGUI.query_name_input.get()!="":
-        for key in all_query_dictionary.keys():
+        for key in queryDictionary.keys():
             if key == myGUI.query_name_input.get():
                 is_key_in_dic = True
 
         if not is_key_in_dic:
             unique_id = str(uuid.uuid4())
-            create_query = q.myQuery(2, myGUI.query_input.get(), myGUI.query_name_input.get(), unique_id)
-            custom_query_dictionary[unique_id] = create_query
-            all_query_dictionary[unique_id] = create_query
+            create_query = q.cQuery(2, myGUI.query_input.get(), myGUI.query_name_input.get(), unique_id)
+            waqlQueries[unique_id] = create_query
+            queryDictionary[unique_id] = create_query
             save_to_json()
             myGUI.all_tv.insert(parent=custom_query_uuid, index='end', iid=unique_id, values=((create_query.query_name).replace(" ", "\ "), create_query.query_uuid))
 
@@ -296,7 +318,7 @@ def open_multiditor():
     if "entry" in str(myGUI.root.focus_get()):
         print("Is Typing")
     else:
-        if str(w.GetWindowText(w.GetForegroundWindow())) == "Query Extension":
+        if str(w.GetWindowText(w.GetForegroundWindow())) == "QueryModule Extension":
             multieditorARGS= {"command": "ShowMultiEditor", "objects":
                               [
 
@@ -326,32 +348,38 @@ def multi_add_note():
 
 def save_to_json():
     try:
-        with open('custom_query_data.json') as data_file:
+        with open('Data/CustomQueries.json') as data_file:
             delete_data = json.load(data_file)
             delete_data.clear()
     except:
         pass
 
     saving_data = {}
-    saving_data['queries'] = []
-    for query in custom_query_dictionary.keys():
-        saving_data['queries'].append({
-            'query_info': custom_query_dictionary[query].query_info,
-            'query_name': custom_query_dictionary[query].query_name,
-            'query_type': int(custom_query_dictionary[query].query_type)
+    saving_data['waqlQueries'] = []
+    for waqlQuery in waqlQueries.keys():
+        saving_data['waqlQueries'].append({
+            'query_info': waqlQueries[waqlQuery].query_info,
+            'query_name': waqlQueries[waqlQuery].query_name,
+            'query_type': int(waqlQueries[waqlQuery].query_type)
+        })
+    for waapiQuery in waapiQueries.keys():
+        saving_data['waapiQueries'].append({
+            'query_info': waapiQueries[waapiQuery].query_info,
+            'query_name': waapiQueries[waapiQuery].query_name,
+            'query_type': int(waapiQueries[waapiQuery].query_type)
         })
 
-    with open('custom_query_data.json', 'w') as out_file:
+    with open('Data/CustomQueries.json', 'w') as out_file:
         json.dump(saving_data, out_file)
 
 def get_query_type_name(query_type_int):
     query_type = ""
     if query_type_int == 0:
-        query_type = "Hardcoded Query"
+        query_type = "Hardcoded QueryModule"
     elif query_type_int == 1:
-        query_type = "Wwise Query"
+        query_type = "Wwise QueryModule"
     elif query_type_int == 2:
-        query_type = "Modified Query"
+        query_type = "Modified QueryModule"
     return query_type
 
 def get_right_p4_file(file):
@@ -396,7 +424,7 @@ def save_query_result(event):
     with open("querylog/Query_" + str(datetime.now()).replace(":", ",").replace(" ", "_") + ".json", "w", encoding='utf-8') as f:
         json.dump(data, f, ensure_ascii=False, indent=4)
 
-if is_connected:
+if False:
     print('rf')
     set_all_query_tree()
 

@@ -1,5 +1,70 @@
 from tkinter import *
 from tkinter import ttk
+import Core.Core as c
+from Data import ModuleEnum as m
+
+class cCoreGui():
+    def __init__(self):
+        self.root = Tk()
+        self.root.title("Wwise Extension")
+        self.root.geometry("700x400")
+        self.coreNavBar = self.SetNavBar()
+
+    def SetNavBar(self):
+        return cNavBar(self)
+
+    def SetModuleGUI(self, enum):
+        if enum == m.Modules.HOME:
+            self.SetHomeModule()
+        elif enum == m.Modules.QUERYMODULE:
+            self.SetQueryModule()
+
+    def SetQueryModule(self):
+        queryModule = QueryModuleGUI(self)
+
+    def SetHomeModule(self):
+        homeModule = HomeModuleGUI(self)
+
+    def SetSettings(self):
+        settings = SettingsGUI(self)
+
+class cNavBar(Frame):
+    def __init__(self, masterGUI):
+        super().__init__()
+        self.masterGUI = masterGUI
+        self.InitNavBar()
+
+    def InitNavBar(self):
+        menubar = Menu(self.master)
+        self.master.config(menu=menubar)
+        fileMenu = Menu(menubar, tearoff='off')
+        fileMenu.add_command(label="Home", command=self.masterGUI.SetHomeModule)
+        fileMenu.add_command(label="Settings", command=self.masterGUI.SetSettings)
+        fileMenu.add_command(label="Query", command=self.masterGUI.SetQueryModule)
+        menubar.add_cascade(label="Modules", menu=fileMenu)
+
+class QueryModuleGUI(Frame):
+    def __init__(self, masterGUI):
+        super().__init__()
+        self.masterGUI = masterGUI
+        self.master.title("Wwise Extension - Query Module")
+
+class HomeModuleGUI(Frame):
+    def __init__(self, masterGUI):
+        super().__init__()
+        self.masterGUI = masterGUI
+        self.master.title("Wwise Extension - Home")
+
+class SettingsGUI(Frame):
+    def __init__(self, masterGUI):
+        super().__init__()
+        self.masterGUI = masterGUI
+        self.master.title("Wwise Extension - Settings")
+
+
+
+
+
 
 
 class GUI_Connected():
@@ -7,7 +72,7 @@ class GUI_Connected():
         self.root = Tk()
         self.root.resizable(0, 0)
 
-        self.root.title("Query Extension")
+        self.root.title("QueryModule Extension")
         self.modify_query_frame = ttk.Frame(self.root)
         self.modify_query_frame.grid(column=0, row=0, columnspan=3, rowspan=1, sticky="nesw")
         self.all_query_frame = ttk.Frame(self.root)
@@ -25,15 +90,15 @@ class GUI_Connected():
         ######################
         #modified query input#
         ######################
-        self.query_name_label = ttk.Label(self.modify_query_frame, text="Query Name:", width=12)
+        self.query_name_label = ttk.Label(self.modify_query_frame, text="QueryModule Name:", width=12)
         self.query_name_label.grid(row=0, column=0, sticky="nesw")
         self.query_name_input = ttk.Entry(self.modify_query_frame, width=35)
         self.query_name_input.grid(row=0, column=1)
-        self.query_input_label = ttk.Label(self.modify_query_frame, text="Query:", width=6)
+        self.query_input_label = ttk.Label(self.modify_query_frame, text="QueryModule:", width=6)
         self.query_input_label.grid(row=0, column=2, sticky="nesw")
         self.query_input = ttk.Entry(self.modify_query_frame, width=110)
         self.query_input.grid(row=0, column=3)
-        self.query_Button = ttk.Button(self.modify_query_frame, text='Create Query', takefocus=False)
+        self.query_Button = ttk.Button(self.modify_query_frame, text='Create QueryModule', takefocus=False)
         self.query_Button.grid(row=0, column=4)
         self.result_Button = ttk.Button(self.modify_query_frame, text='Results', takefocus=False)
         self.result_Button.grid(row=0, column=5)
@@ -194,7 +259,7 @@ class GUI_Connected():
         self.label_query_info.insert('end', query_info)
         self.label_query_info.config(state=DISABLED)
 
-        if query_type == "type: Modified Query":
+        if query_type == "type: Modified QueryModule":
             self.delete_query_button['state'] = NORMAL
             self.rename_query_button['state'] = NORMAL
             self.rename_entry['state'] = NORMAL
