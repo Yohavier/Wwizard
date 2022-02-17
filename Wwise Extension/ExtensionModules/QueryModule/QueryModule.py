@@ -6,7 +6,7 @@ from ExtensionModules.QueryModule import Query as q
 class cQueryModule():
     def __init__(self, core):
         self.core = core
-        self.client = core.client
+        self.client = core.wwiseClient
         self.queryDictionary = {}
         self.waqlQueries = {}
         self.waapiQueries = {}
@@ -44,6 +44,7 @@ class cQueryModule():
 
 
     def GetCustomQueries(self, parentList):
+        print(self.core.coreSettings.customQueryPath)
         with open(self.core.coreSettings.customQueryPath, 'r') as json_file:
             # WAQL Queries
             data = json.load(json_file)

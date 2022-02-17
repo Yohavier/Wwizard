@@ -15,7 +15,7 @@ class cCoreGui():
         self.coreNavBar = cNavBar(self)
         self.queryGUI = QueryModuleGUI(self)
         self.homeGUI = HomeModuleGUI(self)
-        self.settingsGUI = SettingsModuleGUI(self)
+        self.settingsGUI = SettingsModuleGUI(self, self.core.coreSettings)
         self.currentGUI = None
 
 
@@ -76,7 +76,7 @@ class QueryModuleGUI(Frame):
 
         self.queryList = masterGUI.core.coreQueryModule.LoadAllQueries()
 
-        self.masterFrame = Frame(masterGUI.root, bg='#156475')
+        self.masterFrame = Frame(masterGUI.root)
         self.masterFrame.pack(fill=BOTH, expand=True)
 
         self.querySelection = CustomTreeview.cCustomTreeview(self.masterFrame)
@@ -122,14 +122,49 @@ class HomeModuleGUI(Frame):
 
 
 class SettingsModuleGUI(Frame):
-    def __init__(self, masterGUI):
+    def __init__(self, masterGUI, coreSettings):
         super().__init__()
         self.masterGUI = masterGUI
 
         self.masterFrame = Frame(masterGUI.root)
-        self.masterFrame.pack(side=LEFT)
-        blackbutton = Button(self.masterFrame, text="Blue", fg="black")
-        blackbutton.pack()
+        self.masterFrame.pack(fill=BOTH, expand=True)
+
+        # Wwise Authoring Path
+        self.wwiseAuthoringPathFrame = Frame(self.masterFrame)
+        self.wwiseAuthoringPathFrame.pack(fill=X, expand=True)
+
+        self.wwiseAuthoringPathLabel = Label(self.wwiseAuthoringPathFrame, text="Wwise Authoring Path")
+        self.wwiseAuthoringPathLabel.pack(expand=True, side=LEFT)
+
+        self.wwiseAuthoringPathEntry = Entry(self.wwiseAuthoringPathFrame)
+        self.wwiseAuthoringPathEntry.insert(0, coreSettings.wwiseAuthoringPath)
+        self.wwiseAuthoringPathEntry.pack(expand=True, side=LEFT)
+
+        # Wwise Project Path
+        self.wwiseProjectPathFrame = Frame(self.masterFrame)
+        self.wwiseProjectPathFrame.pack(fill=X, expand=True)
+
+        self.wwiseProjectPathLabel = Label(self.wwiseProjectPathFrame, text="Wwise Project Path")
+        self.wwiseProjectPathLabel.pack(fill=X, expand=True, side=LEFT)
+
+        self.wwiseProjectPathEntry = Entry(self.wwiseProjectPathFrame)
+        self.wwiseProjectPathEntry.insert(0, coreSettings.wwiseProjectPath)
+        self.wwiseProjectPathEntry.pack(fill=X, expand=True, side=LEFT)
+
+        # Custom Query Path
+        self.customQueryPathFrame = Frame(self.masterFrame)
+        self.customQueryPathFrame.pack(fill=X, expand=True)
+
+        self.customQueryPathLabel = Label(self.customQueryPathFrame, text="Custom Query Path")
+        self.customQueryPathLabel.pack(fill=X, expand=True, side=LEFT)
+
+        self.customQueryPathEntry = Entry(self.customQueryPathFrame)
+        self.customQueryPathEntry.insert(0, coreSettings.customQueryPath)
+        self.customQueryPathEntry.pack(fill=X, expand=True, side=LEFT)
+
+        self.saveSettingsButton = Button(self.masterFrame, text="Save", command=lambda: coreSettings.SaveSettings(self.wwiseAuthoringPathEntry.get(), self.wwiseProjectPathEntry.get(), self.customQueryPathEntry.get()))
+        self.saveSettingsButton.pack(expand=True, side=BOTTOM)
+
         self.Hide()
 
     def Hide(self):

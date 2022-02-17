@@ -10,7 +10,7 @@ from ExtensionModules.QueryModule import QueryModule
 class cCore():
     def __init__(self):
         self.coreSettings = self.GetSettings()
-        self.client = self.GetWwiseClient()
+        self.wwiseClient = self.GetWwiseClient()
         self.coreQueryModule = QueryModule.cQueryModule(self)
         self.coreGUI = self.InitGUI()
 
@@ -19,8 +19,7 @@ class cCore():
         tempSettings = Settings.cSettings()
         file = open('Data/Settings.json')
         settings = json.load(file)
-        print(settings['Settings']['InitialModule'])
-        tempSettings.SetSettings(settings['Settings']['WwiseProjectPath'], settings['Settings']['WwiseAuthoringPath'], settings['Settings']['CustomQueryPath'], settings['Settings']['InitialModule'])
+        tempSettings.SetSettings(settings['WwiseProjectPath'], settings['WwiseAuthoringPath'], settings['CustomQueryPath'], settings['InitialModule'])
         file.close()
         return tempSettings
 
@@ -45,7 +44,7 @@ class cCore():
     def CloseCore(self):
         print("Disconnected from Wwise.")
         self.coreGUI.root.quit()
-        self.client.disconnect()
+        self.wwiseClient.disconnect()
 
     def CoreLoop(self):
         self.coreGUI.root.protocol("WM_DELETE_WINDOW", self.CloseCore)
