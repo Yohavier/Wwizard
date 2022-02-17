@@ -1,9 +1,10 @@
 class cQuery():
-    def __init__(self, query_type, query_info, name, uuid):
+    def __init__(self, query_type, query_info, name, uuid, parent):
         self.query_type = query_type
         self.query_info = query_info
         self.query_name = name
         self.query_uuid = uuid
+        self.query_parents = parent
 
     def run_query(self, client):
         query_results = None

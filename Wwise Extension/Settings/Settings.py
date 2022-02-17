@@ -3,7 +3,7 @@ class cSettings():
         self.wwiseAuthoringPath = ""
         self.wwiseProjectPath = ""
         self.customQueryPath = ""
-        self.initialModule = "QUERYMODULE"
+        self.initialModule = ""
 
     def SetSettings(self, wwiseProjectPath, wwiseAuthoringPath, customQueryPath, initialModule):
         self.wwiseProjectPath = wwiseProjectPath

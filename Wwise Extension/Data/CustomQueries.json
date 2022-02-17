@@ -1,2 +1,16 @@
-{"waqlQueries": [],
-"waapiQueries": []}
+{
+  "waqlQueries":
+  [
+    {
+      "query_info":"asdas",
+      "query_name": "waql"
+    }
+  ],
+  "waapiQueries":
+  [
+    {
+      "query_info":"asdas",
+      "query_name": "waapi"
+    }
+  ]
+}

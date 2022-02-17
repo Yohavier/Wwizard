@@ -2,65 +2,142 @@ from tkinter import *
 from tkinter import ttk
 import Core.Core as c
 from Data import ModuleEnum as m
+from Data import CustomColours as cc
+from Core import HelperFunctions as h
+from GUI import CustomTreeview
 
 class cCoreGui():
-    def __init__(self):
+    def __init__(self, core):
+        self.core = core
         self.root = Tk()
         self.root.title("Wwise Extension")
         self.root.geometry("700x400")
-        self.coreNavBar = self.SetNavBar()
+        self.coreNavBar = cNavBar(self)
+        self.queryGUI = QueryModuleGUI(self)
+        self.homeGUI = HomeModuleGUI(self)
+        self.settingsGUI = SettingsModuleGUI(self)
+        self.currentGUI = None
 
-    def SetNavBar(self):
-        return cNavBar(self)
 
-    def SetModuleGUI(self, enum):
+    def ChangeLayout(self, enum):
+        print(enum)
         if enum == m.Modules.HOME:
-            self.SetHomeModule()
+            self.ChangeToHomeModule()
         elif enum == m.Modules.QUERYMODULE:
-            self.SetQueryModule()
+            self.ChangeToQueryModule()
+        elif enum == m.Modules.SETTINGS:
+            self.ChangeToSettingsModule()
 
-    def SetQueryModule(self):
-        queryModule = QueryModuleGUI(self)
+    def ChangeToQueryModule(self):
+        if self.currentGUI:
+            self.currentGUI.Hide()
+        self.currentGUI = self.queryGUI
+        self.queryGUI.Show()
 
-    def SetHomeModule(self):
-        homeModule = HomeModuleGUI(self)
+    def ChangeToHomeModule(self):
+        if self.currentGUI:
+            self.currentGUI.Hide()
+        self.currentGUI = self.homeGUI
+        self.homeGUI.Show()
 
-    def SetSettings(self):
-        settings = SettingsGUI(self)
+    def ChangeToSettingsModule(self):
+        if self.currentGUI:
+            self.currentGUI.Hide()
+        self.currentGUI = self.settingsGUI
+        self.settingsGUI.Show()
 
 class cNavBar(Frame):
     def __init__(self, masterGUI):
         super().__init__()
         self.masterGUI = masterGUI
-        self.InitNavBar()
+        self.__InitNavBar()
 
-    def InitNavBar(self):
+    def __InitNavBar(self):
+        """Main menu bar"""
         menubar = Menu(self.master)
         self.master.config(menu=menubar)
-        fileMenu = Menu(menubar, tearoff='off')
-        fileMenu.add_command(label="Home", command=self.masterGUI.SetHomeModule)
-        fileMenu.add_command(label="Settings", command=self.masterGUI.SetSettings)
-        fileMenu.add_command(label="Query", command=self.masterGUI.SetQueryModule)
-        menubar.add_cascade(label="Modules", menu=fileMenu)
+
+        """Project tab, holds settings and home"""
+        ProjectMenu = Menu(menubar, tearoff='off', fg=h._from_rgb(cc.lightGrey), background=h._from_rgb(cc.darkGrey), activebackground=h._from_rgb(cc.grey))
+        ProjectMenu.add_command(label="Home", command=self.masterGUI.ChangeToHomeModule)
+        ProjectMenu.add_command(label="Settings", command=self.masterGUI.ChangeToSettingsModule)
+        menubar.add_cascade(label="Project", menu=ProjectMenu)
+
+        """Modules tab, holds all the different Modules"""
+        ModuleMenu = Menu(menubar, tearoff='off', fg=h._from_rgb(cc.lightGrey), background=h._from_rgb(cc.darkGrey), activebackground=h._from_rgb(cc.grey))
+        ModuleMenu.add_command(label="Query", command=self.masterGUI.ChangeToQueryModule)
+        menubar.add_cascade(label="Modules", menu=ModuleMenu)
+
 
 class QueryModuleGUI(Frame):
     def __init__(self, masterGUI):
         super().__init__()
         self.masterGUI = masterGUI
+
+        self.queryList = masterGUI.core.coreQueryModule.LoadAllQueries()
+
+        self.masterFrame = Frame(masterGUI.root, bg='#156475')
+        self.masterFrame.pack(fill=BOTH, expand=True)
+
+        self.querySelection = CustomTreeview.cCustomTreeview(self.masterFrame)
+        self.querySelection.tv.pack(fill=BOTH, expand=True, side=LEFT)
+
+        self.queryResult = CustomTreeview.cCustomTreeview(self.masterFrame)
+        self.queryResult.tv.pack(fill=BOTH, expand=True, side=LEFT)
+
+        self.activeQuerySelection = CustomTreeview.cCustomTreeview(self.masterFrame)
+        self.activeQuerySelection.tv.pack(fill=BOTH, expand=True, side=LEFT)
+
+        self.UpdateViews()
+        self.Hide()
+
+    def Hide(self):
+        self.masterFrame.pack_forget()
+
+    def Show(self):
         self.master.title("Wwise Extension - Query Module")
+        self.masterFrame.pack(fill=BOTH, expand=True)
+
+    def UpdateViews(self):
+        self. querySelection.UpdateTreeview(self.queryList)
+
 
 class HomeModuleGUI(Frame):
     def __init__(self, masterGUI):
         super().__init__()
         self.masterGUI = masterGUI
-        self.master.title("Wwise Extension - Home")
 
-class SettingsGUI(Frame):
+        self.masterFrame = Frame(masterGUI.root, background="red")
+        self.masterFrame.pack()
+        blackbutton = Button(self.masterFrame, text="Yellow", fg="black")
+        blackbutton.pack()
+        self.Hide()
+
+    def Hide(self):
+        self.masterFrame.pack_forget()
+
+    def Show(self):
+        self.master.title("Wwise Extension - Home")
+        self.masterFrame.pack()
+
+
+class SettingsModuleGUI(Frame):
     def __init__(self, masterGUI):
         super().__init__()
         self.masterGUI = masterGUI
-        self.master.title("Wwise Extension - Settings")
 
+        self.masterFrame = Frame(masterGUI.root)
+        self.masterFrame.pack(side=LEFT)
+        blackbutton = Button(self.masterFrame, text="Blue", fg="black")
+        blackbutton.pack()
+        self.Hide()
+
+    def Hide(self):
+        self.masterFrame.pack_forget()
+
+    def Show(self):
+        self.master.title("Wwise Extension - Settings")
+        self.masterFrame.pack()
 
 
 
@@ -208,8 +285,8 @@ class GUI_Connected():
         self.style.map("Vertical.TScrollbar", background=[('active', '#8d8d8d')])
         self.style.map("Treeview", background=[("selected", '#db9850')])
         self.style.layout("Treeview.Item", [('Treeitem.padding', {'sticky': 'nswe', 'children': [('Treeitem.indicator', {'side': 'left', 'sticky': ''}),
-                          ('Treeitem.image', {'side': 'left', 'sticky': ''}), # ('Treeitem.focus', {'side': 'left', 'sticky': '', 'children': [
-                          ('Treeitem.text', {'side': 'left', 'sticky': ''}), #]})
+                          ('Treeitem.image', {'side': 'left', 'sticky': ''}), ('Treeitem.focus', {'side': 'left', 'sticky': '', 'children': [
+                          ('Treeitem.text', {'side': 'left', 'sticky': ''}), ]})
                           ], })])
         self.note_text.config(state=DISABLED)
 
