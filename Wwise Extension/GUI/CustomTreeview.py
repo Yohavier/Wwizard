@@ -6,16 +6,14 @@ from Core import HelperFunctions as h
 class cCustomTreeview():
     def __init__(self, masterGUI):
         self.tv = ttk.Treeview(masterGUI)
-        self.tv['columns'] = ('File', 'Type', 'QueryRef')
-        self.tv.column('#0', anchor=W, width=50)
-        self.tv.column('File', anchor=W, width=100)
-        self.tv.column('Type', anchor=W, width=100)
-        self.tv.column('QueryRef', anchor=W, width=100)
+        self.tv['columns'] = ('Type', 'QueryRef')
+        self.tv.column('#0')
+        self.tv.column('Type')
+        self.tv.column('QueryRef')
 
-        self.tv.heading('#0', anchor=W)
-        self.tv.heading('File', text='File', anchor=W)
-        self.tv.heading('Type', text='Type', anchor=W)
-        self.tv.heading('QueryRef', text='QueryRef', anchor=W)
+        self.tv.heading('#0', text='File Name')
+        self.tv.heading('Type', text='Type')
+        self.tv.heading('QueryRef', text='QueryRef')
 
 
         self.style = ttk.Style()
@@ -47,11 +45,11 @@ class cCustomTreeview():
             prevParent = ''
             for parent in queryList[query].query_parents:
                 try:
-                    self.tv.insert(parent=prevParent, index=i, iid=parent[0], values=(parent[2], parent[1], ''))
+                    self.tv.insert(parent=prevParent, index=i, iid=parent[0], text= parent[2], values=(parent[1], ''))
                     prevParent = parent[0]
                     i += 1
                 except:
                     prevParent = parent[0]
 
-            self.tv.insert(parent=prevParent, index=i, iid=query, values=(queryList[query].query_name,'',''))
+            self.tv.insert(parent=prevParent, index=i, iid=query, text= queryList[query].query_name, values=('',''))
             i+=1
