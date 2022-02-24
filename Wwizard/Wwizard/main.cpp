@@ -6,11 +6,11 @@
 #include <d3d10.h>
 #include <tchar.h>
 #include "Dockspace.h"
-#include "AK/WwiseAuthoringAPI/AkAutobahn/Client.h"
-#include "AK/WwiseAuthoringAPI/waapi.h"
 #include <string>
 #include <sstream>
 #include <iostream>
+#include "QueryHelper.h"
+#include <vector>
 
 static ID3D10Device* g_pd3dDevice = NULL;
 static IDXGISwapChain* g_pSwapChain = NULL;
@@ -38,38 +38,25 @@ AkAssertHook g_pAssertHook = SampleAssertHook;
 void wwise()
 {
     using namespace AK::WwiseAuthoringAPI;
+    QueryHelper* helper = new QueryHelper();
+    helper->ChangeSettings("127.0.0.1", 8080);
 
-    // Enable this for debugging purposes.
-    Client client;
+    AkJson args(AkJson::Map{
+            { "from", AkJson::Map{
+                { "path", AkJson::Array{ AkVariant("\\Queries") } } } }
+        });
 
-    // Connect to Wwise Authoring on localhost.
+    AkJson options(AkJson::Map{
+        { "return", AkJson::Array{ AkVariant("id"), AkVariant("name"), AkVariant("type")}}});
 
-    if (!client.Connect("127.0.0.1", 8080))
+    std::vector<std::string> output;
+    helper->WalkProject(args, options, output);
+
+    for (auto object : output)
     {
-        std::cout << "Could not connect to Wwise Authoring on localhost." << std::endl;
-        return;
+        std::cout << object << std::endl;
     }
-
-    // Obtain the wwise info.
-    AkJson wwiseInfoJson;
-    if (!client.Call(ak::wwise::core::getInfo, AkJson(AkJson::Type::Map), AkJson(AkJson::Type::Map), wwiseInfoJson, 10))
-    {
-        std::cout << "Failed to obtain Wwise Info within 10ms: " << std::string(wwiseInfoJson["message"].GetVariant()) << std::endl;
-        return;
-    }
-
-    // Output some information, including converting from UTF8 for proper display.
-    std::ostringstream os;
-    os << wwiseInfoJson["displayName"].GetVariant().GetString() << " " << wwiseInfoJson["version"]["displayName"].GetVariant().GetString() << "\n";
-    os << wwiseInfoJson["copyright"].GetVariant().GetString() << "\n";
-    os << wwiseInfoJson["branch"].GetVariant().GetString() << "\n";
-    os << wwiseInfoJson["directories"]["authoring"].GetVariant().GetString() << "\n\n";
-
-
-    std::wstring_convert<std::codecvt_utf8_utf16<wchar_t>> converter;
-    std::wstring wstr = converter.from_bytes(os.str());
-    std::wcout << wstr;
-
+    delete helper;
 }
 int main(int, char**)
 {
