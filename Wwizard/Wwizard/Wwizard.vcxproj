@@ -152,6 +152,7 @@
     <ClCompile Include="..\ThirdParty\imgui_draw.cpp" />
     <ClCompile Include="..\ThirdParty\imgui_tables.cpp" />
     <ClCompile Include="..\ThirdParty\imgui_widgets.cpp" />
+    <ClCompile Include="Application.cpp" />
     <ClCompile Include="Dockspace.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="QueryHelper.cpp" />
@@ -165,6 +166,7 @@
     <ClInclude Include="..\ThirdParty\imstb_rectpack.h" />
     <ClInclude Include="..\ThirdParty\imstb_textedit.h" />
     <ClInclude Include="..\ThirdParty\imstb_truetype.h" />
+    <ClInclude Include="Application.h" />
     <ClInclude Include="Dockspace.h" />
     <ClInclude Include="QueryHelper.h" />
   </ItemGroup>

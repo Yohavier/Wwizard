@@ -103,7 +103,7 @@ namespace wwizardGUI
             }
             if (ImGui::BeginMenu("Module"))
             {
-                if (ImGui::MenuItem("Home"), NULL)
+                if (ImGui::MenuItem("Home", NULL))
                 {
                     SetLayout(Layout::HOME);
                 }
