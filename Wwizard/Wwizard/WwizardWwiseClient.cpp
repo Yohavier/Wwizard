@@ -1,8 +1,41 @@
-#include "QueryHelper.h"
+#include "WwizardWwiseClient.h"
 
 using namespace AK::WwiseAuthoringAPI;
 
-void QueryHelper::WalkProject(const AkJson& arg, const AkJson& opt, std::vector<std::string>& outputList)
+cWwizardWwiseClient::cWwizardWwiseClient() 
+    :m_port(0)
+    , m_ip("")
+{
+    std::cout << "Initialized Wwizard Wwise Client" << std::endl;
+}
+
+cWwizardWwiseClient::~cWwizardWwiseClient()
+{
+    if (m_isConnected)
+    {
+        std::cout << "Disconnect from Wwise Instance" << std::endl;
+        m_wwiseClient.Disconnect();
+    }
+    std::cout << "End Wwizard Wwise Client" << std::endl;
+}
+
+bool cWwizardWwiseClient::Connect(const std::string& ip, const int& port)
+{
+    if (m_wwiseClient.Connect(ip.c_str(), port))
+    {
+        std::cout << "Connected to Wwise Instance!" << std::endl;
+        m_isConnected = true;
+        return true;
+    }
+    else
+    {
+        std::cout << "Failed to Connect to Wwise Instance!" << std::endl;
+        m_isConnected = false;
+        return false;
+    }
+}
+
+void cWwizardWwiseClient::WalkProject(const AkJson& arg, const AkJson& opt, std::vector<std::string>& outputList)
 {
  	AkJson queryResult;
 	m_wwiseClient.Connect(m_ip.c_str(), m_port);
@@ -16,13 +49,7 @@ void QueryHelper::WalkProject(const AkJson& arg, const AkJson& opt, std::vector<
     }
 }
 
-void QueryHelper::ChangeSettings(const std::string ip, const int port)
-{
-	m_ip = ip;
-	m_port = port;
-}
-
-void QueryHelper::WalkChildren(const std::string& guid, std::vector<std::string>& outputList, const AkJson& opt)
+void cWwizardWwiseClient::WalkChildren(const std::string& guid, std::vector<std::string>& outputList, const AkJson& opt)
 {
     AkJson queryResult;
 

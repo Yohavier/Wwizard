@@ -51,7 +51,7 @@
     <ClCompile Include="Dockspace.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="QueryHelper.cpp">
+    <ClCompile Include="WwizardWwiseClient.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="Application.cpp">
@@ -86,7 +86,7 @@
     <ClInclude Include="Dockspace.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="QueryHelper.h">
+    <ClInclude Include="WwizardWwiseClient.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Application.h">

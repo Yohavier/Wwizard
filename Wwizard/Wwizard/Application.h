@@ -7,6 +7,7 @@
 #include <tchar.h>
 #include <memory>
 #include "Dockspace.h"
+#include "WwizardWwiseClient.h"
 
 class Application
 {
@@ -16,11 +17,11 @@ public:
 	void ShutDown();
 
 private:
+	std::unique_ptr<cWwizardWwiseClient> m_wwizardWwiseClient = nullptr;
 	std::unique_ptr<wwizardGUI::Dockspace> myDock = nullptr;
+	
 	bool m_isRunning = true;
 
-	bool show_demo_window = true;
-	bool show_another_window = false;
 	ImVec4 clear_color = ImVec4(0.45f, 0.55f, 0.60f, 1.00f);
 	HWND hwnd;
 	WNDCLASSEX wc;
