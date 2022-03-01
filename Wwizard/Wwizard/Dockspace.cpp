@@ -1,11 +1,15 @@
 #include "Dockspace.h"
 #include <stdio.h>
 
-namespace wwizardGUI
+namespace wwizard
 {
-	Dockspace::Dockspace()
-	{
-		
+	Dockspace::Dockspace(cWwizardWwiseClient* wwizardWwiseClient)
+        : m_currentLayout(Layout::HOME)
+        , m_wwizarWwiseClient(wwizardWwiseClient)
+	{ 
+        //Init all modules
+        m_queryEditorModule.Init(m_wwizarWwiseClient);
+        std::cout << "Initialized Dockspace" << std::endl;
 	}
 
 	void Dockspace::Render(bool* p_open)
@@ -76,7 +80,7 @@ namespace wwizardGUI
 
         CreateMenuBar();
         
-        if (currentLayout == Layout::QUERYEDITOR)
+        if (m_currentLayout == Layout::QUERYEDITOR)
         {
             CreateQueryEditor(p_open);
         }
@@ -130,7 +134,7 @@ namespace wwizardGUI
 
     void Dockspace::SetLayout(Layout newLayout)
     {
-        currentLayout = newLayout;
+        m_currentLayout = newLayout;
     }
 
     void Dockspace::CreateQueryEditor(bool* p_open)
@@ -145,11 +149,12 @@ namespace wwizardGUI
         ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2(2, 2));
         if (ImGui::BeginTable("split", 1, ImGuiTableFlags_BordersOuter | ImGuiTableFlags_Resizable))
         {
-            // Iterate placeholder objects (all the same data)
-            for (int obj_i = 0; obj_i < 4; obj_i++)
+            for (int obj_i = 0; obj_i < m_queryEditorModule.GetWwiseQueries().size(); obj_i++)
             {
-                ShowPlaceholderObject("Object", obj_i);
-                //ImGui::Separator();
+                ImGui::TableNextRow();
+                ImGui::TableSetColumnIndex(0);
+                ImGuiTreeNodeFlags flags = ImGuiTreeNodeFlags_Leaf | ImGuiTreeNodeFlags_NoTreePushOnOpen | ImGuiTreeNodeFlags_Bullet;
+                ImGui::Selectable(m_queryEditorModule.GetWwiseQueries()[obj_i].c_str());
             }
             ImGui::EndTable();
         }

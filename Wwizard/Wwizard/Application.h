@@ -17,8 +17,8 @@ public:
 	void ShutDown();
 
 private:
-	std::unique_ptr<cWwizardWwiseClient> m_wwizardWwiseClient = nullptr;
-	std::unique_ptr<wwizardGUI::Dockspace> myDock = nullptr;
+	cWwizardWwiseClient* m_wwizardWwiseClient = nullptr;
+	std::unique_ptr<wwizard::Dockspace> myDock = nullptr;
 	
 	bool m_isRunning = true;
 

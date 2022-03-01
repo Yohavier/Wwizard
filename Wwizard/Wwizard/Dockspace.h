@@ -1,9 +1,11 @@
 #pragma once
 #include <iostream>
+#include "WwizardWwiseClient.h"
 #include "imgui.h"
 #include "imgui_internal.h"
+#include "QueryEditorModule.h"
 
-namespace wwizardGUI
+namespace wwizard
 {
 	enum Layout
 	{
@@ -16,7 +18,7 @@ namespace wwizardGUI
 	class Dockspace
 	{
 	public:
-		Dockspace();
+		Dockspace(cWwizardWwiseClient* wwizardWwiseClient);
 		void Render(bool* p_open);
 
 	private:
@@ -27,7 +29,10 @@ namespace wwizardGUI
 		void ShowPlaceholderObject(const char* prefix, int uid);
 
 	private:
-		Layout currentLayout;
+		Layout m_currentLayout;
+		cWwizardWwiseClient* m_wwizarWwiseClient;
+
+		QueryEditorModule m_queryEditorModule = QueryEditorModule();
 	};
 }
 

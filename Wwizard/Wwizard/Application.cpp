@@ -21,7 +21,7 @@ AkAssertHook g_pAssertHook = SampleAssertHook;
 
 Application::Application()
 {
-    m_wwizardWwiseClient = std::unique_ptr<cWwizardWwiseClient>(new cWwizardWwiseClient());
+    m_wwizardWwiseClient = new cWwizardWwiseClient();
     //Default Connection
     m_wwizardWwiseClient->Connect("127.0.0.1", 8080);
 
@@ -92,7 +92,7 @@ Application::Application()
     clear_color = ImVec4(0.45f, 0.55f, 0.60f, 1.00f);
 
     //Create Custom GUI
-    myDock = std::unique_ptr<wwizardGUI::Dockspace>(new wwizardGUI::Dockspace());
+    myDock = std::unique_ptr<wwizard::Dockspace>(new wwizard::Dockspace(m_wwizardWwiseClient));
 }
 
 void Application::Loop()
@@ -139,6 +139,7 @@ void Application::Loop()
 
 void Application::ShutDown()
 {
+    delete m_wwizardWwiseClient;
     ImGui_ImplDX10_Shutdown();
     ImGui_ImplWin32_Shutdown();
     ImGui::DestroyContext();

@@ -155,6 +155,7 @@
     <ClCompile Include="Application.cpp" />
     <ClCompile Include="Dockspace.cpp" />
     <ClCompile Include="main.cpp" />
+    <ClCompile Include="QueryEditorModule.cpp" />
     <ClCompile Include="WwizardWwiseClient.cpp" />
   </ItemGroup>
   <ItemGroup>
@@ -168,6 +169,7 @@
     <ClInclude Include="..\ThirdParty\imstb_truetype.h" />
     <ClInclude Include="Application.h" />
     <ClInclude Include="Dockspace.h" />
+    <ClInclude Include="QueryEditorModule.h" />
     <ClInclude Include="WwizardWwiseClient.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

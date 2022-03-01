@@ -38,7 +38,6 @@ bool cWwizardWwiseClient::Connect(const std::string& ip, const int& port)
 void cWwizardWwiseClient::WalkProject(const AkJson& arg, const AkJson& opt, std::vector<std::string>& outputList)
 {
  	AkJson queryResult;
-	m_wwiseClient.Connect(m_ip.c_str(), m_port);
 	m_wwiseClient.Call(ak::wwise::core::object::get, arg, opt, queryResult, 100);
 
     const auto& objects = queryResult["return"].GetArray();
