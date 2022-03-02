@@ -26,7 +26,7 @@ namespace wwizard
 		void CreateQueryEditor(bool* p_open);
 		void CreateHomeLayout();
 		void SetLayout(Layout newLayout);
-		void ShowPlaceholderObject(const char* prefix, int uid);
+		void ShowPlaceholderObject(BaseQueryStructure* queryObject);
 
 	private:
 		Layout m_currentLayout;

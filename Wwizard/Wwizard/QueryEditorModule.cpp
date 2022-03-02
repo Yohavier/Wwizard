@@ -2,11 +2,13 @@
 
 QueryEditorModule::QueryEditorModule()
 {
+    m_wwiseQueries = new BaseQueryStructure();
 	std::cout << "Queryeditor Module loaded!" << std::endl;
 }
 
 void QueryEditorModule::Init(cWwizardWwiseClient* wwizardClient)
 {
+    std::cout << "Init QueryModule" << std::endl;
 	m_wwizardClient = wwizardClient;
     FetchWwiseQueries();
 }
@@ -14,22 +16,36 @@ void QueryEditorModule::Init(cWwizardWwiseClient* wwizardClient)
 void QueryEditorModule::FetchWwiseQueries()
 {
     using namespace AK::WwiseAuthoringAPI;
-
-    AkJson args(AkJson::Map{
-        { "from", AkJson::Map{
-            { "path", AkJson::Array{ AkVariant("\\Queries") } } } }
-        });
-
-    // Connect to Wwise Authoring on localhost.
     AkJson options(AkJson::Map{
-        { "return", AkJson::Array{ AkVariant("id"), AkVariant("name"), AkVariant("type")}} });
+    { "return", AkJson::Array{ AkVariant("id"), AkVariant("name"), AkVariant("type"), AkVariant("path")}} });
 
-    m_wwiseQueries.clear();
+    AkJson parentObject;
+    parentObject = m_wwizardClient->GetObjectFromPath("\\Queries", options);
+    BaseQueryStructure parentStructureFolder = BaseQueryStructure(parentObject["return"].GetArray()[0]["name"].GetVariant().GetString(), parentObject["return"].GetArray()[0]["id"].GetVariant().GetInt32(), parentObject["return"].GetArray()[0]["path"].GetVariant().GetString(), QueryType::FOLDER);
 
-    m_wwizardClient->WalkProject(args, options, m_wwiseQueries);
+    m_wwiseQueries->m_guuid = parentStructureFolder.m_guuid;
+    m_wwiseQueries->m_name = parentStructureFolder.m_name;
+    m_wwiseQueries->m_path = parentStructureFolder.m_path;
+
+    FetchWwiseFolderchildren(m_wwiseQueries, options);
 }
 
-const std::vector<std::string>& QueryEditorModule::GetWwiseQueries()
+void QueryEditorModule::FetchWwiseFolderchildren(BaseQueryStructure* parentStructureFolder, AkJson options)
 {
-    return m_wwiseQueries;
+    AkJson queryResult = m_wwizardClient->GetChildrenFromPath(parentStructureFolder->m_path, options);
+
+    for (const auto& object : queryResult["return"].GetArray())
+    {
+        if (object["type"].GetVariant().GetString() == "Query")
+        {
+            BaseQueryStructure* newQuery = new BaseQueryStructure(object["name"].GetVariant().GetString(), object["id"].GetVariant().GetInt32(), object["path"].GetVariant().GetString(), QueryType::WWISEQUERY);
+            parentStructureFolder->subDir.push_back(newQuery);
+        }
+        else
+        {
+            BaseQueryStructure* newFolder = new BaseQueryStructure(object["name"].GetVariant().GetString(), object["id"].GetVariant().GetInt32(), object["path"].GetVariant().GetString(), QueryType::FOLDER);
+            parentStructureFolder->subDir.push_back(newFolder);
+            FetchWwiseFolderchildren(newFolder, options);
+        }
+    }
 }

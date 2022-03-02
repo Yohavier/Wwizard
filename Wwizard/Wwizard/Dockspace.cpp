@@ -140,69 +140,56 @@ namespace wwizard
     void Dockspace::CreateQueryEditor(bool* p_open)
     { 
         ImGui::SetNextWindowSize(ImVec2(430, 450), ImGuiCond_FirstUseEver);
-        if (!ImGui::Begin("All Queries", p_open))
+        if (!ImGui::Begin("Example: Property editor", p_open))
         {
             ImGui::End();
             return;
         }
 
         ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2(2, 2));
-        if (ImGui::BeginTable("split", 1, ImGuiTableFlags_BordersOuter | ImGuiTableFlags_Resizable))
+
+        
+        if (ImGui::BeginTable("split", 2, ImGuiTableFlags_BordersOuter | ImGuiTableFlags_Resizable))
         {
-            for (int obj_i = 0; obj_i < m_queryEditorModule.GetWwiseQueries().size(); obj_i++)
-            {
-                ImGui::TableNextRow();
-                ImGui::TableSetColumnIndex(0);
-                ImGuiTreeNodeFlags flags = ImGuiTreeNodeFlags_Leaf | ImGuiTreeNodeFlags_NoTreePushOnOpen | ImGuiTreeNodeFlags_Bullet;
-                ImGui::Selectable(m_queryEditorModule.GetWwiseQueries()[obj_i].c_str());
-            }
+            // Iterate placeholder objects (all the same data)
+
+            ShowPlaceholderObject(m_queryEditorModule.m_wwiseQueries);
+            //ImGui::Separator();
             ImGui::EndTable();
         }
         ImGui::PopStyleVar();
         ImGui::End();
     }
 
-    void Dockspace::CreateHomeLayout()
-    {
-        
-    }
-
-    void Dockspace::ShowPlaceholderObject(const char* prefix, int uid)
+    void Dockspace::ShowPlaceholderObject(BaseQueryStructure* queryObject)
     {
         // Use object uid as identifier. Most commonly you could also use the object pointer as a base ID.
-        ImGui::PushID(uid);
+        ImGui::PushID(0);
 
         // Text and Tree nodes are less high than framed widgets, using AlignTextToFramePadding() we add vertical spacing to make the tree lines equal high.
         ImGui::TableNextRow();
         ImGui::TableSetColumnIndex(0);
         ImGui::AlignTextToFramePadding();
-        bool node_open = ImGui::TreeNode("Object", prefix, uid);
 
+        bool node_open = ImGui::TreeNode("", queryObject->m_name.c_str());
 
         if (node_open)
         {
-            static float placeholder_members[8] = { 0.0f, 0.0f, 1.0f, 3.1416f, 100.0f, 999.0f };
-            for (int i = 0; i < 8; i++)
+            for (int i = 0; i < queryObject->subDir.size(); i++)
             {
                 ImGui::PushID(i); // Use field index as identifier.
-                if (i < 2)
-                {
-                    ShowPlaceholderObject("Child", 424242);
-                }
-                else
-                {
-                    // Here we use a TreeNode to highlight on hover (we could use e.g. Selectable as well)
-                    ImGui::TableNextRow();
-                    ImGui::TableSetColumnIndex(0);
-                    ImGui::AlignTextToFramePadding();
-                    ImGuiTreeNodeFlags flags = ImGuiTreeNodeFlags_Leaf | ImGuiTreeNodeFlags_NoTreePushOnOpen | ImGuiTreeNodeFlags_Bullet;
-                    ImGui::Selectable("Field");
-                    //ImGui::Selectable(, flags, "Field_%d", i);
-                }
+
+                ShowPlaceholderObject(queryObject->subDir[i]);
+
                 ImGui::PopID();
             }
             ImGui::TreePop();
         }
         ImGui::PopID();
+    }
+
+    void Dockspace::CreateHomeLayout()
+    {
+        
     }
 }

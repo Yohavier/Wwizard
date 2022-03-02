@@ -7133,7 +7133,7 @@ static void ShowExampleAppLayout(bool* p_open)
 // [SECTION] Example App: Property Editor / ShowExampleAppPropertyEditor()
 //-----------------------------------------------------------------------------
 
-static void ShowPlaceholderObject(const char* prefix, int uid)
+static void ShowNodeChildren(const char* prefix, int uid)
 {
     // Use object uid as identifier. Most commonly you could also use the object pointer as a base ID.
     ImGui::PushID(uid);
@@ -7154,7 +7154,7 @@ static void ShowPlaceholderObject(const char* prefix, int uid)
             ImGui::PushID(i); // Use field index as identifier.
             if (i < 2)
             {
-                ShowPlaceholderObject("Child", 424242);
+                ShowNodeChildren("Child", 424242);
             }
             else
             {
@@ -7203,7 +7203,7 @@ static void ShowExampleAppPropertyEditor(bool* p_open)
         // Iterate placeholder objects (all the same data)
         for (int obj_i = 0; obj_i < 4; obj_i++)
         {
-            ShowPlaceholderObject("Object", obj_i);
+            ShowNodeChildren("Object", obj_i);
             //ImGui::Separator();
         }
         ImGui::EndTable();

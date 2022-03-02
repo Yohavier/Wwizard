@@ -14,15 +14,17 @@ public:
 
 	~cWwizardWwiseClient();
 
-	//Connect to a wwise instance
 	bool Connect(const std::string& ip, const int& port);
 
 	bool IsWwiseConnected() { return m_isConnected; }
 
-	void WalkProject(const AkJson& arg, const AkJson& opt, std::vector<std::string>& outputList);
+	void WalkProjectPath(const AkJson& arg, const AkJson& opt, std::vector<AkJson>& outputList);
+
+	AkJson GetChildrenFromPath(const std::string path, AkJson option);
+	AkJson GetObjectFromPath(const std::string path, AkJson option);
 	
 private:
-	void WalkChildren(const std::string& guid, std::vector<std::string>& outputList, const AkJson& opt);
+	void WalkChildren(const std::string& guid, const AkJson& opt, std::vector<AkJson>& outputList);
 
 private:
 	Client m_wwiseClient;
