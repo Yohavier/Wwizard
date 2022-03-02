@@ -2,7 +2,7 @@
 
 QueryEditorModule::QueryEditorModule()
 {
-    m_wwiseQueries = new BaseQueryStructure();
+    m_wwiseQueryHierarchy = new BaseQueryStructure();
 	std::cout << "Queryeditor Module loaded!" << std::endl;
 }
 
@@ -23,11 +23,11 @@ void QueryEditorModule::FetchWwiseQueries()
     parentObject = m_wwizardClient->GetObjectFromPath("\\Queries", options);
     BaseQueryStructure parentStructureFolder = BaseQueryStructure(parentObject["return"].GetArray()[0]["name"].GetVariant().GetString(), parentObject["return"].GetArray()[0]["id"].GetVariant().GetInt32(), parentObject["return"].GetArray()[0]["path"].GetVariant().GetString(), QueryType::FOLDER);
 
-    m_wwiseQueries->m_guuid = parentStructureFolder.m_guuid;
-    m_wwiseQueries->m_name = parentStructureFolder.m_name;
-    m_wwiseQueries->m_path = parentStructureFolder.m_path;
+    m_wwiseQueryHierarchy->m_guuid = parentStructureFolder.m_guuid;
+    m_wwiseQueryHierarchy->m_name = parentStructureFolder.m_name;
+    m_wwiseQueryHierarchy->m_path = parentStructureFolder.m_path;
 
-    FetchWwiseFolderchildren(m_wwiseQueries, options);
+    FetchWwiseFolderchildren(m_wwiseQueryHierarchy, options);
 }
 
 void QueryEditorModule::FetchWwiseFolderchildren(BaseQueryStructure* parentStructureFolder, AkJson options)
@@ -40,6 +40,7 @@ void QueryEditorModule::FetchWwiseFolderchildren(BaseQueryStructure* parentStruc
         {
             BaseQueryStructure* newQuery = new BaseQueryStructure(object["name"].GetVariant().GetString(), object["id"].GetVariant().GetInt32(), object["path"].GetVariant().GetString(), QueryType::WWISEQUERY);
             parentStructureFolder->subDir.push_back(newQuery);
+            //allQueryDictionary.emplace(object["id"].GetVariant().GetInt32(), newQuery);
         }
         else
         {
@@ -49,3 +50,13 @@ void QueryEditorModule::FetchWwiseFolderchildren(BaseQueryStructure* parentStruc
         }
     }
 }
+/*
+void QueryEditorModule::AddToActiveQueryList(int guuid)
+{
+    activeQueryDictionary.emplace(guuid, allQueryDictionary.find(guuid));
+}
+
+std::map<int, BaseQueryStructure*>& QueryEditorModule::GetActiveQueryList()
+{
+    return activeQueryDictionary;
+}*/

@@ -138,25 +138,47 @@ namespace wwizard
     }
 
     void Dockspace::CreateQueryEditor(bool* p_open)
-    { 
+    {       
+        //Available Queries Field
         ImGui::SetNextWindowSize(ImVec2(430, 450), ImGuiCond_FirstUseEver);
-        if (!ImGui::Begin("Example: Property editor", p_open))
+        if (!ImGui::Begin("Available Queries", p_open))
         {
             ImGui::End();
             return;
         }
-
         ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2(2, 2));
-
-        
-        if (ImGui::BeginTable("split", 2, ImGuiTableFlags_BordersOuter | ImGuiTableFlags_Resizable))
+        if (ImGui::BeginTable("availableWwiseQueries", 1, ImGuiTableFlags_BordersOuter | ImGuiTableFlags_Resizable))
         {
-            // Iterate placeholder objects (all the same data)
-
-            ShowPlaceholderObject(m_queryEditorModule.m_wwiseQueries);
-            //ImGui::Separator();
+            ShowPlaceholderObject(m_queryEditorModule.m_wwiseQueryHierarchy);
             ImGui::EndTable();
         }
+        ImGui::PopStyleVar();
+        ImGui::End();
+
+        //Active Queries Field
+        ImGui::SetNextWindowSize(ImVec2(430, 450), ImGuiCond_FirstUseEver);
+        if (!ImGui::Begin("Active Queries", p_open))
+        {
+            ImGui::End();
+            return;
+        }
+        ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2(2, 2));
+        if (ImGui::BeginTable("activeWwiseQueries", 1, ImGuiTableFlags_BordersOuter | ImGuiTableFlags_Resizable))
+        {
+            //ShowPlaceholderObject(m_queryEditorModule.m_wwiseQueries);
+            ImGui::EndTable();
+        }
+        ImGui::PopStyleVar();
+        ImGui::End();
+
+        //Details window
+        ImGui::SetNextWindowSize(ImVec2(430, 450), ImGuiCond_FirstUseEver);
+        if (!ImGui::Begin("Details", p_open))
+        {
+            ImGui::End();
+            return;
+        }
+        ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2(2, 2));
         ImGui::PopStyleVar();
         ImGui::End();
     }
@@ -170,20 +192,38 @@ namespace wwizard
         ImGui::TableNextRow();
         ImGui::TableSetColumnIndex(0);
         ImGui::AlignTextToFramePadding();
+        static int item_current_idx = 0;
 
-        bool node_open = ImGui::TreeNode("", queryObject->m_name.c_str());
-
-        if (node_open)
+        if (queryObject->m_structureType == QueryType::FOLDER)
         {
-            for (int i = 0; i < queryObject->subDir.size(); i++)
+            bool node_open = ImGui::TreeNode("", queryObject->m_name.c_str());
+
+            if (node_open)
             {
-                ImGui::PushID(i); // Use field index as identifier.
+                for (int i = 0; i < queryObject->subDir.size(); i++)
+                {
+                    ImGui::PushID(i); // Use field index as identifier.
 
-                ShowPlaceholderObject(queryObject->subDir[i]);
+                    ShowPlaceholderObject(queryObject->subDir[i]);
 
-                ImGui::PopID();
+                    ImGui::PopID();
+                }
+                ImGui::TreePop();
             }
-            ImGui::TreePop();
+        }
+        else
+        {
+            const bool is_selected = (item_current_idx == queryObject->m_guuid);
+            if (ImGui::Selectable(queryObject->m_name.c_str(), is_selected)) 
+            {
+                //if (is_selected)
+                    //m_queryEditorModule.AddToActiveQueryList(queryObject->m_guuid);
+
+                item_current_idx = queryObject->m_guuid;
+            }
+
+            if (is_selected)
+                ImGui::SetItemDefaultFocus();
         }
         ImGui::PopID();
     }

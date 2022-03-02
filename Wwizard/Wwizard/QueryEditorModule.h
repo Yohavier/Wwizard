@@ -37,10 +37,17 @@ public:
 	void Init(cWwizardWwiseClient* wwizardClient);
 	void FetchWwiseQueries();
 	void FetchWwiseFolderchildren(BaseQueryStructure* parentStructureFolder, AkJson options);
+	
+	//void AddToActiveQueryList(int guuid);
+	//void RemoveFromActiveQueryList();
+	//std::map<int, BaseQueryStructure*>& GetActiveQueryList();
 
-	BaseQueryStructure* m_wwiseQueries;
+	BaseQueryStructure* m_wwiseQueryHierarchy;
 
 private:
 	cWwizardWwiseClient* m_wwizardClient;
+
+	//std::map<int, BaseQueryStructure*> activeQueryDictionary;
+	//std::map<int, BaseQueryStructure*> allQueryDictionary;
 };
 
