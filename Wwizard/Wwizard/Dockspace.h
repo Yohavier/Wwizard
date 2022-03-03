@@ -27,7 +27,7 @@ namespace wwizard
 		void CreateHomeLayout();
 		void SetLayout(Layout newLayout);
 		void ShowPlaceholderObject(BaseQueryStructure* queryObject);
-			
+		void ShowActiveList();
 
 
 	private:

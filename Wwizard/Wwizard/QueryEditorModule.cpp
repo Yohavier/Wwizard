@@ -40,7 +40,7 @@ void QueryEditorModule::FetchWwiseFolderchildren(BaseQueryStructure* parentStruc
         {
             BaseQueryStructure* newQuery = new BaseQueryStructure(object["name"].GetVariant().GetString(), object["id"].GetVariant().GetInt32(), object["path"].GetVariant().GetString(), QueryType::WWISEQUERY);
             parentStructureFolder->subDir.push_back(newQuery);
-            //allQueryDictionary.emplace(object["id"].GetVariant().GetInt32(), newQuery);
+            allQueryDictionary.insert({ object["id"].GetVariant().GetInt32(), newQuery });
         }
         else
         {
@@ -50,13 +50,22 @@ void QueryEditorModule::FetchWwiseFolderchildren(BaseQueryStructure* parentStruc
         }
     }
 }
-/*
+
 void QueryEditorModule::AddToActiveQueryList(int guuid)
 {
-    activeQueryDictionary.emplace(guuid, allQueryDictionary.find(guuid));
+    activeQueryDictionary.insert({ guuid, allQueryDictionary.find(guuid)->second });
 }
 
-std::map<int, BaseQueryStructure*>& QueryEditorModule::GetActiveQueryList()
+void QueryEditorModule::RemoveFromActiveQueryList(const int guuid)
+{
+    auto it = activeQueryDictionary.find(guuid);
+    if (it != activeQueryDictionary.end()) 
+    {
+        activeQueryDictionary.erase(it);
+    }
+}
+
+std::map<int, BaseQueryStructure*> QueryEditorModule::GetActiveQueryList()
 {
     return activeQueryDictionary;
-}*/
+}

@@ -3,6 +3,7 @@
 #include <iostream>
 #include <string>
 #include "WwizardWwiseClient.h"
+#include <map>
 
 enum QueryType {
 	WWISEQUERY,
@@ -38,16 +39,16 @@ public:
 	void FetchWwiseQueries();
 	void FetchWwiseFolderchildren(BaseQueryStructure* parentStructureFolder, AkJson options);
 	
-	//void AddToActiveQueryList(int guuid);
-	//void RemoveFromActiveQueryList();
-	//std::map<int, BaseQueryStructure*>& GetActiveQueryList();
+	void AddToActiveQueryList(int guuid);
+	void RemoveFromActiveQueryList(const int guuid);
+	std::map<int, BaseQueryStructure*> GetActiveQueryList();
 
 	BaseQueryStructure* m_wwiseQueryHierarchy;
 
 private:
 	cWwizardWwiseClient* m_wwizardClient;
 
-	//std::map<int, BaseQueryStructure*> activeQueryDictionary;
-	//std::map<int, BaseQueryStructure*> allQueryDictionary;
+	std::map<int, BaseQueryStructure*> activeQueryDictionary;
+	std::map<int, BaseQueryStructure*> allQueryDictionary;
 };
 

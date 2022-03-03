@@ -165,7 +165,7 @@ namespace wwizard
         ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2(2, 2));
         if (ImGui::BeginTable("activeWwiseQueries", 1, ImGuiTableFlags_BordersOuter | ImGuiTableFlags_Resizable))
         {
-            //ShowPlaceholderObject(m_queryEditorModule.m_wwiseQueries);
+            ShowActiveList();
             ImGui::EndTable();
         }
         ImGui::PopStyleVar();
@@ -181,6 +181,36 @@ namespace wwizard
         ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2(2, 2));
         ImGui::PopStyleVar();
         ImGui::End();
+    }
+
+    void Dockspace::ShowActiveList()
+    {
+        ImGui::PushID(0);
+        ImGui::TableNextRow();
+        ImGui::TableSetColumnIndex(0);
+        ImGui::AlignTextToFramePadding();
+        static int item_current_idx = 0;
+
+        for (auto& object : m_queryEditorModule.GetActiveQueryList())
+        {
+            const bool is_selected = (item_current_idx == object.second->m_guuid);
+            if (ImGui::Selectable(object.second->m_name.c_str(), is_selected))
+            {
+                if (is_selected)
+                {
+                    m_queryEditorModule.RemoveFromActiveQueryList(object.second->m_guuid);
+                    item_current_idx = 0;
+                }
+                else 
+                {
+                    item_current_idx = object.second->m_guuid;
+                }
+            }
+            if (is_selected)
+                ImGui::SetItemDefaultFocus();
+        }
+
+        ImGui::PopID();
     }
 
     void Dockspace::ShowPlaceholderObject(BaseQueryStructure* queryObject)
@@ -216,8 +246,8 @@ namespace wwizard
             const bool is_selected = (item_current_idx == queryObject->m_guuid);
             if (ImGui::Selectable(queryObject->m_name.c_str(), is_selected)) 
             {
-                //if (is_selected)
-                    //m_queryEditorModule.AddToActiveQueryList(queryObject->m_guuid);
+                if (is_selected)
+                    m_queryEditorModule.AddToActiveQueryList(queryObject->m_guuid);
 
                 item_current_idx = queryObject->m_guuid;
             }
