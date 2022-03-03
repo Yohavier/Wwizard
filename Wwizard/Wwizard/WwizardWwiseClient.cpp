@@ -95,3 +95,18 @@ AkJson cWwizardWwiseClient::GetObjectFromPath(const std::string path, AkJson opt
 
     return queryResult;
 }
+
+AkJson cWwizardWwiseClient::RunQueryFromGuuid(const std::string guid)
+{
+    std::cout << guid << std::endl;
+    AkJson arg(AkJson::Map{
+       { "from", AkJson::Map{{ "query", AkJson::Array{AkVariant(guid)}}}}});
+
+    AkJson options(AkJson::Map{
+    { "return", AkJson::Array{ AkVariant("id"), AkVariant("name"), AkVariant("type"), AkVariant("path")}} });
+
+    AkJson queryResult;
+    m_wwiseClient.Call(ak::wwise::core::object::get, arg, options, queryResult, 100);
+
+    return queryResult;
+}

@@ -149,11 +149,12 @@ namespace wwizard
         ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2(2, 2));
         if (ImGui::BeginTable("availableWwiseQueries", 1, ImGuiTableFlags_BordersOuter | ImGuiTableFlags_Resizable))
         {
-            ShowPlaceholderObject(m_queryEditorModule.m_wwiseQueryHierarchy);
+            ShowAvailableList(m_queryEditorModule.m_wwiseQueryHierarchy);
             ImGui::EndTable();
         }
         ImGui::PopStyleVar();
         ImGui::End();
+
 
         //Active Queries Field
         ImGui::SetNextWindowSize(ImVec2(430, 450), ImGuiCond_FirstUseEver);
@@ -171,6 +172,7 @@ namespace wwizard
         ImGui::PopStyleVar();
         ImGui::End();
 
+
         //Details window
         ImGui::SetNextWindowSize(ImVec2(430, 450), ImGuiCond_FirstUseEver);
         if (!ImGui::Begin("Details", p_open))
@@ -178,7 +180,32 @@ namespace wwizard
             ImGui::End();
             return;
         }
+
         ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2(2, 2));
+        if (m_queryEditorModule.GetCurrentSelection() == nullptr) {
+            ImGui::LabelText("Name", "");
+        }
+        else
+        {
+            ImGui::LabelText("Name", m_queryEditorModule.GetCurrentSelection()->m_name.c_str());
+        }
+        
+        ImGui::PopStyleVar();
+        ImGui::End();
+
+        //Results
+        ImGui::SetNextWindowSize(ImVec2(430, 450), ImGuiCond_FirstUseEver);
+        if (!ImGui::Begin("Results", p_open))
+        {
+            ImGui::End();
+            return;
+        }
+        ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2(2, 2));
+        if (ImGui::BeginTable("activeWwiseQueries", 1, ImGuiTableFlags_BordersOuter | ImGuiTableFlags_Resizable))
+        {
+            ShowResultList();
+            ImGui::EndTable();
+        }
         ImGui::PopStyleVar();
         ImGui::End();
     }
@@ -189,21 +216,22 @@ namespace wwizard
         ImGui::TableNextRow();
         ImGui::TableSetColumnIndex(0);
         ImGui::AlignTextToFramePadding();
-        static int item_current_idx = 0;
 
         for (auto& object : m_queryEditorModule.GetActiveQueryList())
         {
-            const bool is_selected = (item_current_idx == object.second->m_guuid);
+            const bool is_selected = (m_queryEditorModule.GetCurrentSelectionGuid() == object.second->m_guid && ImGui::IsWindowFocused());
             if (ImGui::Selectable(object.second->m_name.c_str(), is_selected))
             {
                 if (is_selected)
                 {
-                    m_queryEditorModule.RemoveFromActiveQueryList(object.second->m_guuid);
-                    item_current_idx = 0;
+                    m_queryEditorModule.RemoveFromActiveQueryList(object.second->m_guid);
+                    std::string resetSelection = "";
+                    m_queryEditorModule.SetQuerySelection(resetSelection);
+                    m_queryEditorModule.RunActiveQueries();
                 }
                 else 
                 {
-                    item_current_idx = object.second->m_guuid;
+                    m_queryEditorModule.SetQuerySelection(object.second->m_guid);
                 }
             }
             if (is_selected)
@@ -213,7 +241,7 @@ namespace wwizard
         ImGui::PopID();
     }
 
-    void Dockspace::ShowPlaceholderObject(BaseQueryStructure* queryObject)
+    void Dockspace::ShowAvailableList(BaseQueryStructure* queryObject)
     {
         // Use object uid as identifier. Most commonly you could also use the object pointer as a base ID.
         ImGui::PushID(0);
@@ -222,7 +250,6 @@ namespace wwizard
         ImGui::TableNextRow();
         ImGui::TableSetColumnIndex(0);
         ImGui::AlignTextToFramePadding();
-        static int item_current_idx = 0;
 
         if (queryObject->m_structureType == QueryType::FOLDER)
         {
@@ -234,7 +261,7 @@ namespace wwizard
                 {
                     ImGui::PushID(i); // Use field index as identifier.
 
-                    ShowPlaceholderObject(queryObject->subDir[i]);
+                    ShowAvailableList(queryObject->subDir[i]);
 
                     ImGui::PopID();
                 }
@@ -243,18 +270,41 @@ namespace wwizard
         }
         else
         {
-            const bool is_selected = (item_current_idx == queryObject->m_guuid);
+            const bool is_selected = (m_queryEditorModule.GetCurrentSelectionGuid() == queryObject->m_guid && ImGui::IsWindowFocused());
+
             if (ImGui::Selectable(queryObject->m_name.c_str(), is_selected)) 
             {
+                
                 if (is_selected)
-                    m_queryEditorModule.AddToActiveQueryList(queryObject->m_guuid);
+                {
+                    m_queryEditorModule.AddToActiveQueryList(queryObject->m_guid);
+                    m_queryEditorModule.RunActiveQueries();
+                }     
 
-                item_current_idx = queryObject->m_guuid;
+                m_queryEditorModule.SetQuerySelection(queryObject->m_guid);
             }
 
             if (is_selected)
                 ImGui::SetItemDefaultFocus();
         }
+        ImGui::PopID();
+    }
+
+    void Dockspace::ShowResultList()
+    {
+        ImGui::PushID(0);
+        ImGui::TableNextRow();
+        ImGui::TableSetColumnIndex(0);
+        ImGui::AlignTextToFramePadding();
+
+        for (auto& object : m_queryEditorModule.resultList)
+        {
+            if (ImGui::Selectable(object.c_str(), false))
+            {
+   
+            }          
+        }
+
         ImGui::PopID();
     }
 

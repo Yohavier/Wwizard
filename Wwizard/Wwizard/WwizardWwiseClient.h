@@ -21,7 +21,10 @@ public:
 	void WalkProjectPath(const AkJson& arg, const AkJson& opt, std::vector<AkJson>& outputList);
 
 	AkJson GetChildrenFromPath(const std::string path, AkJson option);
+
 	AkJson GetObjectFromPath(const std::string path, AkJson option);
+
+	AkJson RunQueryFromGuuid(const std::string guuid);
 	
 private:
 	void WalkChildren(const std::string& guid, const AkJson& opt, std::vector<AkJson>& outputList);
