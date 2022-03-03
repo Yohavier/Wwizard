@@ -16,7 +16,7 @@ public:
 
 	bool Connect(const std::string& ip, const int& port);
 
-	bool IsWwiseConnected() { return m_isConnected; }
+	bool IsWwiseConnected() { return isConnected; }
 
 	void WalkProjectPath(const AkJson& arg, const AkJson& opt, std::vector<AkJson>& outputList);
 
@@ -30,10 +30,10 @@ private:
 	void WalkChildren(const std::string& guid, const AkJson& opt, std::vector<AkJson>& outputList);
 
 private:
-	Client m_wwiseClient;
+	Client wwiseClient;
 
-	bool m_isConnected = false;
-	int m_port;
-	std::string m_ip;
+	bool isConnected = false;
+	int port;
+	std::string ipAdresse;
 };
 

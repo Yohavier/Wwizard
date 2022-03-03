@@ -32,10 +32,10 @@ namespace wwizard
 		void ShowResultList();
 
 	private:
-		Layout m_currentLayout;
-		cWwizardWwiseClient* m_wwizarWwiseClient;
+		Layout currentLayout;
+		cWwizardWwiseClient* wwizarWwiseClient;
 
-		QueryEditorModule m_queryEditorModule = QueryEditorModule();
+		QueryEditorModule queryEditorModule = QueryEditorModule();
 	};
 }
 

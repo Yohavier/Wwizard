@@ -4,11 +4,11 @@
 namespace wwizard
 {
 	Dockspace::Dockspace(cWwizardWwiseClient* wwizardWwiseClient)
-        : m_currentLayout(Layout::HOME)
-        , m_wwizarWwiseClient(wwizardWwiseClient)
+        : currentLayout(Layout::HOME)
+        , wwizarWwiseClient(wwizardWwiseClient)
 	{ 
         //Init all modules
-        m_queryEditorModule.Init(m_wwizarWwiseClient);
+        queryEditorModule.Init(wwizarWwiseClient);
         std::cout << "Initialized Dockspace" << std::endl;
 	}
 
@@ -80,7 +80,7 @@ namespace wwizard
 
         CreateMenuBar();
         
-        if (m_currentLayout == Layout::QUERYEDITOR)
+        if (currentLayout == Layout::QUERYEDITOR)
         {
             CreateQueryEditor(p_open);
         }
@@ -134,7 +134,7 @@ namespace wwizard
 
     void Dockspace::SetLayout(Layout newLayout)
     {
-        m_currentLayout = newLayout;
+        currentLayout = newLayout;
     }
 
     void Dockspace::CreateQueryEditor(bool* p_open)
@@ -149,7 +149,7 @@ namespace wwizard
         ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2(2, 2));
         if (ImGui::BeginTable("availableWwiseQueries", 1, ImGuiTableFlags_BordersOuter | ImGuiTableFlags_Resizable))
         {
-            ShowAvailableList(m_queryEditorModule.m_wwiseQueryHierarchy);
+            ShowAvailableList(queryEditorModule.wwiseQueryHierarchy);
             ImGui::EndTable();
         }
         ImGui::PopStyleVar();
@@ -182,12 +182,12 @@ namespace wwizard
         }
 
         ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2(2, 2));
-        if (m_queryEditorModule.GetCurrentSelection() == nullptr) {
+        if (queryEditorModule.GetCurrentSelection() == nullptr) {
             ImGui::LabelText("Name", "");
         }
         else
         {
-            ImGui::LabelText("Name", m_queryEditorModule.GetCurrentSelection()->m_name.c_str());
+            ImGui::LabelText("Name", queryEditorModule.GetCurrentSelection()->name.c_str());
         }
         
         ImGui::PopStyleVar();
@@ -217,21 +217,21 @@ namespace wwizard
         ImGui::TableSetColumnIndex(0);
         ImGui::AlignTextToFramePadding();
 
-        for (auto& object : m_queryEditorModule.GetActiveQueryList())
+        for (auto& object : queryEditorModule.GetActiveQueryList())
         {
-            const bool is_selected = (m_queryEditorModule.GetCurrentSelectionGuid() == object.second->m_guid && ImGui::IsWindowFocused());
-            if (ImGui::Selectable(object.second->m_name.c_str(), is_selected))
+            const bool is_selected = (queryEditorModule.GetCurrentSelectionGuid() == object.second->guid && ImGui::IsWindowFocused());
+            if (ImGui::Selectable(object.second->name.c_str(), is_selected))
             {
                 if (is_selected)
                 {
-                    m_queryEditorModule.RemoveFromActiveQueryList(object.second->m_guid);
+                    queryEditorModule.RemoveFromActiveQueryList(object.second->guid);
                     std::string resetSelection = "";
-                    m_queryEditorModule.SetQuerySelection(resetSelection);
-                    m_queryEditorModule.RunActiveQueries();
+                    queryEditorModule.SetQuerySelection(resetSelection);
+                    queryEditorModule.RunActiveQueries();
                 }
                 else 
                 {
-                    m_queryEditorModule.SetQuerySelection(object.second->m_guid);
+                    queryEditorModule.SetQuerySelection(object.second->guid);
                 }
             }
             if (is_selected)
@@ -251,17 +251,17 @@ namespace wwizard
         ImGui::TableSetColumnIndex(0);
         ImGui::AlignTextToFramePadding();
 
-        if (queryObject->m_structureType == QueryType::FOLDER)
+        if (queryObject->structureType == QueryType::FOLDER)
         {
-            bool node_open = ImGui::TreeNode("", queryObject->m_name.c_str());
+            bool node_open = ImGui::TreeNode("", queryObject->name.c_str());
 
             if (node_open)
             {
-                for (int i = 0; i < queryObject->subDir.size(); i++)
+                for (int i = 0; i < queryObject->subHierarchy.size(); i++)
                 {
                     ImGui::PushID(i); // Use field index as identifier.
 
-                    ShowAvailableList(queryObject->subDir[i]);
+                    ShowAvailableList(queryObject->subHierarchy[i]);
 
                     ImGui::PopID();
                 }
@@ -270,18 +270,18 @@ namespace wwizard
         }
         else
         {
-            const bool is_selected = (m_queryEditorModule.GetCurrentSelectionGuid() == queryObject->m_guid && ImGui::IsWindowFocused());
+            const bool is_selected = (queryEditorModule.GetCurrentSelectionGuid() == queryObject->guid && ImGui::IsWindowFocused());
 
-            if (ImGui::Selectable(queryObject->m_name.c_str(), is_selected)) 
+            if (ImGui::Selectable(queryObject->name.c_str(), is_selected)) 
             {
                 
                 if (is_selected)
                 {
-                    m_queryEditorModule.AddToActiveQueryList(queryObject->m_guid);
-                    m_queryEditorModule.RunActiveQueries();
+                    queryEditorModule.AddToActiveQueryList(queryObject->guid);
+                    queryEditorModule.RunActiveQueries();
                 }     
 
-                m_queryEditorModule.SetQuerySelection(queryObject->m_guid);
+                queryEditorModule.SetQuerySelection(queryObject->guid);
             }
 
             if (is_selected)
@@ -297,11 +297,11 @@ namespace wwizard
         ImGui::TableSetColumnIndex(0);
         ImGui::AlignTextToFramePadding();
 
-        for (auto& object : m_queryEditorModule.resultList)
+        for (auto& object : queryEditorModule.queryResultFiles)
         {
             if (ImGui::Selectable(object.c_str(), false))
             {
-   
+                
             }          
         }
 

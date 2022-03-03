@@ -3,34 +3,34 @@
 using namespace AK::WwiseAuthoringAPI;
 
 cWwizardWwiseClient::cWwizardWwiseClient() 
-    :m_port(0)
-    , m_ip("")
+    :port(0)
+    , ipAdresse("")
 {
     std::cout << "Initialized Wwizard Wwise Client" << std::endl;
 }
 
 cWwizardWwiseClient::~cWwizardWwiseClient()
 {
-    if (m_isConnected)
+    if (isConnected)
     {
         std::cout << "Disconnect from Wwise Instance" << std::endl;
-        m_wwiseClient.Disconnect();
+        wwiseClient.Disconnect();
     }
     std::cout << "End Wwizard Wwise Client" << std::endl;
 }
 
 bool cWwizardWwiseClient::Connect(const std::string& ip, const int& port)
 {
-    if (m_wwiseClient.Connect(ip.c_str(), port))
+    if (wwiseClient.Connect(ip.c_str(), port))
     {
         std::cout << "Connected to Wwise Instance!" << std::endl;
-        m_isConnected = true;
+        isConnected = true;
         return true;
     }
     else
     {
         std::cout << "Failed to Connect to Wwise Instance!" << std::endl;
-        m_isConnected = false;
+        isConnected = false;
         return false;
     }
 }
@@ -38,7 +38,7 @@ bool cWwizardWwiseClient::Connect(const std::string& ip, const int& port)
 void cWwizardWwiseClient::WalkProjectPath(const AkJson& arg, const AkJson& opt, std::vector<AkJson>& outputList)
 {
  	AkJson queryResult;
-	m_wwiseClient.Call(ak::wwise::core::object::get, arg, opt, queryResult, 100);
+	wwiseClient.Call(ak::wwise::core::object::get, arg, opt, queryResult, 100);
 
     const auto& objects = queryResult["return"].GetArray();
     for (const auto& object : objects)
@@ -58,7 +58,7 @@ void cWwizardWwiseClient::WalkChildren(const std::string& guid, const AkJson& op
                 {"transform", AkJson::Array{ AkJson::Map {{"select", AkJson::Array{ AkVariant("children")}}}}}
             }});
 
-    m_wwiseClient.Call(ak::wwise::core::object::get, arg, opt, queryResult, 100);
+    wwiseClient.Call(ak::wwise::core::object::get, arg, opt, queryResult, 100);
 
     const auto& objects = queryResult["return"].GetArray();
     for (const auto& object : objects)
@@ -77,7 +77,7 @@ AkJson cWwizardWwiseClient::GetChildrenFromPath(const std::string path, AkJson o
         } });
     AkJson queryResult;
  
-    m_wwiseClient.Call(ak::wwise::core::object::get, arg, option, queryResult, 100);
+    wwiseClient.Call(ak::wwise::core::object::get, arg, option, queryResult, 100);
     
     return queryResult;
 }
@@ -91,7 +91,7 @@ AkJson cWwizardWwiseClient::GetObjectFromPath(const std::string path, AkJson opt
 
     AkJson queryResult;
 
-    m_wwiseClient.Call(ak::wwise::core::object::get, arg, option, queryResult, 100);
+    wwiseClient.Call(ak::wwise::core::object::get, arg, option, queryResult, 100);
 
     return queryResult;
 }
@@ -106,7 +106,7 @@ AkJson cWwizardWwiseClient::RunQueryFromGuuid(const std::string guid)
     { "return", AkJson::Array{ AkVariant("id"), AkVariant("name"), AkVariant("type"), AkVariant("path")}} });
 
     AkJson queryResult;
-    m_wwiseClient.Call(ak::wwise::core::object::get, arg, options, queryResult, 100);
+    wwiseClient.Call(ak::wwise::core::object::get, arg, options, queryResult, 100);
 
     return queryResult;
 }

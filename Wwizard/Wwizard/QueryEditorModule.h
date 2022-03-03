@@ -14,19 +14,19 @@ enum QueryType {
 
 struct BaseQueryStructure
 {
-	std::string m_name;
-	std::string m_guid;
-	std::string m_path;
-	QueryType m_structureType = FOLDER;
-	std::vector<BaseQueryStructure*> subDir;
+	std::string name;
+	std::string guid;
+	std::string path;
+	QueryType structureType = FOLDER;
+	std::vector<BaseQueryStructure*> subHierarchy;
 
 	BaseQueryStructure() = default;
 
 	BaseQueryStructure(std::string name, std::string guid, std::string path, QueryType queryType)
-		: m_name(name)
-		, m_guid(guid)
-		, m_path(path)
-		, m_structureType(queryType)
+		: name(name)
+		, guid(guid)
+		, path(path)
+		, structureType(queryType)
 	{}
 };
 
@@ -48,10 +48,10 @@ public:
 
 	void RunActiveQueries();
 
-	BaseQueryStructure* m_wwiseQueryHierarchy;
-	std::vector<std::string> resultList;
+	BaseQueryStructure* wwiseQueryHierarchy;
+	std::vector<std::string> queryResultFiles;
 private:
-	cWwizardWwiseClient* m_wwizardClient;
+	cWwizardWwiseClient* wwizardClient;
 	std::string selectedGuid = "";
 	std::map<std::string, BaseQueryStructure*> activeQueryDictionary;
 	std::map<std::string, BaseQueryStructure*> allQueryDictionary;

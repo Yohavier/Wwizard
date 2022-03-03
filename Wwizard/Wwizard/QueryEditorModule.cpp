@@ -2,14 +2,14 @@
 
 QueryEditorModule::QueryEditorModule()
 {
-    m_wwiseQueryHierarchy = new BaseQueryStructure();
+    wwiseQueryHierarchy = new BaseQueryStructure();
 	std::cout << "Queryeditor Module loaded!" << std::endl;
 }
 
 void QueryEditorModule::Init(cWwizardWwiseClient* wwizardClient)
 {
     std::cout << "Init QueryModule" << std::endl;
-	m_wwizardClient = wwizardClient;
+	wwizardClient = wwizardClient;
     FetchWwiseQueries();
 }
 
@@ -20,32 +20,32 @@ void QueryEditorModule::FetchWwiseQueries()
     { "return", AkJson::Array{ AkVariant("id"), AkVariant("name"), AkVariant("type"), AkVariant("path")}} });
 
     AkJson parentObject;
-    parentObject = m_wwizardClient->GetObjectFromPath("\\Queries", options);
+    parentObject = wwizardClient->GetObjectFromPath("\\Queries", options);
     BaseQueryStructure parentStructureFolder = BaseQueryStructure(parentObject["return"].GetArray()[0]["name"].GetVariant().GetString(), parentObject["return"].GetArray()[0]["id"].GetVariant().GetString(), parentObject["return"].GetArray()[0]["path"].GetVariant().GetString(), QueryType::FOLDER);
 
-    m_wwiseQueryHierarchy->m_guid = parentStructureFolder.m_guid;
-    m_wwiseQueryHierarchy->m_name = parentStructureFolder.m_name;
-    m_wwiseQueryHierarchy->m_path = parentStructureFolder.m_path;
+    wwiseQueryHierarchy->guid = parentStructureFolder.guid;
+    wwiseQueryHierarchy->name = parentStructureFolder.name;
+    wwiseQueryHierarchy->path = parentStructureFolder.path;
 
-    FetchWwiseFolderchildren(m_wwiseQueryHierarchy, options);
+    FetchWwiseFolderchildren(wwiseQueryHierarchy, options);
 }
 
 void QueryEditorModule::FetchWwiseFolderchildren(BaseQueryStructure* parentStructureFolder, AkJson options)
 {
-    AkJson queryResult = m_wwizardClient->GetChildrenFromPath(parentStructureFolder->m_path, options);
+    AkJson queryResult = wwizardClient->GetChildrenFromPath(parentStructureFolder->path, options);
 
     for (const auto& object : queryResult["return"].GetArray())
     {
         if (object["type"].GetVariant().GetString() == "Query")
         {
             BaseQueryStructure* newQuery = new BaseQueryStructure(object["name"].GetVariant().GetString(), object["id"].GetVariant().GetString(), object["path"].GetVariant().GetString(), QueryType::WWISEQUERY);
-            parentStructureFolder->subDir.push_back(newQuery);
+            parentStructureFolder->subHierarchy.push_back(newQuery);
             allQueryDictionary.insert({ object["id"].GetVariant().GetString(), newQuery });
         }
         else
         {
             BaseQueryStructure* newFolder = new BaseQueryStructure(object["name"].GetVariant().GetString(), object["id"].GetVariant().GetString(), object["path"].GetVariant().GetString(), QueryType::FOLDER);
-            parentStructureFolder->subDir.push_back(newFolder);
+            parentStructureFolder->subHierarchy.push_back(newFolder);
             FetchWwiseFolderchildren(newFolder, options);
         }
     }
@@ -95,11 +95,11 @@ void QueryEditorModule::RunActiveQueries()
 {
     for (auto it = activeQueryDictionary.begin(); it != activeQueryDictionary.end(); ++it)
     {
-        AkJson queryResult = m_wwizardClient->RunQueryFromGuuid(it->second->m_guid);
+        AkJson queryResult = wwizardClient->RunQueryFromGuuid(it->second->guid);
 
         for (const auto& object : queryResult["return"].GetArray())
         {
-            resultList.push_back(object["name"].GetVariant().GetString());
+            queryResultFiles.push_back(object["name"].GetVariant().GetString());
         }
     }
 }
