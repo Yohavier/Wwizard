@@ -30,6 +30,21 @@ struct BaseQueryStructure
 	{}
 };
 
+struct QueryResult
+{
+	std::string name;
+	std::string guid;
+	std::string path;
+	std::string type;
+
+	QueryResult(std::string name, std::string guid, std::string path, std::string type)
+		: name(name)
+		, guid(guid)
+		, path(path)
+		, type(type)
+	{}
+};
+
 
 class QueryEditorModule
 {
@@ -42,20 +57,23 @@ public:
 	void AddToActiveQueryList(std::string guid);
 	void RemoveFromActiveQueryList(const std::string guid);
 	std::map<std::string, BaseQueryStructure*> GetActiveQueryList();
-	const BaseQueryStructure* GetCurrentSelection();
-	void SetQuerySelection(std::string& guid);
+
+	const BaseQueryStructure* GetCurrentSelectionQuery();
+	const QueryResult* GetCurrentSelectionFile();
+
+	void SetQueryModuleSelection(std::string& guid);
 	const std::string& GetCurrentSelectionGuid();
 
 	void RunActiveQueries();
 
 	BaseQueryStructure* wwiseQueryHierarchy;
-	std::vector<std::string> queryResultFiles;
+	std::map<std::string, QueryResult> queryResultFiles;
+	
 private:
 	cWwizardWwiseClient* wwizardClient;
 	std::string selectedGuid = "";
 	std::map<std::string, BaseQueryStructure*> activeQueryDictionary;
 	std::map<std::string, BaseQueryStructure*> allQueryDictionary;
-
 
 };
 

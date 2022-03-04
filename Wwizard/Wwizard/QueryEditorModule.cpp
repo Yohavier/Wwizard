@@ -70,18 +70,29 @@ std::map<std::string, BaseQueryStructure*> QueryEditorModule::GetActiveQueryList
     return activeQueryDictionary;
 }
 
-const BaseQueryStructure* QueryEditorModule::GetCurrentSelection()
+const BaseQueryStructure* QueryEditorModule::GetCurrentSelectionQuery()
 {
     auto it = allQueryDictionary.find(selectedGuid);
     if (it != allQueryDictionary.end())
     {
         return it->second;
     }
+
+    return nullptr;
+}
+
+const QueryResult* QueryEditorModule::GetCurrentSelectionFile()
+{
+    auto it = queryResultFiles.find(selectedGuid);
+    if (it != queryResultFiles.end())
+    {
+        return &(it->second);
+    }
     return nullptr;
 }
 
 
-void QueryEditorModule::SetQuerySelection(std::string& guid)
+void QueryEditorModule::SetQueryModuleSelection(std::string& guid)
 {
     selectedGuid = guid;
 }
@@ -99,7 +110,7 @@ void QueryEditorModule::RunActiveQueries()
 
         for (const auto& object : queryResult["return"].GetArray())
         {
-            queryResultFiles.push_back(object["name"].GetVariant().GetString());
+            queryResultFiles.insert({ object["id"].GetVariant().GetString(), QueryResult(object["name"].GetVariant().GetString(), object["id"].GetVariant().GetString(), object["path"].GetVariant().GetString(), object["type"].GetVariant().GetString()) });
         }
     }
 }

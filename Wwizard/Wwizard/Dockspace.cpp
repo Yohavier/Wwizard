@@ -182,12 +182,17 @@ namespace wwizard
         }
 
         ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2(2, 2));
-        if (queryEditorModule.GetCurrentSelection() == nullptr) {
-            ImGui::LabelText("Name", "");
+        if (queryEditorModule.GetCurrentSelectionQuery() == nullptr && queryEditorModule.GetCurrentSelectionFile() == nullptr) 
+        {       
+            ImGui:: Text("", "Name : ");
+        }
+        else if (queryEditorModule.GetCurrentSelectionQuery() != nullptr)
+        {
+            ImGui::Text(("Name : " + queryEditorModule.GetCurrentSelectionQuery()->name).c_str());
         }
         else
         {
-            ImGui::LabelText("Name", queryEditorModule.GetCurrentSelection()->name.c_str());
+            ImGui::Text(("Name : " + queryEditorModule.GetCurrentSelectionFile()->name).c_str());
         }
         
         ImGui::PopStyleVar();
@@ -226,12 +231,12 @@ namespace wwizard
                 {
                     queryEditorModule.RemoveFromActiveQueryList(object.second->guid);
                     std::string resetSelection = "";
-                    queryEditorModule.SetQuerySelection(resetSelection);
+                    queryEditorModule.SetQueryModuleSelection(resetSelection);
                     queryEditorModule.RunActiveQueries();
                 }
                 else 
                 {
-                    queryEditorModule.SetQuerySelection(object.second->guid);
+                    queryEditorModule.SetQueryModuleSelection(object.second->guid);
                 }
             }
             if (is_selected)
@@ -281,7 +286,7 @@ namespace wwizard
                     queryEditorModule.RunActiveQueries();
                 }     
 
-                queryEditorModule.SetQuerySelection(queryObject->guid);
+                queryEditorModule.SetQueryModuleSelection(queryObject->guid);
             }
 
             if (is_selected)
@@ -299,9 +304,14 @@ namespace wwizard
 
         for (auto& object : queryEditorModule.queryResultFiles)
         {
-            if (ImGui::Selectable(object.c_str(), false))
+            const bool is_selected = (queryEditorModule.GetCurrentSelectionGuid() == object.second.guid && ImGui::IsWindowFocused());
+            if (ImGui::Selectable(object.second.name.c_str(), false))
             {
-                
+
+                if (is_selected)
+                    ImGui::SetItemDefaultFocus();
+
+                queryEditorModule.SetQueryModuleSelection(object.second.guid);
             }          
         }
 
