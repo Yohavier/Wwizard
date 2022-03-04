@@ -9,7 +9,7 @@ QueryEditorModule::QueryEditorModule()
 void QueryEditorModule::Init(cWwizardWwiseClient* wwizardClient)
 {
     std::cout << "Init QueryModule" << std::endl;
-	wwizardClient = wwizardClient;
+	QueryEditorModule::wwizardClient = wwizardClient;
     FetchWwiseQueries();
 }
 

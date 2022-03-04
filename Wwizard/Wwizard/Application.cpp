@@ -25,8 +25,6 @@ Application::Application()
     //Default Connection
     m_wwizardWwiseClient->Connect("127.0.0.1", 8080);
 
-
-
     // Create application window
    //ImGui_ImplWin32_EnableDpiAwareness();
     wc = { sizeof(WNDCLASSEX), CS_CLASSDC, WndProc, 0L, 0L, GetModuleHandle(NULL), NULL, NULL, NULL, NULL, _T("ImGui Example"), NULL };

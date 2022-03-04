@@ -1,4 +1,5 @@
 #include "WwizardWwiseClient.h"
+#include <windows.h>
 
 using namespace AK::WwiseAuthoringAPI;
 
@@ -27,12 +28,31 @@ bool cWwizardWwiseClient::Connect(const std::string& ip, const int& port)
         isConnected = true;
         return true;
     }
+    else if (ForceOpenWwiseInstance())
+    {
+        std::cout << "Force open Wwise Instance!" << std::endl;
+        isConnected = true;
+        return true;
+    }
     else
     {
         std::cout << "Failed to Connect to Wwise Instance!" << std::endl;
         isConnected = false;
         return false;
     }
+}
+
+bool cWwizardWwiseClient::ForceOpenWwiseInstance()
+{
+    std::string commandline = "\"E:\\Wwise 2021.1.6.7774\\Authoring\\x64\\Release\\bin\\WwiseConsole.exe\" waapi-server \"D:\\ue\\BubbleSpace\\BubbleSpace_WwiseProject\\BubbleSpace_WwiseProject.wproj\" --allow-migration --wamp-port 8080";
+    WinExec(commandline.c_str(), 1);
+    if (wwiseClient.Connect("127.0.0.1", 8080))
+    {
+        isConnected = true;
+        return true;
+    }
+    else
+        return false;
 }
 
 void cWwizardWwiseClient::WalkProjectPath(const AkJson& arg, const AkJson& opt, std::vector<AkJson>& outputList)

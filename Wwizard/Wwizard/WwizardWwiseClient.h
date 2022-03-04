@@ -16,6 +16,8 @@ public:
 
 	bool Connect(const std::string& ip, const int& port);
 
+	bool ForceOpenWwiseInstance();
+
 	bool IsWwiseConnected() { return isConnected; }
 
 	void WalkProjectPath(const AkJson& arg, const AkJson& opt, std::vector<AkJson>& outputList);
