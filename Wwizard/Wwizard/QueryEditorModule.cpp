@@ -63,6 +63,7 @@ void QueryEditorModule::RemoveFromActiveQueryList(const std::string guid)
     {
         activeQueryDictionary.erase(it);
     }
+    RunActiveQueries();
 }
 
 std::map<std::string, BaseQueryStructure*> QueryEditorModule::GetActiveQueryList()
@@ -104,13 +105,18 @@ const std::string& QueryEditorModule::GetCurrentSelectionGuid()
 
 void QueryEditorModule::RunActiveQueries()
 {
+    queryResultFiles.clear();
     for (auto it = activeQueryDictionary.begin(); it != activeQueryDictionary.end(); ++it)
     {
         AkJson queryResult = wwizardClient->RunQueryFromGuuid(it->second->guid);
 
-        for (const auto& object : queryResult["return"].GetArray())
+        if (!queryResult["return"].IsEmpty())
         {
-            queryResultFiles.insert({ object["id"].GetVariant().GetString(), QueryResult(object["name"].GetVariant().GetString(), object["id"].GetVariant().GetString(), object["path"].GetVariant().GetString(), object["type"].GetVariant().GetString()) });
+            for (const auto& object : queryResult["return"].GetArray())
+            {
+                queryResultFiles.insert({ object["id"].GetVariant().GetString(), QueryResult(object["name"].GetVariant().GetString(), object["id"].GetVariant().GetString(), object["path"].GetVariant().GetString(), object["type"].GetVariant().GetString()) });
+            }
         }
+
     }
 }
