@@ -1,0 +1,14 @@
+{
+    "WaapiQueries": [
+        {
+            "guid": "1234",
+            "name": "test waapi query1",
+            "path": "myDir"
+        },
+        {
+            "guid": "aasd2233",
+            "name": "test waapi query 2 1",
+            "path": "myDirssssda"
+        }
+    ]
+}

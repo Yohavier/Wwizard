@@ -1,9 +1,17 @@
 #include "QueryEditorModule.h"
+#include "rapidjson/document.h"
 
 QueryEditorModule::QueryEditorModule()
 {
     wwiseQueryHierarchy = new BaseQueryStructure();
 	std::cout << "Queryeditor Module loaded!" << std::endl;
+
+    LoadWaapiQueriesFromJson();
+}
+
+QueryEditorModule::~QueryEditorModule()
+{
+    SaveWaapiQueriesToJson();
 }
 
 void QueryEditorModule::Init(cWwizardWwiseClient* wwizardClient)
@@ -40,7 +48,7 @@ void QueryEditorModule::FetchWwiseFolderchildren(BaseQueryStructure* parentStruc
         {
             BaseQueryStructure* newQuery = new BaseQueryStructure(object["name"].GetVariant().GetString(), object["id"].GetVariant().GetString(), object["path"].GetVariant().GetString(), QueryType::WWISEQUERY);
             parentStructureFolder->subHierarchy.push_back(newQuery);
-            allQueryDictionary.insert({ object["id"].GetVariant().GetString(), newQuery });
+            wwiseQueries.insert({ object["id"].GetVariant().GetString(), newQuery });
         }
         else
         {
@@ -53,10 +61,10 @@ void QueryEditorModule::FetchWwiseFolderchildren(BaseQueryStructure* parentStruc
 
 void QueryEditorModule::AddToActiveQueryList(std::string guid)
 {
-    activeQueryDictionary.insert({ guid, allQueryDictionary.find(guid)->second });
+    activeQueryDictionary.insert({ guid, wwiseQueries.find(guid)->second });
 }
 
-void QueryEditorModule::RemoveFromActiveQueryList(const std::string guid)
+void QueryEditorModule::RemoveFromActiveQueryList(const std:: string guid)
 {
     auto it = activeQueryDictionary.find(guid);
     if (it != activeQueryDictionary.end()) 
@@ -73,8 +81,8 @@ std::map<std::string, BaseQueryStructure*> QueryEditorModule::GetActiveQueryList
 
 const BaseQueryStructure* QueryEditorModule::GetCurrentSelectionQuery()
 {
-    auto it = allQueryDictionary.find(selectedGuid);
-    if (it != allQueryDictionary.end())
+    auto it = wwiseQueries.find(selectedGuid);
+    if (it != wwiseQueries.end())
     {
         return it->second;
     }
@@ -108,15 +116,56 @@ void QueryEditorModule::RunActiveQueries()
     queryResultFiles.clear();
     for (auto it = activeQueryDictionary.begin(); it != activeQueryDictionary.end(); ++it)
     {
-        AkJson queryResult = wwizardClient->RunQueryFromGuuid(it->second->guid);
-
-        if (!queryResult["return"].IsEmpty())
+        if (it->second->structureType == QueryType::WWISEQUERY)
         {
-            for (const auto& object : queryResult["return"].GetArray())
+            AkJson queryResult = wwizardClient->RunQueryFromGuuid(it->second->guid);
+
+            if (!queryResult["return"].IsEmpty())
             {
-                queryResultFiles.insert({ object["id"].GetVariant().GetString(), QueryResult(object["name"].GetVariant().GetString(), object["id"].GetVariant().GetString(), object["path"].GetVariant().GetString(), object["type"].GetVariant().GetString()) });
+                for (const auto& object : queryResult["return"].GetArray())
+                {
+                    queryResultFiles.insert({ object["id"].GetVariant().GetString(), QueryResult(object["name"].GetVariant().GetString(), object["id"].GetVariant().GetString(), object["path"].GetVariant().GetString(), object["type"].GetVariant().GetString()) });
+                }
             }
         }
-
     }
+}
+
+void QueryEditorModule::LoadWaapiQueriesFromJson()
+{
+    using json = nlohmann::json;
+    
+
+    std::ifstream i("..\\SavedData\\test.json", std::ifstream::binary);
+    json j;
+    i >> j;
+
+    for (auto& object : j["WaapiQueries"])
+    {
+        waapiQueries.insert({ object["guid"], BaseQueryStructure(object["name"], object["guid"], object["path"], QueryType::WAAPIQUERY) });
+
+        auto it = waapiQueries.find(object["guid"]);
+        if (it != waapiQueries.end())
+        {
+            wwiseQueries.insert({ it->second.guid, &it->second });
+        }     
+    }
+
+    std::ofstream MyFile("..\\SavedData\\test.json");
+    MyFile << std::setw(4) << j << std::endl;
+}
+
+void QueryEditorModule::SaveWaapiQueriesToJson()
+{
+    using json = nlohmann::json;
+    json savedWaapiQueries;
+
+    std::ofstream SavingJsonFile("..\\SavedData\\test.json");
+
+    for (const auto& object : waapiQueries)
+    {
+        savedWaapiQueries["WaapiQueries"].push_back({ {"name", object.second.name},{"guid", object.second.guid}, {"path", object.second.path} });
+    }
+
+    SavingJsonFile << std::setw(4) << savedWaapiQueries << std::endl;
 }

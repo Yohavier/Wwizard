@@ -28,6 +28,8 @@ public:
 
 	AkJson RunQueryFromGuuid(const std::string guuid);
 	
+	AkJson RunWaapiQuery(const std::string arg);
+
 private:
 	void WalkChildren(const std::string& guid, const AkJson& opt, std::vector<AkJson>& outputList);
 
