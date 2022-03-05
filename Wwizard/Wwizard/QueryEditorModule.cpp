@@ -1,5 +1,13 @@
 #include "QueryEditorModule.h"
-#include "rapidjson/document.h"
+#include <iostream>
+#include <fstream>
+#include <cstdlib>
+#include <rapidjson/filereadstream.h>
+#include <rapidjson/filewritestream.h>
+#include <rapidjson/writer.h>
+#include <rapidjson/document.h>
+
+
 
 QueryEditorModule::QueryEditorModule()
 {
@@ -127,36 +135,77 @@ void QueryEditorModule::RunActiveQueries()
                     queryResultFiles.insert({ object["id"].GetVariant().GetString(), QueryResult(object["name"].GetVariant().GetString(), object["id"].GetVariant().GetString(), object["path"].GetVariant().GetString(), object["type"].GetVariant().GetString()) });
                 }
             }
-        }
+        } 
     }
 }
 
 void QueryEditorModule::LoadWaapiQueriesFromJson()
 {
-    using json = nlohmann::json;
+    using namespace rapidjson;
+
+    FILE* fp = fopen("big.json", "rb"); 
+    char readBuffer[65536];
+    FileReadStream is(fp, readBuffer, sizeof(readBuffer));
     
+    Document d;
+    d.ParseStream(is);
+    fclose(fp);
 
-    std::ifstream i("..\\SavedData\\test.json", std::ifstream::binary);
-    json j;
-    i >> j;
+    assert(d["WaapiQueries"].IsArray());
 
-    for (auto& object : j["WaapiQueries"])
+    for (int i = 0; i < d["WaapiQueries"].Size(); i++)
     {
-        waapiQueries.insert({ object["guid"], BaseQueryStructure(object["name"], object["guid"], object["path"], QueryType::WAAPIQUERY) });
+        waapiQueries.insert({ d["WaapiQueries"][i]["guid"].GetString(), BaseQueryStructure(d["WaapiQueries"][i]["name"].GetString(), d["WaapiQueries"][i]["guid"].GetString(), d["WaapiQueries"][i]["path"].GetString(), QueryType::WAAPIQUERY) });
 
-        auto it = waapiQueries.find(object["guid"]);
+        auto it = waapiQueries.find(d["WaapiQueries"][i]["guid"].GetString());
         if (it != waapiQueries.end())
         {
             wwiseQueries.insert({ it->second.guid, &it->second });
-        }     
+        }
     }
-
-    std::ofstream MyFile("..\\SavedData\\test.json");
-    MyFile << std::setw(4) << j << std::endl;
 }
 
 void QueryEditorModule::SaveWaapiQueriesToJson()
-{
+{   
+    using namespace rapidjson;
+
+    Document d;
+    d.SetObject();
+
+    Value waapiQueries;    // Null
+    waapiQueries.SetArray();
+    
+    for (const auto& object : QueryEditorModule::waapiQueries)
+    {
+        Value query(kObjectType);
+        {
+            Value name;
+            name = StringRef(object.second.name.c_str());
+            query.AddMember("name", name, d.GetAllocator());
+
+            Value guid; 
+            guid = StringRef(object.second.guid.c_str());
+            query.AddMember("guid", guid, d.GetAllocator());
+
+            Value path;
+            path = StringRef(object.second.path.c_str());
+            query.AddMember("path", path, d.GetAllocator());
+        }
+        waapiQueries.PushBack(query, d.GetAllocator());
+    }
+
+    d.AddMember("WaapiQueries", waapiQueries, d.GetAllocator());
+ 
+    FILE* fp = fopen("big.json", "wb");
+    char writeBuffer[65536];
+    FileWriteStream os(fp, writeBuffer, sizeof(writeBuffer));
+
+    Writer<FileWriteStream> writer(os);
+    d.Accept(writer);
+
+    fclose(fp);
+
+    /*
     using json = nlohmann::json;
     json savedWaapiQueries;
 
@@ -168,4 +217,5 @@ void QueryEditorModule::SaveWaapiQueriesToJson()
     }
 
     SavingJsonFile << std::setw(4) << savedWaapiQueries << std::endl;
+    */
 }
