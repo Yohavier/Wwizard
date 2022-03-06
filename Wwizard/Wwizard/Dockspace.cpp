@@ -151,6 +151,7 @@ namespace wwizard
         {
             ShowAvailableList(queryEditorModule.wwiseQueryHierarchy);
             ShowWaapiQueries();
+            ShowWaqlQueries();
             ImGui::EndTable();
         }
         ImGui::PopStyleVar();
@@ -334,6 +335,46 @@ namespace wwizard
             ImGui::TreePop();
         }
         ImGui::PopID();  
+    }
+
+    void Dockspace::ShowWaqlQueries()
+    {
+        ImGui::PushID(2);
+        ImGui::TableNextRow();
+        ImGui::TableSetColumnIndex(0);
+        ImGui::AlignTextToFramePadding();
+
+        bool node_open = ImGui::TreeNode("", "Waql Queries");
+
+        if (node_open)
+        {
+            int counter = 0;
+
+            for (auto& object : queryEditorModule.waqlQueries)
+            {
+                ImGui::PushID(counter);
+                const bool is_selected = (queryEditorModule.GetCurrentSelectionGuid() == object.second.guid && ImGui::IsWindowFocused());
+
+                if (ImGui::Selectable(object.second.name.c_str(), is_selected))
+                {
+                    if (is_selected)
+                    {
+                        queryEditorModule.AddToActiveQueryList(object.second.guid);
+                        queryEditorModule.RunActiveQueries();
+                    }
+
+                    queryEditorModule.SetQueryModuleSelection(object.second.guid);
+                }
+
+                if (is_selected)
+                    ImGui::SetItemDefaultFocus();
+
+                ImGui::PopID();
+                counter++;
+            }
+            ImGui::TreePop();
+        }
+        ImGui::PopID();
     }
 
     void Dockspace::ShowResultList()

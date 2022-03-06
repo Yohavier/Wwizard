@@ -30,7 +30,9 @@ namespace wwizard
 		void ShowAvailableList(BaseQueryStructure* queryObject);
 		void ShowActiveList();
 		void ShowResultList();
+
 		void ShowWaapiQueries();
+		void ShowWaqlQueries();
 
 	private:
 		Layout currentLayout;

@@ -18,7 +18,7 @@ struct BaseQueryStructure
 	std::string name;
 	std::string guid;
 	std::string path;
-	std::string arg;
+	AkJson arg;
 	QueryType structureType = FOLDER;
 	std::vector<BaseQueryStructure*> subHierarchy;
 
@@ -31,7 +31,7 @@ struct BaseQueryStructure
 		, structureType(queryType)
 	{}
 
-	BaseQueryStructure(std::string name, std::string guid, std::string path, QueryType queryType, std::string arg)
+	BaseQueryStructure(std::string name, std::string guid, std::string path, QueryType queryType, AkJson arg)
 		: name(name)
 		, guid(guid)
 		, path(path)
@@ -78,11 +78,15 @@ public:
 	void RunActiveQueries();
 
 	void LoadWaapiQueriesFromJson();
+	void LoadWaqlQueriesFromJson();
+
 	void SaveWaapiQueriesToJson();
 
 	BaseQueryStructure* wwiseQueryHierarchy;
 	std::map<std::string, QueryResult> queryResultFiles;
+
 	std::map<std::string, BaseQueryStructure> waapiQueries;
+	std::map<std::string, BaseQueryStructure> waqlQueries;
 
 private:
 	cWwizardWwiseClient* wwizardClient;

@@ -131,13 +131,24 @@ AkJson cWwizardWwiseClient::RunQueryFromGuuid(const std::string guid)
     return queryResult;
 }
 
-AkJson cWwizardWwiseClient::RunWaapiQuery(const std::string arg)
+AkJson cWwizardWwiseClient::RunWaapiQuery(const AkJson arg)
 {
     AkJson queryResult;
     AkJson options(AkJson::Map{
     { "return", AkJson::Array{ AkVariant("id"), AkVariant("name"), AkVariant("type"), AkVariant("path")}} });
 
-    //wwiseClient.Call(ak::wwise::core::object::get, arg), options, queryResult, 100);
+    wwiseClient.Call(ak::wwise::core::object::get, arg, options, queryResult, 100);
+
+    return queryResult;
+}
+
+AkJson cWwizardWwiseClient::RunWaqlQuery(const AkJson arg)
+{
+    AkJson queryResult;
+    AkJson options(AkJson::Map{
+    { "return", AkJson::Array{ AkVariant("id"), AkVariant("name"), AkVariant("type"), AkVariant("path")}} });
+
+    wwiseClient.Call(ak::wwise::core::object::get, arg, options, queryResult, 100);
 
     return queryResult;
 }

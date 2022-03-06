@@ -1,14 +1,25 @@
 {
     "WaapiQueries": [
         {
-            "guid": "1234",
             "name": "test waapi query1",
-            "path": "myDir"
+            "guid": "1234",
+            "path": "myDir",
+            "arg": { "from": { "path": [ "\\Queries" ] } }
         },
         {
-            "guid": "aasd2233",
             "name": "test waapi query 2 1",
-            "path": "myDirssssda"
+            "guid": "aasd2233",
+            "path": "myDirssssda",
+            "arg": { "from": { "path": [ "\\Queries" ] } }
+        }
+    ],
+    "WaqlQueries": [
+        {
+            "name": "test waapi query1",
+            "guid": "12342",
+            "path": "myDir",
+            "arg": { "waql": "$ \"\\Actor-Mixer Hierarchy\" select descendants" }
         }
     ]
 }
+
