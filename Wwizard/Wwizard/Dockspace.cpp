@@ -458,8 +458,10 @@ namespace wwizard
                 queryEditorModule.CreateNewQuery(nameText, QueryType::WAQLQUERY, argText);
             else
             {
+
                 ImGui::OpenPopup("Options");
             }
+            
         }    
     }
 }

@@ -270,10 +270,10 @@ void QueryEditorModule::SaveWaapiQueriesToJson()
 void QueryEditorModule::CreateNewQuery(std::string name, QueryType type, std::string arg)
 {
     AkJson placeholder;
-    std::string guid = std::to_string(((long long)rand() << 32) | rand());
-    BaseQueryStructure newQuery = BaseQueryStructure(name, guid, "", type, placeholder);
+    std::string guid = std::to_string(((long long)rand() << 32) | rand());  
     if (type == QueryType::WAAPIQUERY)
     {
+        BaseQueryStructure newQuery = BaseQueryStructure(name, guid, "", type, placeholder);
         waapiQueries.insert({ guid, newQuery });
         auto it = waapiQueries.find(guid);
         if (it != waapiQueries.end())
@@ -283,6 +283,8 @@ void QueryEditorModule::CreateNewQuery(std::string name, QueryType type, std::st
     } 
     else if (type == QueryType::WAQLQUERY)
     {
+        AkJson argJson(AkJson::Map{ {{"waql", AkVariant(arg)}}});
+        BaseQueryStructure newQuery = BaseQueryStructure(name, guid, "", type, argJson);
         waqlQueries.insert({ guid, newQuery });
         auto it = waqlQueries.find(guid);
         if (it != waqlQueries.end())
