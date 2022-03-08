@@ -140,23 +140,29 @@ void QueryEditorModule::RunActiveQueries()
         } 
         else if(it->second->structureType == QueryType::WAAPIQUERY)
         {
-            AkJson queryResult = wwizardClient->RunWaapiQuery(it->second->arg);
-            if (!queryResult["return"].IsEmpty())
+            if (!it->second->arg.IsEmpty())
             {
-                for (const auto& object : queryResult["return"].GetArray())
+                AkJson queryResult = wwizardClient->RunWaapiQuery(it->second->arg);
+                if (!queryResult["return"].IsEmpty())
                 {
-                    queryResultFiles.insert({ object["id"].GetVariant().GetString(), QueryResult(object["name"].GetVariant().GetString(), object["id"].GetVariant().GetString(), object["path"].GetVariant().GetString(), object["type"].GetVariant().GetString()) });
+                    for (const auto& object : queryResult["return"].GetArray())
+                    {
+                        queryResultFiles.insert({ object["id"].GetVariant().GetString(), QueryResult(object["name"].GetVariant().GetString(), object["id"].GetVariant().GetString(), object["path"].GetVariant().GetString(), object["type"].GetVariant().GetString()) });
+                    }
                 }
-            }
+            }       
         }
         else if (it->second->structureType == QueryType::WAQLQUERY)
         {
-            AkJson queryResult = wwizardClient->RunWaqlQuery(it->second->arg);
-            if (!queryResult["return"].IsEmpty())
+            if (!it->second->arg.IsEmpty())
             {
-                for (const auto& object : queryResult["return"].GetArray())
+                AkJson queryResult = wwizardClient->RunWaqlQuery(it->second->arg);
+                if (!queryResult["return"].IsEmpty())
                 {
-                    queryResultFiles.insert({object["id"].GetVariant().GetString(),QueryResult(object["name"].GetVariant().GetString(), object["id"].GetVariant().GetString(), object["path"].GetVariant().GetString(), object["type"].GetVariant().GetString()) });
+                    for (const auto& object : queryResult["return"].GetArray())
+                    {
+                        queryResultFiles.insert({ object["id"].GetVariant().GetString(),QueryResult(object["name"].GetVariant().GetString(), object["id"].GetVariant().GetString(), object["path"].GetVariant().GetString(), object["type"].GetVariant().GetString()) });
+                    }
                 }
             }
         }
@@ -188,6 +194,7 @@ void QueryEditorModule::LoadWaqlQueriesFromJson()
         }
     }
 }
+
 void QueryEditorModule::LoadWaapiQueriesFromJson()
 {
     using namespace rapidjson;
@@ -258,4 +265,29 @@ void QueryEditorModule::SaveWaapiQueriesToJson()
     d.Accept(writer);
 
     fclose(fp);
+}
+
+void QueryEditorModule::CreateNewQuery(std::string name, QueryType type, std::string arg)
+{
+    AkJson placeholder;
+    std::string guid = std::to_string(((long long)rand() << 32) | rand());
+    BaseQueryStructure newQuery = BaseQueryStructure(name, guid, "", type, placeholder);
+    if (type == QueryType::WAAPIQUERY)
+    {
+        waapiQueries.insert({ guid, newQuery });
+        auto it = waapiQueries.find(guid);
+        if (it != waapiQueries.end())
+        {
+            wwiseQueries.insert({ it->second.guid, &it->second });
+        }
+    } 
+    else if (type == QueryType::WAQLQUERY)
+    {
+        waqlQueries.insert({ guid, newQuery });
+        auto it = waqlQueries.find(guid);
+        if (it != waqlQueries.end())
+        {
+            wwiseQueries.insert({ it->second.guid, &it->second });
+        }
+    }
 }

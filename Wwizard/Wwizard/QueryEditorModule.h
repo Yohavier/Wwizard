@@ -82,6 +82,8 @@ public:
 
 	void SaveWaapiQueriesToJson();
 
+	void CreateNewQuery(std::string name, QueryType type, std::string arg);
+
 	BaseQueryStructure* wwiseQueryHierarchy;
 	std::map<std::string, QueryResult> queryResultFiles;
 
@@ -93,7 +95,5 @@ private:
 	std::string selectedGuid = "";
 	std::map<std::string, BaseQueryStructure*> activeQueryDictionary;
 	std::map<std::string, BaseQueryStructure*> wwiseQueries;
-
-
 };
 

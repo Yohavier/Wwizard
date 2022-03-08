@@ -128,6 +128,15 @@ namespace wwizard
                 }
                 ImGui::EndMenu();
             }
+            if (currentLayout == Layout::QUERYEDITOR)
+            {
+                if (ImGui::BeginMenu("Add Query"))
+                { 
+                    SetAddQueryPopUp();
+                    ImGui::EndMenu();
+                }    
+                
+            }
             ImGui::EndMenuBar();
         }
     }
@@ -147,9 +156,11 @@ namespace wwizard
             return;
         }
         ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2(2, 2));
+
+
         if (ImGui::BeginTable("availableWwiseQueries", 1, ImGuiTableFlags_BordersOuter | ImGuiTableFlags_Resizable))
         {
-            ShowAvailableList(queryEditorModule.wwiseQueryHierarchy);
+            ShowWwiseQueries(queryEditorModule.wwiseQueryHierarchy);
             ShowWaapiQueries();
             ShowWaqlQueries();
             ImGui::EndTable();
@@ -248,7 +259,7 @@ namespace wwizard
         ImGui::PopID();
     }
 
-    void Dockspace::ShowAvailableList(BaseQueryStructure* queryObject)
+    void Dockspace::ShowWwiseQueries(BaseQueryStructure* queryObject)
     {
         // Use object uid as identifier. Most commonly you could also use the object pointer as a base ID.
         ImGui::PushID(0);
@@ -268,7 +279,7 @@ namespace wwizard
                 {
                     ImGui::PushID(i); // Use field index as identifier.
 
-                    ShowAvailableList(queryObject->subHierarchy[i]);
+                    ShowWwiseQueries(queryObject->subHierarchy[i]);
 
                     ImGui::PopID();
                 }
@@ -403,5 +414,52 @@ namespace wwizard
     void Dockspace::CreateHomeLayout()
     {
         
+    }
+
+    void Dockspace::SetAddQueryPopUp()
+    {  
+        static char argText[124] = "pls enter your query text here....";
+        static char nameText[64] = "pls enter your query name here....";
+        static bool waql = false;
+        static bool waapi = false;
+
+        if (ImGui::Checkbox("Waapi", &waapi))
+        {
+            waql = false;
+        }
+        if (ImGui::Checkbox("Waql", &waql))
+        {
+            waapi = false;
+        }
+
+        ImGui::Text("label");
+        ImGui::SameLine();
+        ImGui::InputText("##", nameText, IM_ARRAYSIZE(nameText));
+
+        ImGui::Text("MultiArg");
+        ImGui::SameLine();
+        ImGui::InputTextMultiline("###", argText, IM_ARRAYSIZE(argText));
+
+        if (ImGui::BeginPopup("Options"))
+        {
+            ImGui::Text("Please select if its a Waapi or Waql Query!");
+            if (ImGui::Button("Close"))
+            {
+                ImGui::CloseCurrentPopup();
+            }
+            ImGui::EndPopup();
+        }
+        if (ImGui::Button("Submit Query", ImVec2(-FLT_MIN, 0.0f)))
+        {
+
+            if (waapi)
+                queryEditorModule.CreateNewQuery(nameText, QueryType::WAAPIQUERY, argText);
+            else if (waql)
+                queryEditorModule.CreateNewQuery(nameText, QueryType::WAQLQUERY, argText);
+            else
+            {
+                ImGui::OpenPopup("Options");
+            }
+        }    
     }
 }

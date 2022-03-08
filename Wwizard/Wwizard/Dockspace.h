@@ -27,12 +27,14 @@ namespace wwizard
 		void CreateHomeLayout();
 		void SetLayout(Layout newLayout);
 
-		void ShowAvailableList(BaseQueryStructure* queryObject);
+		
 		void ShowActiveList();
 		void ShowResultList();
 
 		void ShowWaapiQueries();
 		void ShowWaqlQueries();
+		void ShowWwiseQueries(BaseQueryStructure* queryObject);
+		void SetAddQueryPopUp();
 
 	private:
 		Layout currentLayout;
