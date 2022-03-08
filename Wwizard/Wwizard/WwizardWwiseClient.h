@@ -28,9 +28,7 @@ public:
 
 	AkJson RunQueryFromGuuid(const std::string guuid);
 	
-	AkJson RunWaapiQuery(const AkJson arg);
-
-	AkJson RunWaqlQuery(const AkJson arg);
+	AkJson RunCustomQuery(const AkJson arg);
 
 private:
 	void WalkChildren(const std::string& guid, const AkJson& opt, std::vector<AkJson>& outputList);

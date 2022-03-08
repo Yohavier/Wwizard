@@ -67,12 +67,12 @@ public:
 	
 	void AddToActiveQueryList(std::string guid);
 	void RemoveFromActiveQueryList(const std::string guid);
-	std::map<std::string, BaseQueryStructure*> GetActiveQueryList();
+	std::map<std::string, BaseQueryStructure&> GetActiveQueryList();
 
 	const BaseQueryStructure* GetCurrentSelectionQuery();
 	const QueryResult* GetCurrentSelectionFile();
 
-	void SetQueryModuleSelection(std::string& guid);
+	void SetQuerySelection(std::string& guid);
 	const std::string& GetCurrentSelectionGuid();
 
 	void RunActiveQueries();
@@ -82,18 +82,41 @@ public:
 
 	void SaveWaapiQueriesToJson();
 
+	template<typename TReturn, typename TMap>
+	TReturn FindInMap(TMap findMap)
+	{
+		auto it = findMap.find(selectedGuid);
+		if (it != findMap.end())
+		{
+			return &(it->second);
+		}
+		else
+		{
+			return nullptr;
+		}
+	}
+
 	void CreateNewQuery(std::string name, QueryType type, std::string arg);
 
 	BaseQueryStructure* wwiseQueryHierarchy;
 	std::map<std::string, QueryResult> queryResultFiles;
 
-	std::map<std::string, BaseQueryStructure> waapiQueries;
-	std::map<std::string, BaseQueryStructure> waqlQueries;
-
-private:
-	cWwizardWwiseClient* wwizardClient;
+	std::map<std::string, BaseQueryStructure&> waapiQueries;
+	std::map<std::string, BaseQueryStructure&> waqlQueries;
+	std::map<std::string, BaseQueryStructure&> wwiseQueries;
 	std::string selectedGuid = "";
-	std::map<std::string, BaseQueryStructure*> activeQueryDictionary;
-	std::map<std::string, BaseQueryStructure*> wwiseQueries;
+
+	void AddQueryToAllQueriesMap(BaseQueryStructure* newQuery);
+
+	std::map<std::string, BaseQueryStructure> allQueries;
+private:
+
+
+	std::string GenerateGuid();
+
+	cWwizardWwiseClient* wwizardClient;
+	
+	std::map<std::string, BaseQueryStructure&> activeQueryDictionary;
 };
+
 

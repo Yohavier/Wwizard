@@ -195,17 +195,16 @@ namespace wwizard
         }
 
         ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2(2, 2));
-        if (queryEditorModule.GetCurrentSelectionQuery() == nullptr && queryEditorModule.GetCurrentSelectionFile() == nullptr) 
-        {       
-            ImGui:: Text("", "Name : ");
-        }
-        else if (queryEditorModule.GetCurrentSelectionQuery() != nullptr)
+        auto possibleSelectedQuery = queryEditorModule.FindInMap<BaseQueryStructure*, std::map<std::string, BaseQueryStructure>&>(queryEditorModule.allQueries);
+        auto possibleSelectedFile = queryEditorModule.FindInMap<QueryResult*, std::map<std::string, QueryResult>&>(queryEditorModule.queryResultFiles);
+        
+        if (possibleSelectedQuery != nullptr)
         {
-            ImGui::Text(("Name : " + queryEditorModule.GetCurrentSelectionQuery()->name).c_str());
+            ImGui::Text(("Name : " + possibleSelectedQuery->name).c_str());
         }
-        else
+        else if(possibleSelectedFile != nullptr)
         {
-            ImGui::Text(("Name : " + queryEditorModule.GetCurrentSelectionFile()->name).c_str());
+            ImGui::Text(("Name : " + possibleSelectedFile->name).c_str());
         }
         
         ImGui::PopStyleVar();
@@ -237,19 +236,19 @@ namespace wwizard
 
         for (auto& object : queryEditorModule.GetActiveQueryList())
         {
-            const bool is_selected = (queryEditorModule.GetCurrentSelectionGuid() == object.second->guid && ImGui::IsWindowFocused());
-            if (ImGui::Selectable(object.second->name.c_str(), is_selected))
+            const bool is_selected = (queryEditorModule.GetCurrentSelectionGuid() == object.second.guid && ImGui::IsWindowFocused());
+            if (ImGui::Selectable(object.second.name.c_str(), is_selected))
             {
                 if (is_selected)
                 {
-                    queryEditorModule.RemoveFromActiveQueryList(object.second->guid);
+                    queryEditorModule.RemoveFromActiveQueryList(object.second.guid);
                     std::string resetSelection = "";
-                    queryEditorModule.SetQueryModuleSelection(resetSelection);
+                    queryEditorModule.SetQuerySelection(resetSelection);
                     queryEditorModule.RunActiveQueries();
                 }
                 else 
                 {
-                    queryEditorModule.SetQueryModuleSelection(object.second->guid);
+                    queryEditorModule.SetQuerySelection(object.second.guid);
                 }
             }
             if (is_selected)
@@ -299,7 +298,7 @@ namespace wwizard
                     queryEditorModule.RunActiveQueries();
                 }     
 
-                queryEditorModule.SetQueryModuleSelection(queryObject->guid);
+                queryEditorModule.SetQuerySelection(queryObject->guid);
             }
 
             if (is_selected)
@@ -334,7 +333,7 @@ namespace wwizard
                         queryEditorModule.RunActiveQueries();
                     }
 
-                    queryEditorModule.SetQueryModuleSelection(object.second.guid);
+                    queryEditorModule.SetQuerySelection(object.second.guid);
                 }
 
                 if (is_selected)
@@ -374,7 +373,7 @@ namespace wwizard
                         queryEditorModule.RunActiveQueries();
                     }
 
-                    queryEditorModule.SetQueryModuleSelection(object.second.guid);
+                    queryEditorModule.SetQuerySelection(object.second.guid);
                 }
 
                 if (is_selected)
@@ -404,7 +403,7 @@ namespace wwizard
                 if (is_selected)
                     ImGui::SetItemDefaultFocus();
 
-                queryEditorModule.SetQueryModuleSelection(object.second.guid);
+                queryEditorModule.SetQuerySelection(object.second.guid);
             }          
         }
 
