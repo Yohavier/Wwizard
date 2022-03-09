@@ -60,6 +60,12 @@
     <ClCompile Include="QueryEditorModule.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="SettingHandler.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\ThirdParty\imgui_stdlib.cpp">
+      <Filter>ImGui</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\ThirdParty\backends\imgui_impl_dx10.h">
@@ -97,6 +103,12 @@
     </ClInclude>
     <ClInclude Include="QueryEditorModule.h">
       <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="SettingHandler.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\ThirdParty\imgui_stdlib.h">
+      <Filter>ImGui</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

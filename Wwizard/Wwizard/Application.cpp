@@ -21,9 +21,10 @@ AkAssertHook g_pAssertHook = SampleAssertHook;
 
 Application::Application()
 {
-    m_wwizardWwiseClient = new cWwizardWwiseClient();
+    wwizardWwiseClient = new WwizardWwiseClient();
+    settingsHandler = new SettingHandler();
     //Default Connection
-    m_wwizardWwiseClient->Connect("127.0.0.1", 8080);
+    wwizardWwiseClient->Connect(*settingsHandler);
 
     // Create application window
    //ImGui_ImplWin32_EnableDpiAwareness();
@@ -52,20 +53,6 @@ Application::Application()
     //io.ConfigFlags |= ImGuiConfigFlags_NavEnableGamepad;      // Enable Gamepad Controls
     io->ConfigFlags |= ImGuiConfigFlags_DockingEnable;           // Enable Docking
     io->ConfigFlags |= ImGuiConfigFlags_ViewportsEnable;         // Enable Multi-Viewport / Platform Windows
-    //io.ConfigViewportsNoAutoMerge = true;
-    //io.ConfigViewportsNoTaskBarIcon = true;
-
-    // Setup Dear ImGui style
-    ImGui::StyleColorsDark();
-    //ImGui::StyleColorsClassic();
-
-    // When viewports are enabled we tweak WindowRounding/WindowBg so platform windows can look identical to regular ones.
-    ImGuiStyle& style = ImGui::GetStyle();
-    if (io->ConfigFlags & ImGuiConfigFlags_ViewportsEnable)
-    {
-        style.WindowRounding = 0.0f;
-        style.Colors[ImGuiCol_WindowBg].w = 1.0f;
-    }
 
     // Setup Platform/Renderer backends
     ImGui_ImplWin32_Init(hwnd);
@@ -85,12 +72,9 @@ Application::Application()
     //io.Fonts->AddFontFromFileTTF("../../misc/fonts/ProggyTiny.ttf", 10.0f);
     //ImFont* font = io.Fonts->AddFontFromFileTTF("c:\\Windows\\Fonts\\ArialUni.ttf", 18.0f, NULL, io.Fonts->GetGlyphRangesJapanese());
     //IM_ASSERT(font != NULL);
-
-    // Our state
-    clear_color = ImVec4(0.45f, 0.55f, 0.60f, 1.00f);
-
     //Create Custom GUI
-    myDock = std::unique_ptr<wwizard::Dockspace>(new wwizard::Dockspace(m_wwizardWwiseClient));
+
+    myDock = std::unique_ptr<wwizard::Dockspace>(new wwizard::Dockspace(wwizardWwiseClient, settingsHandler));
 }
 
 void Application::Loop()
@@ -133,11 +117,13 @@ void Application::Loop()
         g_pSwapChain->Present(1, 0); // Present with vsync
         //g_pSwapChain->Present(0, 0); // Present without vsync
     }
+    ShutDown();
 }
 
 void Application::ShutDown()
 {
-    delete m_wwizardWwiseClient;
+    delete wwizardWwiseClient;
+    delete settingsHandler;
     ImGui_ImplDX10_Shutdown();
     ImGui_ImplWin32_Shutdown();
     ImGui::DestroyContext();

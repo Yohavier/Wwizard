@@ -1,54 +1,39 @@
 #include "Dockspace.h"
 #include <stdio.h>
+#include "imgui_stdlib.h"
 
 namespace wwizard
 {
-	Dockspace::Dockspace(cWwizardWwiseClient* wwizardWwiseClient)
+	Dockspace::Dockspace(WwizardWwiseClient* wwizardWwiseClient, SettingHandler* settingHandler)
         : currentLayout(Layout::HOME)
         , wwizarWwiseClient(wwizardWwiseClient)
+        , settingHandler(settingHandler)
 	{ 
         //Init all modules
         queryEditorModule.Init(wwizarWwiseClient);
         std::cout << "Initialized Dockspace" << std::endl;
+        SetDefaultStyle();
 	}
 
 	void Dockspace::Render(bool* p_open)
 	{
-        // If you strip some features of, this demo is pretty much equivalent to calling DockSpaceOverViewport()!
-        // In most cases you should be able to just call DockSpaceOverViewport() and ignore all the code below!
-        // In this specific demo, we are not using DockSpaceOverViewport() because:
-        // - we allow the host window to be floating/moveable instead of filling the viewport (when opt_fullscreen == false)
-        // - we allow the host window to have padding (when opt_padding == true)
-        // - we have a local menu bar in the host window (vs. you could use BeginMainMenuBar() + DockSpaceOverViewport() in your code!)
-        // TL;DR; this demo is more complicated than what you would normally use.
-        // If we removed all the options we are showcasing, this demo would become:
-        //     void ShowExampleAppDockSpace()
-        //     {
-        //         ImGui::DockSpaceOverViewport(ImGui::GetMainViewport());
-        //     }
-
-        static bool opt_fullscreen = true;
-        static bool opt_padding = false;
+        static bool opt_padding = true;
         static ImGuiDockNodeFlags dockspace_flags = ImGuiDockNodeFlags_None;
 
         // We are using the ImGuiWindowFlags_NoDocking flag to make the parent window not dockable into,
         // because it would be confusing to have two docking targets within each others.
         ImGuiWindowFlags window_flags = ImGuiWindowFlags_MenuBar | ImGuiWindowFlags_NoDocking;
-        if (opt_fullscreen)
-        {
-            const ImGuiViewport* viewport = ImGui::GetMainViewport();
-            ImGui::SetNextWindowPos(viewport->WorkPos);
-            ImGui::SetNextWindowSize(viewport->WorkSize);
-            ImGui::SetNextWindowViewport(viewport->ID);
-            ImGui::PushStyleVar(ImGuiStyleVar_WindowRounding, 0.0f);
-            ImGui::PushStyleVar(ImGuiStyleVar_WindowBorderSize, 0.0f);
-            window_flags |= ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoMove;
-            window_flags |= ImGuiWindowFlags_NoBringToFrontOnFocus | ImGuiWindowFlags_NoNavFocus;
-        }
-        else
-        {
-            dockspace_flags &= ~ImGuiDockNodeFlags_PassthruCentralNode;
-        }
+  
+        const ImGuiViewport* viewport = ImGui::GetMainViewport();
+        ImGui::SetNextWindowPos(viewport->WorkPos);
+        ImGui::SetNextWindowSize(viewport->WorkSize);
+        ImGui::SetNextWindowViewport(viewport->ID);
+        ImGui::PushStyleVar(ImGuiStyleVar_WindowRounding, 0.0f);
+        ImGui::PushStyleVar(ImGuiStyleVar_WindowBorderSize, 0.0f);
+
+        window_flags |= ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoMove;
+        window_flags |= ImGuiWindowFlags_NoBringToFrontOnFocus | ImGuiWindowFlags_NoNavFocus;
+
 
         // When using ImGuiDockNodeFlags_PassthruCentralNode, DockSpace() will render our background
         // and handle the pass-thru hole, so we ask Begin() to not render a background.
@@ -64,10 +49,10 @@ namespace wwizard
             ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(0.0f, 0.0f));
         ImGui::Begin("DockSpace Demo", p_open, window_flags);
         if (!opt_padding)
-            ImGui::PopStyleVar();
+        ImGui::PopStyleVar();
 
-        if (opt_fullscreen)
-            ImGui::PopStyleVar(2);
+   
+        ImGui::PopStyleVar(2);
 
         ImGuiID dockspace_id;
         // Submit the DockSpace
@@ -84,6 +69,10 @@ namespace wwizard
         {
             CreateQueryEditor(p_open);
         }
+        else if (currentLayout == Layout::SETTINGS)
+        {
+            ShowSettings(p_open);
+        }
         else //Default Home Layout
         {
             CreateHomeLayout();
@@ -99,7 +88,10 @@ namespace wwizard
             if (ImGui::BeginMenu("Wwizard"))
             {
                 ImGui::MenuItem("Reconnect", NULL);
-                ImGui::MenuItem("Settings", NULL);
+                if (ImGui::MenuItem("Settings", NULL))
+                {
+                    SetLayout(Layout::SETTINGS);
+                }
                 ImGui::Separator();
 
                 ImGui::MenuItem("Close", NULL);
@@ -134,8 +126,7 @@ namespace wwizard
                 { 
                     SetAddQueryPopUp();
                     ImGui::EndMenu();
-                }    
-                
+                }                
             }
             ImGui::EndMenuBar();
         }
@@ -146,6 +137,39 @@ namespace wwizard
         currentLayout = newLayout;
     }
 
+    //Settings Layout
+    void Dockspace::ShowSettings(bool* p_open)
+    {
+        ImGui::SetNextWindowSize(ImVec2(430, 450), ImGuiCond_FirstUseEver);
+        if (!ImGui::Begin("Settings", p_open))
+        {
+            ImGui::End();
+            return;
+        }
+
+        ImGui::Text("Project Path : ");
+        ImGui::SameLine();
+        ImGui::InputText("##1", settingHandler->GetWwisProjectPathRef());
+
+        ImGui::Text("SDK Path     : ");
+        ImGui::SameLine();
+        ImGui::InputText("##2", settingHandler->GetSDKPath());
+
+        ImGui::Text("Waapi IP     : ");
+        ImGui::SameLine();
+        ImGui::InputText("##3", settingHandler->GetWaapiIP());
+       
+        ImGui::Text("Waapi Port   : ");
+        ImGui::SameLine();
+        ImGui::InputInt("##4", settingHandler->GetWaaapiPort());
+        if (ImGui::Button("Save Settings"))
+        {
+            //settingHandler->SaveSettings(projectPathBuffer,sdkPathBuffer, waapiIPBuffer, waapiPortBuffer);
+        }
+        ImGui::End();
+    }
+
+    //QueryLayouts
     void Dockspace::CreateQueryEditor(bool* p_open)
     {       
         //Available Queries Field
@@ -155,7 +179,6 @@ namespace wwizard
             ImGui::End();
             return;
         }
-        ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2(2, 2));
 
 
         if (ImGui::BeginTable("availableWwiseQueries", 1, ImGuiTableFlags_BordersOuter | ImGuiTableFlags_Resizable))
@@ -165,7 +188,6 @@ namespace wwizard
             ShowWaqlQueries();
             ImGui::EndTable();
         }
-        ImGui::PopStyleVar();
         ImGui::End();
 
 
@@ -476,5 +498,11 @@ namespace wwizard
 
         ImGui::PopStyleVar();
         ImGui::End();
+    }
+
+    void Dockspace::SetDefaultStyle()
+    {
+        ImGuiStyle* style = &ImGui::GetStyle();
+        style->WindowPadding = ImVec2(10, 10);
     }
 }

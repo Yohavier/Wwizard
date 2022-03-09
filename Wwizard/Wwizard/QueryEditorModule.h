@@ -3,7 +3,6 @@
 #include <string>
 #include "WwizardWwiseClient.h"
 #include <map>
-#include "nlohmann/json.hpp"
 #include <guiddef.h>
 
 enum class QueryType
@@ -61,7 +60,7 @@ class QueryEditorModule
 {
 public:
 	~QueryEditorModule();
-	void Init(cWwizardWwiseClient* wwizardClient);
+	void Init(WwizardWwiseClient* wwizardClient);
 	void FetchWwiseQueries();
 	void FetchWwiseFolderchildren(BaseQueryStructure* parentStructureFolder, AkJson options);
 	
@@ -130,7 +129,7 @@ private:
 
 	std::string GenerateGuid();
 
-	cWwizardWwiseClient* wwizardClient;
+	WwizardWwiseClient* wwizardClient;
 	
 	std::map<std::string, BaseQueryStructure&> activeQueryDictionary;
 };

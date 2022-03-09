@@ -4,6 +4,7 @@
 #include "imgui.h"
 #include "imgui_internal.h"
 #include "QueryEditorModule.h"
+#include "SettingHandler.h"
 
 namespace wwizard
 {
@@ -12,13 +13,14 @@ namespace wwizard
 		HOME,
 		QUERYEDITOR,
 		NAMINGCONVENTION,
-		SORTORIGINALS
+		SORTORIGINALS,
+		SETTINGS
 	};
 
 	class Dockspace
 	{
 	public:
-		Dockspace(cWwizardWwiseClient* wwizardWwiseClient);
+		Dockspace(WwizardWwiseClient* wwizardWwiseClient, SettingHandler* settingHandler);
 		void Render(bool* p_open);
 
 	private:
@@ -27,19 +29,23 @@ namespace wwizard
 		void CreateHomeLayout();
 		void SetLayout(Layout newLayout);
 
-		
+		//Settings
+		void ShowSettings(bool* p_open);
+
+		//Query Module
 		void ShowActiveList();
 		void ShowResultList();
-
 		void ShowWaapiQueries();
 		void ShowWaqlQueries();
 		void ShowWwiseQueries(BaseQueryStructure* queryObject);
 		void SetAddQueryPopUp();
 		void HandleDetailsWindow(bool* p_open);
+		void SetDefaultStyle();
 
 	private:
 		Layout currentLayout;
-		cWwizardWwiseClient* wwizarWwiseClient;
+		WwizardWwiseClient* wwizarWwiseClient;
+		SettingHandler* settingHandler;
 
 		QueryEditorModule queryEditorModule = QueryEditorModule();
 	};

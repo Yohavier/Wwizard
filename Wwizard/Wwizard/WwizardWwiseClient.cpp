@@ -3,14 +3,14 @@
 
 using namespace AK::WwiseAuthoringAPI;
 
-cWwizardWwiseClient::cWwizardWwiseClient() 
+WwizardWwiseClient::WwizardWwiseClient() 
     :port(0)
     , ipAdresse("")
 {
     std::cout << "Initialized Wwizard Wwise Client" << std::endl;
 }
 
-cWwizardWwiseClient::~cWwizardWwiseClient()
+WwizardWwiseClient::~WwizardWwiseClient()
 {
     if (isConnected)
     {
@@ -20,9 +20,9 @@ cWwizardWwiseClient::~cWwizardWwiseClient()
     std::cout << "End Wwizard Wwise Client" << std::endl;
 }
 
-bool cWwizardWwiseClient::Connect(const std::string& ip, const int& port)
+bool WwizardWwiseClient::Connect(const SettingHandler& settings)
 {
-    if (wwiseClient.Connect(ip.c_str(), port))
+    if (wwiseClient.Connect(settings.waapiIP.c_str(),settings.waapiPort))
     {
         std::cout << "Connected to Wwise Instance!" << std::endl;
         isConnected = true;
@@ -42,7 +42,7 @@ bool cWwizardWwiseClient::Connect(const std::string& ip, const int& port)
     }
 }
 
-bool cWwizardWwiseClient::ForceOpenWwiseInstance()
+bool WwizardWwiseClient::ForceOpenWwiseInstance()
 {
     std::string commandline = "\"E:\\Wwise 2021.1.6.7774\\Authoring\\x64\\Release\\bin\\WwiseConsole.exe\" waapi-server \"D:\\ue\\BubbleSpace\\BubbleSpace_WwiseProject\\BubbleSpace_WwiseProject.wproj\" --allow-migration --wamp-port 8080";
     WinExec(commandline.c_str(), 1);
@@ -55,7 +55,7 @@ bool cWwizardWwiseClient::ForceOpenWwiseInstance()
         return false;
 }
 
-void cWwizardWwiseClient::WalkProjectPath(const AkJson& arg, const AkJson& opt, std::vector<AkJson>& outputList)
+void WwizardWwiseClient::WalkProjectPath(const AkJson& arg, const AkJson& opt, std::vector<AkJson>& outputList)
 {
  	AkJson queryResult;
 	wwiseClient.Call(ak::wwise::core::object::get, arg, opt, queryResult, 100);
@@ -68,7 +68,7 @@ void cWwizardWwiseClient::WalkProjectPath(const AkJson& arg, const AkJson& opt, 
     }
 }
 
-void cWwizardWwiseClient::WalkChildren(const std::string& guid, const AkJson& opt, std::vector<AkJson>& outputList)
+void WwizardWwiseClient::WalkChildren(const std::string& guid, const AkJson& opt, std::vector<AkJson>& outputList)
 {
     AkJson queryResult;
 
@@ -88,7 +88,7 @@ void cWwizardWwiseClient::WalkChildren(const std::string& guid, const AkJson& op
     }
 }
 
-AkJson cWwizardWwiseClient::GetChildrenFromPath(const std::string path, AkJson option)
+AkJson WwizardWwiseClient::GetChildrenFromPath(const std::string path, AkJson option)
 {
     AkJson arg(AkJson::Map{
         {
@@ -102,7 +102,7 @@ AkJson cWwizardWwiseClient::GetChildrenFromPath(const std::string path, AkJson o
     return queryResult;
 }
 
-AkJson cWwizardWwiseClient::GetObjectFromPath(const std::string path, AkJson option)
+AkJson WwizardWwiseClient::GetObjectFromPath(const std::string path, AkJson option)
 {
     AkJson arg(AkJson::Map{
         { "from", AkJson::Map{
@@ -116,7 +116,7 @@ AkJson cWwizardWwiseClient::GetObjectFromPath(const std::string path, AkJson opt
     return queryResult;
 }
 
-AkJson cWwizardWwiseClient::RunQueryFromGuuid(const std::string guid)
+AkJson WwizardWwiseClient::RunQueryFromGuuid(const std::string guid)
 {
     std::cout << guid << std::endl;
     AkJson arg(AkJson::Map{
@@ -131,7 +131,7 @@ AkJson cWwizardWwiseClient::RunQueryFromGuuid(const std::string guid)
     return queryResult;
 }
 
-AkJson cWwizardWwiseClient::RunCustomQuery(const AkJson arg)
+AkJson WwizardWwiseClient::RunCustomQuery(const AkJson arg)
 {
     AkJson queryResult;
     AkJson options(AkJson::Map{

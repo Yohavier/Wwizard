@@ -150,12 +150,14 @@
     <ClCompile Include="..\ThirdParty\imgui.cpp" />
     <ClCompile Include="..\ThirdParty\imgui_demo.cpp" />
     <ClCompile Include="..\ThirdParty\imgui_draw.cpp" />
+    <ClCompile Include="..\ThirdParty\imgui_stdlib.cpp" />
     <ClCompile Include="..\ThirdParty\imgui_tables.cpp" />
     <ClCompile Include="..\ThirdParty\imgui_widgets.cpp" />
     <ClCompile Include="Application.cpp" />
     <ClCompile Include="Dockspace.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="QueryEditorModule.cpp" />
+    <ClCompile Include="SettingHandler.cpp" />
     <ClCompile Include="WwizardWwiseClient.cpp" />
   </ItemGroup>
   <ItemGroup>
@@ -164,12 +166,14 @@
     <ClInclude Include="..\ThirdParty\imconfig.h" />
     <ClInclude Include="..\ThirdParty\imgui.h" />
     <ClInclude Include="..\ThirdParty\imgui_internal.h" />
+    <ClInclude Include="..\ThirdParty\imgui_stdlib.h" />
     <ClInclude Include="..\ThirdParty\imstb_rectpack.h" />
     <ClInclude Include="..\ThirdParty\imstb_textedit.h" />
     <ClInclude Include="..\ThirdParty\imstb_truetype.h" />
     <ClInclude Include="Application.h" />
     <ClInclude Include="Dockspace.h" />
     <ClInclude Include="QueryEditorModule.h" />
+    <ClInclude Include="SettingHandler.h" />
     <ClInclude Include="WwizardWwiseClient.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

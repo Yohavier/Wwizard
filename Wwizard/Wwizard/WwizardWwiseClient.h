@@ -4,17 +4,18 @@
 #include <string>
 #include <iostream>
 #include <vector>
+#include "SettingHandler.h"
 
 using namespace AK::WwiseAuthoringAPI;
 
-class cWwizardWwiseClient
+class WwizardWwiseClient
 { 
 public:
-	cWwizardWwiseClient();
+	WwizardWwiseClient();
 
-	~cWwizardWwiseClient();
+	~WwizardWwiseClient();
 
-	bool Connect(const std::string& ip, const int& port);
+	bool Connect(const SettingHandler& settings);
 
 	bool ForceOpenWwiseInstance();
 

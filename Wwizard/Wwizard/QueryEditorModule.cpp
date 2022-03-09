@@ -13,7 +13,7 @@ QueryEditorModule::~QueryEditorModule()
     //SaveWaapiQueriesToJson();
 }
 
-void QueryEditorModule::Init(cWwizardWwiseClient* wwizardClient)
+void QueryEditorModule::Init(WwizardWwiseClient* wwizardClient)
 {
     std::cout << "Init QueryModule" << std::endl;
 	QueryEditorModule::wwizardClient = wwizardClient;
