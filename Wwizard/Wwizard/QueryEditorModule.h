@@ -6,7 +6,8 @@
 #include "nlohmann/json.hpp"
 #include <guiddef.h>
 
-enum class QueryType {
+enum class QueryType
+{
 	WWISEQUERY,
 	WAQLQUERY,
 	WAAPIQUERY,
@@ -80,6 +81,22 @@ public:
 	void LoadWaqlQueriesFromJson();
 
 	void SaveWaapiQueriesToJson();
+
+	
+	std::string ConvertQueryTypeToString(QueryType queryType)
+	{
+		switch (queryType)
+		{
+			case QueryType::WAAPIQUERY:
+				return "Waapi";
+			case QueryType::WAQLQUERY:
+				return "Waql";
+			case QueryType::WWISEQUERY:
+				return "Wwise";
+			default:
+				return "";
+		}
+	}
 
 	template<typename TReturn, typename TMap>
 	TReturn FindInMap(TMap findMap)

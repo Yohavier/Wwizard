@@ -187,28 +187,8 @@ namespace wwizard
 
 
         //Details window
-        ImGui::SetNextWindowSize(ImVec2(430, 450), ImGuiCond_FirstUseEver);
-        if (!ImGui::Begin("Details", p_open))
-        {
-            ImGui::End();
-            return;
-        }
-
-        ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2(2, 2));
-        auto possibleSelectedQuery = queryEditorModule.FindInMap<BaseQueryStructure*, std::map<std::string, BaseQueryStructure>&>(queryEditorModule.allQueries);
-        auto possibleSelectedFile = queryEditorModule.FindInMap<QueryResult*, std::map<std::string, QueryResult>&>(queryEditorModule.queryResultFiles);
+        HandleDetailsWindow(p_open);
         
-        if (possibleSelectedQuery != nullptr)
-        {
-            ImGui::Text(("Name : " + possibleSelectedQuery->name).c_str());
-        }
-        else if(possibleSelectedFile != nullptr)
-        {
-            ImGui::Text(("Name : " + possibleSelectedFile->name).c_str());
-        }
-        
-        ImGui::PopStyleVar();
-        ImGui::End();
 
         //Results
         ImGui::SetNextWindowSize(ImVec2(430, 450), ImGuiCond_FirstUseEver);
@@ -462,5 +442,39 @@ namespace wwizard
             }
             
         }    
+    }
+    
+    void Dockspace::HandleDetailsWindow(bool* p_open)
+    {
+        ImGui::SetNextWindowSize(ImVec2(430, 450), ImGuiCond_FirstUseEver);
+        if (!ImGui::Begin("Details", p_open))
+        {
+            ImGui::End();
+            return;
+        }
+        ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2(2, 2));
+
+        auto possibleSelectedQuery = queryEditorModule.FindInMap<BaseQueryStructure*, std::map<std::string, BaseQueryStructure>&>(queryEditorModule.allQueries);
+        auto possibleSelectedFile = queryEditorModule.FindInMap<QueryResult*, std::map<std::string, QueryResult>&>(queryEditorModule.queryResultFiles);
+
+        if (possibleSelectedQuery != nullptr)
+        {
+            ImGui::Text(("Name : " + possibleSelectedQuery->name).c_str());
+            ImGui::Text(("Guid : " + possibleSelectedQuery->guid).c_str());
+            ImGui::Text(("Type : " + queryEditorModule.ConvertQueryTypeToString(possibleSelectedQuery->structureType)).c_str());
+
+            if (possibleSelectedQuery->structureType == QueryType::WAAPIQUERY || possibleSelectedQuery->structureType == QueryType::WAQLQUERY)
+            {
+                ImGui::Text("Arg : ");
+            }
+        }
+        else if (possibleSelectedFile != nullptr)
+        {
+            ImGui::Text(("Name : " + possibleSelectedFile->name).c_str());
+            ImGui::Text(("Guid : " + possibleSelectedFile->guid).c_str());
+        }
+
+        ImGui::PopStyleVar();
+        ImGui::End();
     }
 }

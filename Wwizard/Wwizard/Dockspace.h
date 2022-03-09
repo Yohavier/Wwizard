@@ -7,7 +7,7 @@
 
 namespace wwizard
 {
-	enum Layout
+	enum class Layout
 	{
 		HOME,
 		QUERYEDITOR,
@@ -35,6 +35,7 @@ namespace wwizard
 		void ShowWaqlQueries();
 		void ShowWwiseQueries(BaseQueryStructure* queryObject);
 		void SetAddQueryPopUp();
+		void HandleDetailsWindow(bool* p_open);
 
 	private:
 		Layout currentLayout;
