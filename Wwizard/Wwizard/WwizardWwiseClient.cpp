@@ -4,15 +4,13 @@
 using namespace AK::WwiseAuthoringAPI;
 
 WwizardWwiseClient::WwizardWwiseClient() 
-    :port(0)
-    , ipAdresse("")
 {
     std::cout << "Initialized Wwizard Wwise Client" << std::endl;
 }
 
 WwizardWwiseClient::~WwizardWwiseClient()
 {
-    if (isConnected)
+    if (wwiseClient.IsConnected())
     {
         std::cout << "Disconnect from Wwise Instance" << std::endl;
         wwiseClient.Disconnect();
@@ -22,33 +20,35 @@ WwizardWwiseClient::~WwizardWwiseClient()
 
 bool WwizardWwiseClient::Connect(const SettingHandler& settings)
 {
+    if (wwiseClient.IsConnected())
+    {
+        wwiseClient.Disconnect();
+    }
+
     if (wwiseClient.Connect(settings.waapiIP.c_str(),settings.waapiPort))
     {
         std::cout << "Connected to Wwise Instance!" << std::endl;
-        isConnected = true;
         return true;
     }
-    else if (ForceOpenWwiseInstance())
+    else if (ForceOpenWwiseInstance(settings))
     {
         std::cout << "Force open Wwise Instance!" << std::endl;
-        isConnected = true;
         return true;
     }
     else
     {
         std::cout << "Failed to Connect to Wwise Instance!" << std::endl;
-        isConnected = false;
         return false;
     }
 }
 
-bool WwizardWwiseClient::ForceOpenWwiseInstance()
+bool WwizardWwiseClient::ForceOpenWwiseInstance(const SettingHandler& settings)
 {
-    std::string commandline = "\"E:\\Wwise 2021.1.6.7774\\Authoring\\x64\\Release\\bin\\WwiseConsole.exe\" waapi-server \"D:\\ue\\BubbleSpace\\BubbleSpace_WwiseProject\\BubbleSpace_WwiseProject.wproj\" --allow-migration --wamp-port 8080";
-    WinExec(commandline.c_str(), 1);
-    if (wwiseClient.Connect("127.0.0.1", 8080))
+    std::string commandline = "\"E:\\Wwise 2021.1.6.7774\\Authoring\\x64\\Release\\bin\\WwiseConsole.exe\" waapi-server \"D:\\ue\\BubbleSpace\\BubbleSpace_WwiseProject\\BubbleSpace_WwiseProject.wproj\" --allow-migration --wamp-port " + std::to_string(settings.waapiPort);
+    WinExec(commandline.c_str(), 0);
+
+    if (wwiseClient.Connect(settings.waapiIP.c_str(), settings.waapiPort))
     {
-        isConnected = true;
         return true;
     }
     else

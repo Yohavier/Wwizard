@@ -80,6 +80,7 @@ public:
 	void LoadWaqlQueriesFromJson();
 
 	void SaveWaapiQueriesToJson();
+	void ResetQueryModule(WwizardWwiseClient* wwizardClient);
 
 	
 	std::string ConvertQueryTypeToString(QueryType queryType)

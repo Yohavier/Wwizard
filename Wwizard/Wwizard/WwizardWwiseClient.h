@@ -17,9 +17,7 @@ public:
 
 	bool Connect(const SettingHandler& settings);
 
-	bool ForceOpenWwiseInstance();
-
-	bool IsWwiseConnected() { return isConnected; }
+	bool ForceOpenWwiseInstance(const SettingHandler& settings);
 
 	void WalkProjectPath(const AkJson& arg, const AkJson& opt, std::vector<AkJson>& outputList);
 
@@ -31,14 +29,15 @@ public:
 	
 	AkJson RunCustomQuery(const AkJson arg);
 
+	bool IsConnected()
+	{
+		return wwiseClient.IsConnected();
+	}
+
 private:
 	void WalkChildren(const std::string& guid, const AkJson& opt, std::vector<AkJson>& outputList);
 
 private:
 	Client wwiseClient;
-
-	bool isConnected = false;
-	int port;
-	std::string ipAdresse;
 };
 

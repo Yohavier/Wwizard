@@ -15,12 +15,15 @@ QueryEditorModule::~QueryEditorModule()
 
 void QueryEditorModule::Init(WwizardWwiseClient* wwizardClient)
 {
-    std::cout << "Init QueryModule" << std::endl;
-	QueryEditorModule::wwizardClient = wwizardClient;
-    wwiseQueryHierarchy = new BaseQueryStructure();
-    FetchWwiseQueries();
-    LoadWaapiQueriesFromJson();
-    LoadWaqlQueriesFromJson();
+    if(wwizardClient->IsConnected())
+    { 
+        std::cout << "Init QueryModule" << std::endl;
+        QueryEditorModule::wwizardClient = wwizardClient;
+        wwiseQueryHierarchy = new BaseQueryStructure();
+        FetchWwiseQueries();
+        LoadWaapiQueriesFromJson();
+        LoadWaqlQueriesFromJson();
+    }
 }
 
 void QueryEditorModule::FetchWwiseQueries()
@@ -292,4 +295,17 @@ void QueryEditorModule::AddQueryToAllQueriesMap(BaseQueryStructure* newQuery)
 std::string QueryEditorModule::GenerateGuid()
 {
     return std::to_string(((long long)rand() << 32) | rand());
+}
+
+void QueryEditorModule::ResetQueryModule(WwizardWwiseClient* wwizardClient)
+{
+    waapiQueries.clear();
+    waqlQueries.clear();
+    wwiseQueries.clear();
+    allQueries.clear();
+    selectedGuid = "";
+    queryResultFiles.clear();
+    delete wwiseQueryHierarchy;
+
+    Init(wwizardClient);
 }

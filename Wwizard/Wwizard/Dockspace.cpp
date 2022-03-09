@@ -55,7 +55,6 @@ namespace wwizard
         ImGui::Begin("DockSpace Demo", p_open, window_flags);
         if (!opt_padding)
         ImGui::PopStyleVar();
-
    
         ImGui::PopStyleVar(2);
 
@@ -72,7 +71,8 @@ namespace wwizard
         
         if (currentLayout == Layout::QUERYEDITOR)
         {
-            CreateQueryEditor(p_open);
+            if(wwizarWwiseClient->IsConnected())
+                CreateQueryEditor(p_open);
         }
         else if (currentLayout == Layout::SETTINGS)
         {
@@ -174,7 +174,16 @@ namespace wwizard
 
         if (ImGui::Button("Save Settings"))
         {
-            settingHandler->SaveSettings(projectPathSetting, sdkPathSetting, waapiIPSetting, waapiPortSetting);
+            if (waapiIPSetting != *settingHandler->GetWaapiIP() || waapiPortSetting != *settingHandler->GetWaaapiPort())
+            {
+                settingHandler->SaveSettings(projectPathSetting, sdkPathSetting, waapiIPSetting, waapiPortSetting);
+                wwizarWwiseClient->Connect(*settingHandler);
+                queryEditorModule.ResetQueryModule(wwizarWwiseClient);
+            }
+            else
+            {
+                settingHandler->SaveSettings(projectPathSetting, sdkPathSetting, waapiIPSetting, waapiPortSetting);
+            }
         }
         ImGui::End();
     }
