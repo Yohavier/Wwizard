@@ -6,7 +6,7 @@
 #include "nlohmann/json.hpp"
 #include <guiddef.h>
 
-enum QueryType {
+enum class QueryType {
 	WWISEQUERY,
 	WAQLQUERY,
 	WAAPIQUERY,
@@ -19,7 +19,7 @@ struct BaseQueryStructure
 	std::string guid;
 	std::string path;
 	AkJson arg;
-	QueryType structureType = FOLDER;
+	QueryType structureType = QueryType::FOLDER;
 	std::vector<BaseQueryStructure*> subHierarchy;
 
 	BaseQueryStructure() = default;
@@ -59,7 +59,6 @@ struct QueryResult
 class QueryEditorModule
 {
 public:
-	QueryEditorModule();
 	~QueryEditorModule();
 	void Init(cWwizardWwiseClient* wwizardClient);
 	void FetchWwiseQueries();

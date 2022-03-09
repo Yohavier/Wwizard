@@ -237,7 +237,7 @@ namespace wwizard
         for (auto& object : queryEditorModule.GetActiveQueryList())
         {
             const bool is_selected = (queryEditorModule.GetCurrentSelectionGuid() == object.second.guid && ImGui::IsWindowFocused());
-            if (ImGui::Selectable(object.second.name.c_str(), is_selected))
+            if (ImGui::Selectable((object.second.name + "##" + object.second.guid).c_str(), is_selected))
             {
                 if (is_selected)
                 {

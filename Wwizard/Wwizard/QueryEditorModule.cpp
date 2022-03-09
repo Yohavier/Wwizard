@@ -8,13 +8,6 @@
 #include <rapidjson/document.h>
 #include <random>
 
-
-
-QueryEditorModule::QueryEditorModule()
-{ 
-	std::cout << "Queryeditor Module loaded!" << std::endl;
-}
-
 QueryEditorModule::~QueryEditorModule()
 {
     //SaveWaapiQueriesToJson();
@@ -162,7 +155,7 @@ void QueryEditorModule::RunActiveQueries()
 void QueryEditorModule::LoadWaqlQueriesFromJson()
 {
     FILE* fp = fopen("../SavedData/test.json", "rb");
-    char readBuffer[65536];
+    char* readBuffer = new char[65536];
     rapidjson::FileReadStream is(fp, readBuffer, sizeof(readBuffer));
 
     rapidjson::Document d;
@@ -171,7 +164,7 @@ void QueryEditorModule::LoadWaqlQueriesFromJson()
 
     assert(d["WaqlQueries"].IsArray());
 
-    for (int i = 0; i < d["WaqlQueries"].Size(); i++)
+    for (int i = 0; i < static_cast<int>(d["WaqlQueries"].Size()); i++)
     {
         AkJson test;
         test.FromRapidJson(d["WaqlQueries"][i]["arg"], test);
@@ -192,7 +185,7 @@ void QueryEditorModule::LoadWaapiQueriesFromJson()
     using namespace rapidjson;
 
     FILE* fp = fopen("../SavedData/test.json", "rb"); 
-    char readBuffer[65536];
+    char* readBuffer = new char[65536];
     FileReadStream is(fp, readBuffer, sizeof(readBuffer));
     
     Document d;
@@ -201,11 +194,10 @@ void QueryEditorModule::LoadWaapiQueriesFromJson()
 
     assert(d["WaapiQueries"].IsArray());
 
-    for (int i = 0; i < d["WaapiQueries"].Size(); i++)
+    for (int i = 0; i < static_cast<int>(d["WaapiQueries"].Size()); i++)
     {
         AkJson test;
         test.FromRapidJson(d["WaapiQueries"][i]["arg"], test);
-        // Unique ID std::cout << (((long long)rand() << 32) | rand());
         
         BaseQueryStructure* newQuery = new BaseQueryStructure(d["WaapiQueries"][i]["name"].GetString(), d["WaapiQueries"][i]["guid"].GetString(), d["WaapiQueries"][i]["path"].GetString(), QueryType::WAAPIQUERY, test);
         AddQueryToAllQueriesMap(newQuery);
@@ -244,7 +236,9 @@ void QueryEditorModule::SaveWaapiQueriesToJson()
 
             rapidjson::Value arg;
             AkJson a;
-            //a.ToRapidJson(a, arg, d.GetAllocator());
+            
+            //a.ToRapidJson<rapidjson::Value, rapidjson::MemoryPoolAllocator, rapidjson::SizeType>(a, arg, d.GetAllocator());
+            
         }
         waapiQueries.PushBack(rapidJsonQuery, d.GetAllocator());
     }
@@ -252,7 +246,7 @@ void QueryEditorModule::SaveWaapiQueriesToJson()
     d.AddMember("WaapiQueries", waapiQueries, d.GetAllocator());
  
     FILE* fp = fopen("../SavedData/test.json", "wb");
-    char writeBuffer[65536];
+    char* writeBuffer = new char[65536];
     rapidjson::FileWriteStream os(fp, writeBuffer, sizeof(writeBuffer));
 
     rapidjson::Writer<rapidjson::FileWriteStream> writer(os);
