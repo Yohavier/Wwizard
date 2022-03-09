@@ -4,6 +4,11 @@
 
 namespace wwizard
 {
+    static std::string projectPathSetting;
+    static std::string sdkPathSetting;
+    static std::string waapiIPSetting;
+    static int waapiPortSetting;
+
 	Dockspace::Dockspace(WwizardWwiseClient* wwizardWwiseClient, SettingHandler* settingHandler)
         : currentLayout(Layout::HOME)
         , wwizarWwiseClient(wwizardWwiseClient)
@@ -90,6 +95,10 @@ namespace wwizard
                 ImGui::MenuItem("Reconnect", NULL);
                 if (ImGui::MenuItem("Settings", NULL))
                 {
+                    projectPathSetting = *settingHandler->GetWwisProjectPathRef();
+                    sdkPathSetting = *settingHandler->GetSDKPath();
+                    waapiIPSetting = *settingHandler->GetWaapiIP();
+                    waapiPortSetting = *settingHandler->GetWaaapiPort();
                     SetLayout(Layout::SETTINGS);
                 }
                 ImGui::Separator();
@@ -144,27 +153,28 @@ namespace wwizard
         if (!ImGui::Begin("Settings", p_open))
         {
             ImGui::End();
-            return;
+            return; 
         }
 
         ImGui::Text("Project Path : ");
         ImGui::SameLine();
-        ImGui::InputText("##1", settingHandler->GetWwisProjectPathRef());
+        ImGui::InputText("##1", &projectPathSetting);
 
         ImGui::Text("SDK Path     : ");
         ImGui::SameLine();
-        ImGui::InputText("##2", settingHandler->GetSDKPath());
+        ImGui::InputText("##2", &sdkPathSetting);
 
         ImGui::Text("Waapi IP     : ");
         ImGui::SameLine();
-        ImGui::InputText("##3", settingHandler->GetWaapiIP());
+        ImGui::InputText("##3", &waapiIPSetting);
        
         ImGui::Text("Waapi Port   : ");
         ImGui::SameLine();
-        ImGui::InputInt("##4", settingHandler->GetWaaapiPort());
+        ImGui::InputInt("##4", &waapiPortSetting);
+
         if (ImGui::Button("Save Settings"))
         {
-            //settingHandler->SaveSettings(projectPathBuffer,sdkPathBuffer, waapiIPBuffer, waapiPortBuffer);
+            settingHandler->SaveSettings(projectPathSetting, sdkPathSetting, waapiIPSetting, waapiPortSetting);
         }
         ImGui::End();
     }
