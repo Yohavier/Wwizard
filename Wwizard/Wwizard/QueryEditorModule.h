@@ -79,7 +79,8 @@ public:
 	void LoadWaapiQueriesFromJson();
 	void LoadWaqlQueriesFromJson();
 
-	void SaveWaapiQueriesToJson();
+	void SaveCustomQueriesToJson();
+
 	void ResetQueryModule(WwizardWwiseClient* wwizardClient);
 
 	

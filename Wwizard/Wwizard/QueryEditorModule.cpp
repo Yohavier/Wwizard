@@ -6,11 +6,12 @@
 #include <rapidjson/filewritestream.h>
 #include <rapidjson/writer.h>
 #include <rapidjson/document.h>
+#include "rapidjson/RapidJsonUtils.h"
 #include <random>
 
 QueryEditorModule::~QueryEditorModule()
 {
-    //SaveWaapiQueriesToJson();
+    SaveCustomQueriesToJson();
 }
 
 void QueryEditorModule::Init(WwizardWwiseClient* wwizardClient)
@@ -213,7 +214,7 @@ void QueryEditorModule::LoadWaapiQueriesFromJson()
     }
 }
 
-void QueryEditorModule::SaveWaapiQueriesToJson()
+void QueryEditorModule::SaveCustomQueriesToJson()
 {   
     rapidjson::Document d;
     d.SetObject();
@@ -237,17 +238,44 @@ void QueryEditorModule::SaveWaapiQueriesToJson()
             path = rapidjson::StringRef(AkJsonQuery.second.path.c_str());
             rapidJsonQuery.AddMember("path", path, d.GetAllocator());
 
-            rapidjson::Value arg;
-            AkJson a;
-            
-            //a.ToRapidJson<rapidjson::Value, rapidjson::MemoryPoolAllocator, rapidjson::SizeType>(a, arg, d.GetAllocator());
-            
+            rapidjson::Value waapiValue;
+            RapidJsonUtils::ToRapidJson(AkJsonQuery.second.arg, waapiValue, d.GetAllocator());
+            rapidJsonQuery.AddMember("arg", waapiValue, d.GetAllocator());
         }
         waapiQueries.PushBack(rapidJsonQuery, d.GetAllocator());
     }
-
     d.AddMember("WaapiQueries", waapiQueries, d.GetAllocator());
  
+
+    rapidjson::Value waqlQueries;
+    waqlQueries.SetArray();
+
+    for (const auto& AkJsonQuery : QueryEditorModule::waqlQueries)
+    {
+        rapidjson::Value rapidJsonQuery(rapidjson::kObjectType);
+        {
+            rapidjson::Value name;
+            name = rapidjson::StringRef(AkJsonQuery.second.name.c_str());
+            rapidJsonQuery.AddMember("name", name, d.GetAllocator());
+
+            rapidjson::Value guid;
+            guid = rapidjson::StringRef(AkJsonQuery.second.guid.c_str());
+            rapidJsonQuery.AddMember("guid", guid, d.GetAllocator());
+
+            rapidjson::Value path;
+            path = rapidjson::StringRef(AkJsonQuery.second.path.c_str());
+            rapidJsonQuery.AddMember("path", path, d.GetAllocator());
+
+            rapidjson::Value waqlValue;
+            RapidJsonUtils::ToRapidJson(AkJsonQuery.second.arg, waqlValue, d.GetAllocator());
+        
+            rapidJsonQuery.AddMember("arg", waqlValue, d.GetAllocator());
+        }
+        waqlQueries.PushBack(rapidJsonQuery, d.GetAllocator());
+    }
+    d.AddMember("WaqlQueries", waqlQueries, d.GetAllocator());
+
+
     FILE* fp = fopen("../SavedData/test.json", "wb");
     char* writeBuffer = new char[65536];
     rapidjson::FileWriteStream os(fp, writeBuffer, sizeof(writeBuffer));
@@ -260,11 +288,16 @@ void QueryEditorModule::SaveWaapiQueriesToJson()
 
 void QueryEditorModule::CreateNewQuery(std::string name, QueryType type, std::string arg)
 {
-    AkJson placeholder;
+    
     std::string guid = GenerateGuid();
     if (type == QueryType::WAAPIQUERY)
     {
-        BaseQueryStructure* newQuery = new BaseQueryStructure(name, guid, "", type, placeholder);
+        rapidjson::Document a;
+        a.Parse(arg.c_str());
+        AkJson waapiQuery;
+        AkJson::FromRapidJson(a, waapiQuery);
+
+        BaseQueryStructure* newQuery = new BaseQueryStructure(name, guid, "", type, waapiQuery);
         AddQueryToAllQueriesMap(newQuery);
 
         auto it = allQueries.find(guid);

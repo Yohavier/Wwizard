@@ -92,7 +92,6 @@ namespace wwizard
         {
             if (ImGui::BeginMenu("Wwizard"))
             {
-                ImGui::MenuItem("Reconnect", NULL);
                 if (ImGui::MenuItem("Settings", NULL))
                 {
                     projectPathSetting = *settingHandler->GetWwisProjectPathRef();
@@ -131,11 +130,14 @@ namespace wwizard
             }
             if (currentLayout == Layout::QUERYEDITOR)
             {
-                if (ImGui::BeginMenu("Add Query"))
-                { 
-                    SetAddQueryPopUp();
-                    ImGui::EndMenu();
-                }                
+                if (wwizarWwiseClient->IsConnected())
+                {
+                    if (ImGui::BeginMenu("Add Query"))
+                    {
+                        SetAddQueryPopUp();
+                        ImGui::EndMenu();
+                    }
+                }       
             }
             ImGui::EndMenuBar();
         }
