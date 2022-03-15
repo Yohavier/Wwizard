@@ -90,6 +90,10 @@ void Dockspace::CreateMenuBar()
     {
         if (ImGui::BeginMenu("Wwizard"))
         {
+            if (ImGui::MenuItem("Home", NULL))
+            {
+                SetLayout(Layout::HOME);
+            }
             if (ImGui::MenuItem("Settings", NULL))
             {
                 projectPathSetting = settingHandler->GetWwisProjectPathRef();
@@ -105,11 +109,6 @@ void Dockspace::CreateMenuBar()
         }
         if (ImGui::BeginMenu("Module"))
         {
-            if (ImGui::MenuItem("Home", NULL))
-            {
-                SetLayout(Layout::HOME);
-            }
-
             if (ImGui::MenuItem("Naming Convention", NULL))
             {
                 SetLayout(Layout::NAMINGCONVENTION);
@@ -254,7 +253,6 @@ void Dockspace::ShowActiveList()
     ImGui::TableNextRow();
     ImGui::TableSetColumnIndex(0);
     ImGui::AlignTextToFramePadding();
-
     
     for (auto& object : queryEditorModule->GetActiveQueryList())
     {
@@ -507,7 +505,7 @@ void Dockspace::HandleDetailsWindow(bool* p_open)
 
         if (possibleSelectedQuery->structureType == QueryType::WAAPIQUERY || possibleSelectedQuery->structureType == QueryType::WAQLQUERY)
         {
-            ImGui::Text("Arg : ");
+            ImGui::Text(("Arg : " + queryEditorModule->GetCurrentArgAsString()).c_str());
         }
     }
     else if (possibleSelectedFile != nullptr)

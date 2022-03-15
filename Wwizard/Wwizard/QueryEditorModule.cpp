@@ -91,8 +91,8 @@ const std::map<std::string, BaseQueryStructure&>& QueryEditorModule::GetActiveQu
 
 const BaseQueryStructure* const QueryEditorModule::GetCurrentSelectionQuery()
 {
-    auto it = wwiseQueries.find(selectedGuid);
-    if (it != wwiseQueries.end())
+    auto it = allQueries.find(selectedGuid);
+    if (it != allQueries.end())
     {
         return &(it->second);
     }
@@ -315,6 +315,21 @@ void QueryEditorModule::CreateNewQuery(std::string name, QueryType type, std::st
             waqlQueries.insert({ it->second.guid, it->second });
         }
     }
+}
+
+const std::string QueryEditorModule::GetCurrentArgAsString()
+{
+    auto query = GetCurrentSelectionQuery();
+    if (query != nullptr)
+    {
+        rapidjson::Document doc;
+        RapidJsonUtils::ToRapidJson(query->arg, doc, doc.GetAllocator());
+        rapidjson::StringBuffer buffer; 
+        rapidjson::Writer<rapidjson::StringBuffer> writer(buffer);
+        doc.Accept(writer);
+        return buffer.GetString();
+    }
+    return "";
 }
 
 void QueryEditorModule::AddQueryToAllQueriesMap(BaseQueryStructure& newQuery)

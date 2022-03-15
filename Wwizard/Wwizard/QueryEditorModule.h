@@ -97,6 +97,7 @@ public:
 		}
 	}
 	void CreateNewQuery(const std::string name, const QueryType type, const std::string arg);
+	const std::string GetCurrentArgAsString();
 	
 
 private:
@@ -110,6 +111,7 @@ private:
 	void SaveCustomQueriesToJson();
 	void AddQueryToAllQueriesMap(BaseQueryStructure& newQuery);
 	void InitCleanUpCurrentHierarchy();
+
 
 public:
 	std::map<std::string, BaseQueryStructure> allQueries;
