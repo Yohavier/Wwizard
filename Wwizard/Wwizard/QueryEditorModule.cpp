@@ -82,7 +82,6 @@ void QueryEditorModule::RemoveFromActiveQueryList(const std::string guid)
     {
         activeQueryDictionary.erase(it);
     }
-    RunActiveQueries();
 }
 
 const std::map<std::string, BaseQueryStructure&>& QueryEditorModule::GetActiveQueryList()

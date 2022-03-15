@@ -255,17 +255,19 @@ void Dockspace::ShowActiveList()
     ImGui::TableSetColumnIndex(0);
     ImGui::AlignTextToFramePadding();
 
+    
     for (auto& object : queryEditorModule->GetActiveQueryList())
     {
         const bool is_selected = (queryEditorModule->GetCurrentSelectionGuid() == object.second.guid && ImGui::IsWindowFocused());
-        if (ImGui::Selectable((object.second.name + "##" + object.second.guid).c_str(), is_selected))
+        if (ImGui::Selectable((object.second.name + "##" + object.second.guid).c_str(), is_selected, ImGuiSelectableFlags_AllowDoubleClick))
         {
-            if (is_selected)
+            if (ImGui::IsMouseDoubleClicked(0))
             {
                 queryEditorModule->RemoveFromActiveQueryList(object.second.guid);
                 std::string resetSelection = "";
                 queryEditorModule->SetQuerySelection(resetSelection);
                 queryEditorModule->RunActiveQueries();
+                break;
             }
             else 
             {
@@ -310,10 +312,9 @@ void Dockspace::ShowWwiseQueries(const BaseQueryStructure& queryObject)
     {
         const bool is_selected = (queryEditorModule->GetCurrentSelectionGuid() == queryObject.guid && ImGui::IsWindowFocused());
 
-        if (ImGui::Selectable(queryObject.name.c_str(), is_selected)) 
-        {
-                
-            if (is_selected)
+        if (ImGui::Selectable(queryObject.name.c_str(), is_selected, ImGuiSelectableFlags_AllowDoubleClick))
+        { 
+            if (ImGui::IsMouseDoubleClicked(0))
             {
                 queryEditorModule->AddToActiveQueryList(queryObject.guid);
                 queryEditorModule->RunActiveQueries();
@@ -346,9 +347,9 @@ void Dockspace::ShowWaapiQueries()
             ImGui::PushID(counter);
             const bool is_selected = (queryEditorModule->GetCurrentSelectionGuid() == object.second.guid && ImGui::IsWindowFocused());
 
-            if (ImGui::Selectable(object.second.name.c_str(), is_selected))
+            if (ImGui::Selectable(object.second.name.c_str(), is_selected, ImGuiSelectableFlags_AllowDoubleClick))
             {
-                if (is_selected)
+                if (ImGui::IsMouseDoubleClicked(0))
                 {
                     queryEditorModule->AddToActiveQueryList(object.second.guid);
                     queryEditorModule->RunActiveQueries();
@@ -386,9 +387,9 @@ void Dockspace::ShowWaqlQueries()
             ImGui::PushID(counter);
             const bool is_selected = (queryEditorModule->GetCurrentSelectionGuid() == object.second.guid && ImGui::IsWindowFocused());
 
-            if (ImGui::Selectable(object.second.name.c_str(), is_selected))
+            if (ImGui::Selectable(object.second.name.c_str(), is_selected, ImGuiSelectableFlags_AllowDoubleClick))
             {
-                if (is_selected)
+                if (ImGui::IsMouseDoubleClicked(0))
                 {
                     queryEditorModule->AddToActiveQueryList(object.second.guid);
                     queryEditorModule->RunActiveQueries();
