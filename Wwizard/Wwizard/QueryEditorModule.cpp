@@ -14,10 +14,10 @@ QueryEditorModule::~QueryEditorModule()
     SaveCustomQueriesToJson();
 }
 
-QueryEditorModule::QueryEditorModule(std::unique_ptr<WwizardWwiseClient>& exwwizardClient)
-    : wwizardClient(exwwizardClient)
+QueryEditorModule::QueryEditorModule(const std::unique_ptr<WwizardWwiseClient>& wwizardClient)
+    : wwizardClient(wwizardClient)
 {
-    if (exwwizardClient->IsConnected())
+    if (wwizardClient->IsConnected())
     {
         wwiseQueryHierarchy = new BaseQueryStructure();
         FetchWwiseQueries();
@@ -28,7 +28,6 @@ QueryEditorModule::QueryEditorModule(std::unique_ptr<WwizardWwiseClient>& exwwiz
 
 void QueryEditorModule::FetchWwiseQueries()
 {
-    using namespace AK::WwiseAuthoringAPI;
     AkJson options(AkJson::Map{
     { "return", AkJson::Array{ AkVariant("id"), AkVariant("name"), AkVariant("type"), AkVariant("path")}} });
 
@@ -86,12 +85,12 @@ void QueryEditorModule::RemoveFromActiveQueryList(const std::string guid)
     RunActiveQueries();
 }
 
-std::map<std::string, BaseQueryStructure&> QueryEditorModule::GetActiveQueryList()
+const std::map<std::string, BaseQueryStructure&>& QueryEditorModule::GetActiveQueryList()
 {
     return activeQueryDictionary;
 }
 
-const BaseQueryStructure* QueryEditorModule::GetCurrentSelectionQuery()
+const BaseQueryStructure* const QueryEditorModule::GetCurrentSelectionQuery()
 {
     auto it = wwiseQueries.find(selectedGuid);
     if (it != wwiseQueries.end())
@@ -102,7 +101,7 @@ const BaseQueryStructure* QueryEditorModule::GetCurrentSelectionQuery()
     return nullptr;
 }
 
-const QueryResult* QueryEditorModule::GetCurrentSelectionFile()
+const QueryResult* const QueryEditorModule::GetCurrentSelectionFile()
 {
     auto it = queryResultFiles.find(selectedGuid);
     if (it != queryResultFiles.end())
@@ -319,15 +318,21 @@ void QueryEditorModule::CreateNewQuery(std::string name, QueryType type, std::st
     }
 }
 
-void QueryEditorModule::AddQueryToAllQueriesMap(BaseQueryStructure newQuery)
+void QueryEditorModule::AddQueryToAllQueriesMap(BaseQueryStructure& newQuery)
 {
     allQueries.insert({ newQuery.guid, newQuery });
 }
 
-std::string QueryEditorModule::GenerateGuid()
+const std::string QueryEditorModule::GenerateGuid()
 {
     return std::to_string(((long long)rand() << 32) | rand());
 }
+
+void QueryEditorModule::InitCleanUpCurrentHierarchy()
+{
+    delete wwiseQueryHierarchy;
+}
+
 
 void QueryEditorModule::ResetQueryModule(const std::unique_ptr<WwizardWwiseClient>& wwizardClient)
 {
@@ -340,7 +345,8 @@ void QueryEditorModule::ResetQueryModule(const std::unique_ptr<WwizardWwiseClien
 
     if (wwizardClient->IsConnected())
     {
-        delete wwiseQueryHierarchy;
+        InitCleanUpCurrentHierarchy();
+        wwiseQueryHierarchy = new BaseQueryStructure();
         FetchWwiseQueries();
         LoadWaapiQueriesFromJson();
         LoadWaqlQueriesFromJson();

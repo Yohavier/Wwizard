@@ -6,6 +6,8 @@ void SettingHandler::SaveSettings(const std::string wwiseProjectPath, const std:
 	this->sdkPath = sdkPath;
 	this->waapiIP = waapiIP;
 	this->waapiPort = waapiPort;
+
+    WriteToJson();
 }
 
 void SettingHandler::LoadSettings()
@@ -27,11 +29,6 @@ void SettingHandler::LoadSettings()
     this->sdkPath = settingDoc["sdkPath"].GetString();
     this->waapiIP = settingDoc["waapiIP"].GetString();
     this->waapiPort = settingDoc["waapiPort"].GetInt();
-}
-
-SettingHandler::~SettingHandler()
-{
-    WriteToJson();
 }
 
 void SettingHandler::WriteToJson()

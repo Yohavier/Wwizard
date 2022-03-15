@@ -58,32 +58,17 @@ struct QueryResult
 class QueryEditorModule
 {
 public:
-	QueryEditorModule(std::unique_ptr<WwizardWwiseClient>& exwwizardClient);
+	QueryEditorModule(const std::unique_ptr<WwizardWwiseClient>& wwizardClient);
 	~QueryEditorModule();
-	void FetchWwiseQueries();
-	void FetchWwiseFolderchildren(BaseQueryStructure* parentStructureFolder, const AkJson options);
-	
+
 	void AddToActiveQueryList(std::string guid);
 	void RemoveFromActiveQueryList(const std::string guid);
-	std::map<std::string, BaseQueryStructure&> GetActiveQueryList();
-
-	const BaseQueryStructure* GetCurrentSelectionQuery();
-	const QueryResult* GetCurrentSelectionFile();
-
+	const std::map<std::string, BaseQueryStructure&>& GetActiveQueryList();
 	void SetQuerySelection(const std::string& guid);
 	const std::string& GetCurrentSelectionGuid();
-
 	void RunActiveQueries();
-
-	void LoadWaapiQueriesFromJson();
-	void LoadWaqlQueriesFromJson();
-
-	void SaveCustomQueriesToJson();
-
 	void ResetQueryModule(const std::unique_ptr<WwizardWwiseClient>& wwizardClient);
-
-	
-	std::string ConvertQueryTypeToString(QueryType queryType)
+	const std::string ConvertQueryTypeToString(QueryType& queryType)
 	{
 		switch (queryType)
 		{
@@ -97,9 +82,9 @@ public:
 				return "";
 		}
 	}
-
+	
 	template<typename TReturn, typename TMap>
-	TReturn FindInMap(TMap findMap)
+	TReturn FindInMap(const TMap& findMap)
 	{
 		auto it = findMap.find(selectedGuid);
 		if (it != findMap.end())
@@ -111,9 +96,23 @@ public:
 			return nullptr;
 		}
 	}
+	void CreateNewQuery(const std::string name, const QueryType type, const std::string arg);
+	
 
-	void CreateNewQuery(std::string name, QueryType type, std::string arg);
+private:
+	const std::string GenerateGuid();
+	void FetchWwiseQueries();
+	void FetchWwiseFolderchildren(BaseQueryStructure* parentStructureFolder, const AkJson options);
+	const BaseQueryStructure* const GetCurrentSelectionQuery();
+	const QueryResult* const GetCurrentSelectionFile();
+	void LoadWaapiQueriesFromJson();
+	void LoadWaqlQueriesFromJson();
+	void SaveCustomQueriesToJson();
+	void AddQueryToAllQueriesMap(BaseQueryStructure& newQuery);
+	void InitCleanUpCurrentHierarchy();
 
+public:
+	std::map<std::string, BaseQueryStructure> allQueries;
 	BaseQueryStructure* wwiseQueryHierarchy;
 	std::map<std::string, QueryResult> queryResultFiles;
 
@@ -122,13 +121,9 @@ public:
 	std::map<std::string, const BaseQueryStructure&> wwiseQueries;
 	std::string selectedGuid = "";
 
-	void AddQueryToAllQueriesMap(BaseQueryStructure newQuery);
-	std::map<std::string, BaseQueryStructure> allQueries;
+
 private:
-	std::string GenerateGuid();
-
-	std::unique_ptr<WwizardWwiseClient>& wwizardClient;
-
+	const std::unique_ptr<WwizardWwiseClient>& wwizardClient;
 	std::map<std::string, BaseQueryStructure&> activeQueryDictionary;
 };
 
