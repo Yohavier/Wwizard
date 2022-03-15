@@ -14,12 +14,11 @@ QueryEditorModule::~QueryEditorModule()
     SaveCustomQueriesToJson();
 }
 
-void QueryEditorModule::Init(WwizardWwiseClient* wwizardClient)
+QueryEditorModule::QueryEditorModule(std::unique_ptr<WwizardWwiseClient>& exwwizardClient)
+    : wwizardClient(exwwizardClient)
 {
-    if(wwizardClient->IsConnected())
-    { 
-        std::cout << "Init QueryModule" << std::endl;
-        QueryEditorModule::wwizardClient = wwizardClient;
+    if (exwwizardClient->IsConnected())
+    {
         wwiseQueryHierarchy = new BaseQueryStructure();
         FetchWwiseQueries();
         LoadWaapiQueriesFromJson();
@@ -44,7 +43,7 @@ void QueryEditorModule::FetchWwiseQueries()
     FetchWwiseFolderchildren(wwiseQueryHierarchy, options);
 }
 
-void QueryEditorModule::FetchWwiseFolderchildren(BaseQueryStructure* parentStructureFolder, AkJson options)
+void QueryEditorModule::FetchWwiseFolderchildren(BaseQueryStructure* parentStructureFolder, const AkJson options)
 {
     AkJson queryResult = wwizardClient->GetChildrenFromPath(parentStructureFolder->path, options);
 
@@ -53,13 +52,14 @@ void QueryEditorModule::FetchWwiseFolderchildren(BaseQueryStructure* parentStruc
         if (object["type"].GetVariant().GetString() == "Query")
         {
             BaseQueryStructure* newQuery = new BaseQueryStructure(object["name"].GetVariant().GetString(), object["id"].GetVariant().GetString(), object["path"].GetVariant().GetString(), QueryType::WWISEQUERY);
-            parentStructureFolder->subHierarchy.push_back(newQuery);
-            AddQueryToAllQueriesMap(newQuery);
             
+            AddQueryToAllQueriesMap(*newQuery);
+            parentStructureFolder->subHierarchy.push_back(newQuery);
+
             auto it = allQueries.find(object["id"].GetVariant().GetString());
             if (it != allQueries.end())
             {
-                wwiseQueries.insert({ it->second.guid, it->second });
+                wwiseQueries.insert({ it->second.guid, it->second });      
             }
         }
         else
@@ -112,7 +112,7 @@ const QueryResult* QueryEditorModule::GetCurrentSelectionFile()
     return nullptr;
 }
 
-void QueryEditorModule::SetQuerySelection(std::string& guid)
+void QueryEditorModule::SetQuerySelection(const std::string& guid)
 {
     selectedGuid = guid;
 }
@@ -173,7 +173,7 @@ void QueryEditorModule::LoadWaqlQueriesFromJson()
         AkJson test;
         test.FromRapidJson(d["WaqlQueries"][i]["arg"], test);
 
-        BaseQueryStructure* newQuery = new BaseQueryStructure(d["WaqlQueries"][i]["name"].GetString(), d["WaqlQueries"][i]["guid"].GetString(), d["WaqlQueries"][i]["path"].GetString(), QueryType::WAQLQUERY, test);
+        BaseQueryStructure newQuery = BaseQueryStructure(d["WaqlQueries"][i]["name"].GetString(), d["WaqlQueries"][i]["guid"].GetString(), d["WaqlQueries"][i]["path"].GetString(), QueryType::WAQLQUERY, test);
         AddQueryToAllQueriesMap(newQuery);
 
         auto it = allQueries.find(d["WaqlQueries"][i]["guid"].GetString());
@@ -203,7 +203,7 @@ void QueryEditorModule::LoadWaapiQueriesFromJson()
         AkJson test;
         test.FromRapidJson(d["WaapiQueries"][i]["arg"], test);
         
-        BaseQueryStructure* newQuery = new BaseQueryStructure(d["WaapiQueries"][i]["name"].GetString(), d["WaapiQueries"][i]["guid"].GetString(), d["WaapiQueries"][i]["path"].GetString(), QueryType::WAAPIQUERY, test);
+        BaseQueryStructure newQuery = BaseQueryStructure(d["WaapiQueries"][i]["name"].GetString(), d["WaapiQueries"][i]["guid"].GetString(), d["WaapiQueries"][i]["path"].GetString(), QueryType::WAAPIQUERY, test);
         AddQueryToAllQueriesMap(newQuery);
 
         auto it = allQueries.find(d["WaapiQueries"][i]["guid"].GetString());
@@ -288,7 +288,6 @@ void QueryEditorModule::SaveCustomQueriesToJson()
 
 void QueryEditorModule::CreateNewQuery(std::string name, QueryType type, std::string arg)
 {
-    
     std::string guid = GenerateGuid();
     if (type == QueryType::WAAPIQUERY)
     {
@@ -297,7 +296,7 @@ void QueryEditorModule::CreateNewQuery(std::string name, QueryType type, std::st
         AkJson waapiQuery;
         AkJson::FromRapidJson(a, waapiQuery);
 
-        BaseQueryStructure* newQuery = new BaseQueryStructure(name, guid, "", type, waapiQuery);
+        BaseQueryStructure newQuery=BaseQueryStructure(name, guid, "", type, waapiQuery);
         AddQueryToAllQueriesMap(newQuery);
 
         auto it = allQueries.find(guid);
@@ -309,7 +308,7 @@ void QueryEditorModule::CreateNewQuery(std::string name, QueryType type, std::st
     else if (type == QueryType::WAQLQUERY)
     {
         AkJson argJson(AkJson::Map{ {{"waql", AkVariant(arg)}}});
-        BaseQueryStructure* newQuery = new BaseQueryStructure(name, guid, "", type, argJson);
+        BaseQueryStructure newQuery = BaseQueryStructure(name, guid, "", type, argJson);
         AddQueryToAllQueriesMap(newQuery);
 
         auto it = allQueries.find(guid);
@@ -320,9 +319,9 @@ void QueryEditorModule::CreateNewQuery(std::string name, QueryType type, std::st
     }
 }
 
-void QueryEditorModule::AddQueryToAllQueriesMap(BaseQueryStructure* newQuery)
+void QueryEditorModule::AddQueryToAllQueriesMap(BaseQueryStructure newQuery)
 {
-    allQueries.insert({ newQuery->guid,*newQuery });
+    allQueries.insert({ newQuery.guid, newQuery });
 }
 
 std::string QueryEditorModule::GenerateGuid()
@@ -330,7 +329,7 @@ std::string QueryEditorModule::GenerateGuid()
     return std::to_string(((long long)rand() << 32) | rand());
 }
 
-void QueryEditorModule::ResetQueryModule(WwizardWwiseClient* wwizardClient)
+void QueryEditorModule::ResetQueryModule(const std::unique_ptr<WwizardWwiseClient>& wwizardClient)
 {
     waapiQueries.clear();
     waqlQueries.clear();
@@ -338,7 +337,12 @@ void QueryEditorModule::ResetQueryModule(WwizardWwiseClient* wwizardClient)
     allQueries.clear();
     selectedGuid = "";
     queryResultFiles.clear();
-    delete wwiseQueryHierarchy;
 
-    Init(wwizardClient);
+    if (wwizardClient->IsConnected())
+    {
+        delete wwiseQueryHierarchy;
+        FetchWwiseQueries();
+        LoadWaapiQueriesFromJson();
+        LoadWaqlQueriesFromJson();
+    }
 }

@@ -17,13 +17,13 @@ public:
 	}
 	~SettingHandler();
 
-	void SaveSettings(std::string wwiseProjectPath, std::string sdkPath, std::string waapiIP, int waapiPort);
+	void SaveSettings(const std::string wwiseProjectPath, const std::string sdkPath, const std::string waapiIP, const int waapiPort);
 	void LoadSettings();
 
-	std::string* GetWwisProjectPathRef() { return &wwiseProjectPath; }
-	std::string* GetSDKPath() { return &sdkPath; }
-	std::string* GetWaapiIP() { return &waapiIP; }
-	int* GetWaaapiPort() { return &waapiPort; }
+	const std::string& GetWwisProjectPathRef() { return wwiseProjectPath; }
+	const std::string& GetSDKPath() { return sdkPath; }
+	const std::string& GetWaapiIP() { return waapiIP; }
+	const int& GetWaaapiPort() { return waapiPort; }
 
 private:
 	void WriteToJson();

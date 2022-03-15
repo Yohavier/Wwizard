@@ -6,49 +6,48 @@
 #include "QueryEditorModule.h"
 #include "SettingHandler.h"
 
-namespace wwizard
+enum class Layout
 {
-	enum class Layout
-	{
-		HOME,
-		QUERYEDITOR,
-		NAMINGCONVENTION,
-		SORTORIGINALS,
-		SETTINGS
-	};
+	HOME,
+	QUERYEDITOR,
+	NAMINGCONVENTION,
+	SORTORIGINALS,
+	SETTINGS
+};
 
-	class Dockspace
-	{
-	public:
-		Dockspace(WwizardWwiseClient* wwizardWwiseClient, SettingHandler* settingHandler);
-		void Render(bool* p_open);
+class Dockspace
+{
+public:
+	Dockspace(std::unique_ptr<WwizardWwiseClient>& wwizardWwiseClient, std::unique_ptr < SettingHandler>& settingHandler);
+	void Render(bool* p_open);
 
-	private:
-		void CreateMenuBar();
-		void CreateQueryEditor(bool* p_open);
-		void CreateHomeLayout();
-		void SetLayout(Layout newLayout);
+private:
+	void CreateMenuBar();
+	void CreateQueryEditor(bool* p_open);
+	void CreateHomeLayout();
+	void SetLayout(Layout newLayout);
 
-		//Settings
-		void ShowSettings(bool* p_open);
+	//Settings
+	void ShowSettings(bool* p_open);
 
-		//Query Module
-		void ShowActiveList();
-		void ShowResultList();
-		void ShowWaapiQueries();
-		void ShowWaqlQueries();
-		void ShowWwiseQueries(BaseQueryStructure* queryObject);
-		void SetAddQueryPopUp();
-		void HandleDetailsWindow(bool* p_open);
-		void SetDefaultStyle();
+	//Query Module
+	void ShowActiveList();
+	void ShowResultList();
+	void ShowWaapiQueries();
+	void ShowWaqlQueries();
+	void ShowWwiseQueries(const BaseQueryStructure& queryObject);
+	void SetAddQueryPopUp();
+	void HandleDetailsWindow(bool* p_open);
+	void SetDefaultStyle();
 
-	private:
-		Layout currentLayout;
-		WwizardWwiseClient* wwizarWwiseClient;
-		SettingHandler* settingHandler;
+private:
+	Layout currentLayout;
 
-		QueryEditorModule queryEditorModule = QueryEditorModule();
-	};
-}
+	std::unique_ptr<WwizardWwiseClient>& wwizarWwiseClient;
+	std::unique_ptr<SettingHandler>& settingHandler;
+
+	std::unique_ptr<QueryEditorModule> queryEditorModule = nullptr;
+};
+
 
 

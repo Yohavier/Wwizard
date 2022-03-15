@@ -15,13 +15,13 @@ public:
 
 	~WwizardWwiseClient();
 
-	bool Connect(const SettingHandler& settings);
+	bool Connect(const std::unique_ptr<SettingHandler>& settings);
 
-	bool ForceOpenWwiseInstance(const SettingHandler& settings);
+	bool ForceOpenWwiseInstance(const std::unique_ptr<SettingHandler>& settings);
 
 	void WalkProjectPath(const AkJson& arg, const AkJson& opt, std::vector<AkJson>& outputList);
 
-	AkJson GetChildrenFromPath(const std::string path, AkJson option);
+	const AkJson GetChildrenFromPath(const std::string path, const AkJson option);
 
 	AkJson GetObjectFromPath(const std::string path, AkJson option);
 

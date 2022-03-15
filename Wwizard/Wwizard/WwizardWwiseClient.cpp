@@ -18,14 +18,14 @@ WwizardWwiseClient::~WwizardWwiseClient()
     std::cout << "End Wwizard Wwise Client" << std::endl;
 }
 
-bool WwizardWwiseClient::Connect(const SettingHandler& settings)
+bool WwizardWwiseClient::Connect(const std::unique_ptr<SettingHandler>& settings)
 {
     if (wwiseClient.IsConnected())
     {
         wwiseClient.Disconnect();
     }
 
-    if (wwiseClient.Connect(settings.waapiIP.c_str(),settings.waapiPort))
+    if (wwiseClient.Connect(settings->waapiIP.c_str(),settings->waapiPort))
     {
         std::cout << "Connected to Wwise Instance!" << std::endl;
         return true;
@@ -42,12 +42,12 @@ bool WwizardWwiseClient::Connect(const SettingHandler& settings)
     }
 }
 
-bool WwizardWwiseClient::ForceOpenWwiseInstance(const SettingHandler& settings)
+bool WwizardWwiseClient::ForceOpenWwiseInstance(const std::unique_ptr<SettingHandler>& settings)
 {
-    std::string commandline = "\"E:\\Wwise 2021.1.6.7774\\Authoring\\x64\\Release\\bin\\WwiseConsole.exe\" waapi-server \"D:\\ue\\BubbleSpace\\BubbleSpace_WwiseProject\\BubbleSpace_WwiseProject.wproj\" --allow-migration --wamp-port " + std::to_string(settings.waapiPort);
+    std::string commandline = "\"E:\\Wwise 2021.1.6.7774\\Authoring\\x64\\Release\\bin\\WwiseConsole.exe\" waapi-server \"D:\\ue\\BubbleSpace\\BubbleSpace_WwiseProject\\BubbleSpace_WwiseProject.wproj\" --allow-migration --wamp-port " + std::to_string(settings->waapiPort);
     WinExec(commandline.c_str(), 0);
 
-    if (wwiseClient.Connect(settings.waapiIP.c_str(), settings.waapiPort))
+    if (wwiseClient.Connect(settings->waapiIP.c_str(), settings->waapiPort))
     {
         return true;
     }
@@ -88,7 +88,7 @@ void WwizardWwiseClient::WalkChildren(const std::string& guid, const AkJson& opt
     }
 }
 
-AkJson WwizardWwiseClient::GetChildrenFromPath(const std::string path, AkJson option)
+const AkJson WwizardWwiseClient::GetChildrenFromPath(const std::string path, const AkJson option)
 {
     AkJson arg(AkJson::Map{
         {

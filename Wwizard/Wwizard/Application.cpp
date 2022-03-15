@@ -21,10 +21,10 @@ AkAssertHook g_pAssertHook = SampleAssertHook;
 
 Application::Application()
 {
-    wwizardWwiseClient = new WwizardWwiseClient();
-    settingsHandler = new SettingHandler();
+    wwizardWwiseClient.reset(new WwizardWwiseClient());
+    settingsHandler.reset(new SettingHandler());
     //Default Connection
-    wwizardWwiseClient->Connect(*settingsHandler);
+    wwizardWwiseClient->Connect(settingsHandler);
 
     // Create application window
    //ImGui_ImplWin32_EnableDpiAwareness();
@@ -74,7 +74,7 @@ Application::Application()
     //IM_ASSERT(font != NULL);
     //Create Custom GUI
 
-    myDock = std::unique_ptr<wwizard::Dockspace>(new wwizard::Dockspace(wwizardWwiseClient, settingsHandler));
+    myDock.reset(new Dockspace(wwizardWwiseClient, settingsHandler));
 }
 
 void Application::Loop()
@@ -122,8 +122,6 @@ void Application::Loop()
 
 void Application::ShutDown()
 {
-    delete wwizardWwiseClient;
-    delete settingsHandler;
     ImGui_ImplDX10_Shutdown();
     ImGui_ImplWin32_Shutdown();
     ImGui::DestroyContext();

@@ -1,6 +1,6 @@
 #include "SettingHandler.h"
 
-void SettingHandler::SaveSettings(std::string wwiseProjectPath, std::string sdkPath, std::string waapiIP, int waapiPort)
+void SettingHandler::SaveSettings(const std::string wwiseProjectPath, const std::string sdkPath, const std::string waapiIP, const int waapiPort)
 {
 	this->wwiseProjectPath = wwiseProjectPath;
 	this->sdkPath = sdkPath;
