@@ -34,6 +34,8 @@ public:
 		return wwiseClient.IsConnected();
 	}
 
+	void OpenPropertyInWwise(std::string& guid);
+
 private:
 	void WalkChildren(const std::string& guid, const AkJson& opt, std::vector<AkJson>& outputList);
 

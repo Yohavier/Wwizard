@@ -141,3 +141,15 @@ AkJson WwizardWwiseClient::RunCustomQuery(const AkJson arg)
 
     return queryResult;
 }
+
+void WwizardWwiseClient::OpenPropertyInWwise(std::string& guid)
+{
+    AkJson openHierarchy(AkJson::Map{ {{"command", AkVariant("FindInProjectExplorerSyncGroup1")}, {"objects", AkJson::Array{AkVariant(guid)}}} });
+    AkJson openProperty(AkJson::Map{ {{"command", AkVariant("Inspect")}, {"objects", AkJson::Array{AkVariant(guid)}}} });
+
+    AkJson options(AkJson::Map{ });
+    AkJson result;
+
+    wwiseClient.Call(ak::wwise::ui::commands::execute, openProperty, options, result, 100);
+    wwiseClient.Call(ak::wwise::ui::commands::execute, openHierarchy, options, result, 100);
+}

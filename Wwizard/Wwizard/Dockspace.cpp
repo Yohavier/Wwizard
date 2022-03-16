@@ -413,13 +413,17 @@ void Dockspace::ShowQueryResults()
     for (auto& object : queryEditorModule->queryResultFiles)
     {
         const bool is_selected = (queryEditorModule->GetCurrentSelectionGuid() == object.second.guid && ImGui::IsWindowFocused());
-        if (ImGui::Selectable(object.second.name.c_str(), false))
+        if (ImGui::Selectable(object.second.name.c_str(), false, ImGuiSelectableFlags_AllowDoubleClick))
         {
-
             if (is_selected)
                 ImGui::SetItemDefaultFocus();
 
             queryEditorModule->SetQuerySelection(object.second.guid);
+
+            if (ImGui::IsMouseDoubleClicked(0))
+            {
+                wwizarWwiseClient->OpenPropertyInWwise(object.second.guid);
+            }
         }          
     }
 
