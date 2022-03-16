@@ -24,20 +24,20 @@ public:
 private:
 	void CreateMenuBar();
 	void CreateQueryEditor(bool* p_open);
-	void CreateHomeLayout();
+	void ShowHome();
 	void SetLayout(Layout newLayout);
 
 	//Settings
 	void ShowSettings(bool* p_open);
 
 	//Query Module
-	void ShowActiveList();
-	void ShowResultList();
+	void ShowActiveQueries();
+	void ShowQueryResults();
 	void ShowWaapiQueries();
 	void ShowWaqlQueries();
 	void ShowWwiseQueries(const BaseQueryStructure& queryObject);
-	void SetAddQueryPopUp();
-	void HandleDetailsWindow(bool* p_open);
+	void ShowQueryCreator();
+	void ShowDetails(bool* p_open);
 	void SetDefaultStyle();
 
 private:

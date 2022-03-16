@@ -15,6 +15,9 @@ Dockspace::Dockspace(std::unique_ptr<WwizardWwiseClient>& wwizardWwiseClient, st
     //Init all modules
     queryEditorModule.reset(new QueryEditorModule(wwizardWwiseClient));
     std::cout << "Initialized Dockspace" << std::endl;
+    ImGuiIO& io = ImGui::GetIO();
+    float fontSize = 18.0f;// *2.0f;
+    io.FontDefault = io.Fonts->AddFontFromFileTTF("../assets/fonts/OpenSans-Bold.ttf", fontSize);
     SetDefaultStyle();
 }
 
@@ -37,17 +40,9 @@ void Dockspace::Render(bool* p_open)
     window_flags |= ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoMove;
     window_flags |= ImGuiWindowFlags_NoBringToFrontOnFocus | ImGuiWindowFlags_NoNavFocus;
 
-
-    // When using ImGuiDockNodeFlags_PassthruCentralNode, DockSpace() will render our background
-    // and handle the pass-thru hole, so we ask Begin() to not render a background.
     if (dockspace_flags & ImGuiDockNodeFlags_PassthruCentralNode)
         window_flags |= ImGuiWindowFlags_NoBackground;
 
-    // Important: note that we proceed even if Begin() returns false (aka window is collapsed).
-    // This is because we want to keep our DockSpace() active. If a DockSpace() is inactive,
-    // all active windows docked into it will lose their parent and become undocked.
-    // We cannot preserve the docking relationship between an active window and an inactive docking, otherwise
-    // any change of dockspace/settings would lead to windows being stuck in limbo and never being visible.
     if (!opt_padding)
         ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(0.0f, 0.0f));
     ImGui::Begin("DockSpace Demo", p_open, window_flags);
@@ -59,6 +54,7 @@ void Dockspace::Render(bool* p_open)
     ImGuiID dockspace_id;
     // Submit the DockSpace
     ImGuiIO& io = ImGui::GetIO();
+
     if (io.ConfigFlags & ImGuiConfigFlags_DockingEnable)
     {
         dockspace_id = ImGui::GetID("MyDockSpace");
@@ -78,7 +74,7 @@ void Dockspace::Render(bool* p_open)
     }
     else //Default Home Layout
     {
-        CreateHomeLayout();
+        ShowHome();
     }
 
     ImGui::End();
@@ -131,7 +127,7 @@ void Dockspace::CreateMenuBar()
             {
                 if (ImGui::BeginMenu("Add Query"))
                 {
-                    SetAddQueryPopUp();
+                    ShowQueryCreator();
                     ImGui::EndMenu();
                 }
             }       
@@ -159,11 +155,11 @@ void Dockspace::ShowSettings(bool* p_open)
     ImGui::SameLine();
     ImGui::InputText("##1", &projectPathSetting);
 
-    ImGui::Text("SDK Path     : ");
+    ImGui::Text("SDK Path       : ");
     ImGui::SameLine();
     ImGui::InputText("##2", &sdkPathSetting);
 
-    ImGui::Text("Waapi IP     : ");
+    ImGui::Text("Waapi IP        : ");
     ImGui::SameLine();
     ImGui::InputText("##3", &waapiIPSetting);
        
@@ -219,7 +215,7 @@ void Dockspace::CreateQueryEditor(bool* p_open)
     ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2(2, 2));
     if (ImGui::BeginTable("activeWwiseQueries", 1, ImGuiTableFlags_BordersOuter | ImGuiTableFlags_Resizable))
     {
-        ShowActiveList();
+        ShowActiveQueries();
         ImGui::EndTable();
     }
     ImGui::PopStyleVar();
@@ -227,7 +223,7 @@ void Dockspace::CreateQueryEditor(bool* p_open)
 
 
     //Details window
-    HandleDetailsWindow(p_open);
+    ShowDetails(p_open);
         
 
     //Results
@@ -240,14 +236,14 @@ void Dockspace::CreateQueryEditor(bool* p_open)
     ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2(2, 2));
     if (ImGui::BeginTable("activeWwiseQueries", 1, ImGuiTableFlags_BordersOuter | ImGuiTableFlags_Resizable))
     {
-        ShowResultList();
+        ShowQueryResults();
         ImGui::EndTable();
     }
     ImGui::PopStyleVar();
     ImGui::End();
 }
 
-void Dockspace::ShowActiveList()
+void Dockspace::ShowActiveQueries()
 {
     ImGui::PushID(0);
     ImGui::TableNextRow();
@@ -407,7 +403,7 @@ void Dockspace::ShowWaqlQueries()
     ImGui::PopID();
 }
 
-void Dockspace::ShowResultList()
+void Dockspace::ShowQueryResults()
 {
     ImGui::PushID(0);
     ImGui::TableNextRow();
@@ -430,12 +426,12 @@ void Dockspace::ShowResultList()
     ImGui::PopID();
 }
 
-void Dockspace::CreateHomeLayout()
+void Dockspace::ShowHome()
 {
         
 }
 
-void Dockspace::SetAddQueryPopUp()
+void Dockspace::ShowQueryCreator()
 {  
     static char argText[124] = "pls enter your query text here....";
     static char nameText[64] = "pls enter your query name here....";
@@ -484,7 +480,7 @@ void Dockspace::SetAddQueryPopUp()
     }    
 }
     
-void Dockspace::HandleDetailsWindow(bool* p_open)
+void Dockspace::ShowDetails(bool* p_open)
 {
     ImGui::SetNextWindowSize(ImVec2(430, 450), ImGuiCond_FirstUseEver);
     if (!ImGui::Begin("Details", p_open))
@@ -520,6 +516,37 @@ void Dockspace::HandleDetailsWindow(bool* p_open)
 
 void Dockspace::SetDefaultStyle()
 {
-    ImGuiStyle* style = &ImGui::GetStyle();
-    style->WindowPadding = ImVec2(10, 10);
+    ImGuiStyle& style = ImGui::GetStyle();
+    style.WindowPadding = ImVec2(10, 10);
+    style.WindowRounding = 0.0f;
+    style.Colors[ImGuiCol_WindowBg].w = 1.0f;
+
+    auto& colors = ImGui::GetStyle().Colors;
+    colors[ImGuiCol_WindowBg] = ImVec4{ 0.1f, 0.105f, 0.11f, 1.0f };
+
+    // Headers
+    colors[ImGuiCol_Header] = ImColor(219, 152, 80);
+    colors[ImGuiCol_HeaderHovered] = ImColor(219, 152, 80);
+    colors[ImGuiCol_HeaderActive] = ImColor(219, 152, 80);
+
+    // Buttons
+    colors[ImGuiCol_Button] = ImVec4{ 0.2f, 0.205f, 0.21f, 1.0f };
+    colors[ImGuiCol_ButtonHovered] = ImColor(219, 152, 80);
+    colors[ImGuiCol_ButtonActive] = ImVec4{ 0.15f, 0.1505f, 0.151f, 1.0f };
+
+    // Frame BG
+    colors[ImGuiCol_FrameBg] = ImVec4{ 0.2f, 0.205f, 0.21f, 1.0f };
+    colors[ImGuiCol_FrameBgHovered] = ImVec4{ 0.3f, 0.305f, 0.31f, 1.0f };
+    colors[ImGuiCol_FrameBgActive] = ImVec4{ 0.15f, 0.1505f, 0.151f, 1.0f };
+
+    // Tabs
+    colors[ImGuiCol_TabHovered] = ImColor(219, 152, 80);
+    colors[ImGuiCol_TabActive] = ImColor(219, 152, 80);
+    colors[ImGuiCol_TabUnfocused] = ImColor(219, 152, 80);
+    colors[ImGuiCol_TabUnfocusedActive] = ImColor(219, 152, 80);
+
+    // Title
+    colors[ImGuiCol_TitleBg] = ImVec4{ 0.15f, 0.1505f, 0.151f, 1.0f };
+    colors[ImGuiCol_TitleBgActive] = ImVec4{ 0.15f, 0.1505f, 0.151f, 1.0f };
+    colors[ImGuiCol_TitleBgCollapsed] = ImVec4{ 0.15f, 0.1505f, 0.151f, 1.0f };
 }
