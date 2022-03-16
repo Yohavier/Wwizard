@@ -20,7 +20,7 @@ struct BaseQueryStructure
 	std::string path;
 	AkJson arg;
 	QueryType structureType = QueryType::FOLDER;
-	std::vector<BaseQueryStructure*> subHierarchy;
+	std::vector<BaseQueryStructure> subHierarchy;
 	BaseQueryStructure() = default;
 
 	BaseQueryStructure(std::string name, std::string guid, std::string path, QueryType queryType)
@@ -103,19 +103,18 @@ public:
 private:
 	const std::string GenerateGuid();
 	void FetchWwiseQueries();
-	void FetchWwiseFolderchildren(BaseQueryStructure* parentStructureFolder, const AkJson options);
+	void FetchWwiseFolderchildren(BaseQueryStructure& parentStructureFolder, const AkJson options);
 	const BaseQueryStructure* const GetCurrentSelectionQuery();
 	const QueryResult* const GetCurrentSelectionFile();
 	void LoadWaapiQueriesFromJson();
 	void LoadWaqlQueriesFromJson();
 	void SaveCustomQueriesToJson();
 	void AddQueryToAllQueriesMap(BaseQueryStructure& newQuery);
-	void InitCleanUpCurrentHierarchy();
 
 
 public:
 	std::map<std::string, BaseQueryStructure> allQueries;
-	BaseQueryStructure* wwiseQueryHierarchy;
+	std::unique_ptr<BaseQueryStructure> wwiseQueryHierarchy;
 	std::map<std::string, QueryResult> queryResultFiles;
 
 	std::map<std::string, const BaseQueryStructure&> waapiQueries;

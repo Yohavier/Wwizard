@@ -167,7 +167,7 @@ void Dockspace::ShowSettings(bool* p_open)
     ImGui::SameLine();
     ImGui::InputInt("##4", &waapiPortSetting);
 
-    if (ImGui::Button("Save Settings"))
+    if (ImGui::Button("Save Settings", ImVec2(200,50)))
     {
         if (waapiIPSetting != settingHandler->GetWaapiIP() || waapiPortSetting != settingHandler->GetWaaapiPort())
         {
@@ -197,7 +197,7 @@ void Dockspace::CreateQueryEditor(bool* p_open)
 
     if (ImGui::BeginTable("availableWwiseQueries", 1, ImGuiTableFlags_BordersOuter | ImGuiTableFlags_Resizable))
     {
-        ShowWwiseQueries(*(queryEditorModule->wwiseQueryHierarchy));
+        ShowWwiseQueries(*queryEditorModule->wwiseQueryHierarchy);
         ShowWaapiQueries();
         ShowWaqlQueries();
         ImGui::EndTable();
@@ -295,7 +295,7 @@ void Dockspace::ShowWwiseQueries(const BaseQueryStructure& queryObject)
             {
                 ImGui::PushID(i); // Use field index as identifier.
 
-                ShowWwiseQueries(*queryObject.subHierarchy[i]);
+                ShowWwiseQueries(queryObject.subHierarchy[i]);
 
                 ImGui::PopID();
             }

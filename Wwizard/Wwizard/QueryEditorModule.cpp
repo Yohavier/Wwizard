@@ -19,7 +19,7 @@ QueryEditorModule::QueryEditorModule(const std::unique_ptr<WwizardWwiseClient>& 
 {
     if (wwizardClient->IsConnected())
     {
-        wwiseQueryHierarchy = new BaseQueryStructure();
+        wwiseQueryHierarchy.reset( new BaseQueryStructure());
         FetchWwiseQueries();
         LoadWaapiQueriesFromJson();
         LoadWaqlQueriesFromJson();
@@ -39,33 +39,35 @@ void QueryEditorModule::FetchWwiseQueries()
     wwiseQueryHierarchy->name = parentStructureFolder.name;
     wwiseQueryHierarchy->path = parentStructureFolder.path;
 
-    FetchWwiseFolderchildren(wwiseQueryHierarchy, options);
+    FetchWwiseFolderchildren(*wwiseQueryHierarchy, options);
 }
 
-void QueryEditorModule::FetchWwiseFolderchildren(BaseQueryStructure* parentStructureFolder, const AkJson options)
+void QueryEditorModule::FetchWwiseFolderchildren(BaseQueryStructure& parentStructureFolder, const AkJson options)
 {
-    AkJson queryResult = wwizardClient->GetChildrenFromPath(parentStructureFolder->path, options);
+    AkJson queryResult = wwizardClient->GetChildrenFromPath(parentStructureFolder.path, options);
 
     for (const auto& object : queryResult["return"].GetArray())
     {
         if (object["type"].GetVariant().GetString() == "Query")
         {
-            BaseQueryStructure* newQuery = new BaseQueryStructure(object["name"].GetVariant().GetString(), object["id"].GetVariant().GetString(), object["path"].GetVariant().GetString(), QueryType::WWISEQUERY);
+            //created on the stack of that function is just not fading, because its a memory leak        
+            BaseQueryStructure newQuery = BaseQueryStructure(object["name"].GetVariant().GetString(), object["id"].GetVariant().GetString(), object["path"].GetVariant().GetString(), QueryType::WWISEQUERY);
             
-            AddQueryToAllQueriesMap(*newQuery);
-            parentStructureFolder->subHierarchy.push_back(newQuery);
+            AddQueryToAllQueriesMap(newQuery);
+            
 
             auto it = allQueries.find(object["id"].GetVariant().GetString());
             if (it != allQueries.end())
             {
                 wwiseQueries.insert({ it->second.guid, it->second });      
+                parentStructureFolder.subHierarchy.emplace_back(it->second);
             }
         }
         else
         {
-            BaseQueryStructure* newFolder = new BaseQueryStructure(object["name"].GetVariant().GetString(), object["id"].GetVariant().GetString(), object["path"].GetVariant().GetString(), QueryType::FOLDER);
-            parentStructureFolder->subHierarchy.push_back(newFolder);
-            FetchWwiseFolderchildren(newFolder, options);
+            BaseQueryStructure newFolder = BaseQueryStructure(object["name"].GetVariant().GetString(), object["id"].GetVariant().GetString(), object["path"].GetVariant().GetString(), QueryType::FOLDER);
+            parentStructureFolder.subHierarchy.emplace_back(newFolder);
+            FetchWwiseFolderchildren(parentStructureFolder.subHierarchy.back(), options);
         }
     }
 }
@@ -342,12 +344,6 @@ const std::string QueryEditorModule::GenerateGuid()
     return std::to_string(((long long)rand() << 32) | rand());
 }
 
-void QueryEditorModule::InitCleanUpCurrentHierarchy()
-{
-    delete wwiseQueryHierarchy;
-}
-
-
 void QueryEditorModule::ResetQueryModule(const std::unique_ptr<WwizardWwiseClient>& wwizardClient)
 {
     waapiQueries.clear();
@@ -359,10 +355,14 @@ void QueryEditorModule::ResetQueryModule(const std::unique_ptr<WwizardWwiseClien
 
     if (wwizardClient->IsConnected())
     {
-        InitCleanUpCurrentHierarchy();
-        wwiseQueryHierarchy = new BaseQueryStructure();
+        wwiseQueryHierarchy.release();
+        wwiseQueryHierarchy.reset(new BaseQueryStructure());
         FetchWwiseQueries();
         LoadWaapiQueriesFromJson();
         LoadWaqlQueriesFromJson();
+    }
+    else
+    {
+        wwiseQueryHierarchy.release();
     }
 }
