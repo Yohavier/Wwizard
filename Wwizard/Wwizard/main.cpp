@@ -1,6 +1,7 @@
 #include "Application.h"    
 
-/*TODO:
+/*
+* TODO:
 * - opening wwise, connecting app, close wwise -> app fails to reconnect
 * - create connection icon (green/red)
 * - reconnect button

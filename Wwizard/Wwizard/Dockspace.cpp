@@ -507,6 +507,15 @@ void Dockspace::ShowDetails(bool* p_open)
         {
             ImGui::Text(("Arg : " + queryEditorModule->GetCurrentArgAsString()).c_str());
         }
+        else if (possibleSelectedQuery->structureType == QueryType::WWISEQUERY)
+        {
+            ImGui::Text("Arg : ");
+            ImGui::SameLine();
+            if (ImGui::Button("Inspect Wwise Query"))
+            {
+                wwizarWwiseClient->OpenPropertyInWwise(possibleSelectedQuery->guid);
+            }
+        }
     }
     else if (possibleSelectedFile != nullptr)
     {
