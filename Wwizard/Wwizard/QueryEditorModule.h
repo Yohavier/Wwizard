@@ -99,6 +99,7 @@ public:
 	void CreateNewQuery(const std::string name, const QueryType type, const std::string arg);
 	const std::string GetCurrentArgAsString();
 	void SaveChangedQuery(std::string newName, std::string newArg, std::string guid);
+	void DeleteQuery(std::string guid);
 
 private:
 	const std::string GenerateGuid();

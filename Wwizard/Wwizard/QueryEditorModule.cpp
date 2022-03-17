@@ -382,3 +382,11 @@ void QueryEditorModule::SaveChangedQuery(std::string newName, std::string newArg
         it->second.arg = waapiQuery;
     }
 }
+
+void QueryEditorModule::DeleteQuery(std::string guid)
+{
+    allQueries.erase(guid);
+    waqlQueries.erase(guid);
+    waapiQueries.erase(guid);
+    activeQueryDictionary.erase(guid);
+}

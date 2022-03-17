@@ -498,42 +498,15 @@ void Dockspace::ShowDetails(bool* p_open)
 
     if (possibleSelectedQuery != nullptr)
     {
+        static std::string nameText;
+        static std::string argText;
         if (possibleSelectedQuery->structureType == QueryType::WAAPIQUERY || possibleSelectedQuery->structureType == QueryType::WAQLQUERY)
         {
-            static std::string nameText;
-            static std::string argText;
-
             if (ImGui::Button("Edit Query"))
             {
                 ImGui::OpenPopup("QueryEditing");
                 nameText = possibleSelectedQuery->name;
                 argText = queryEditorModule->GetCurrentArgAsString();
-            }
-            if (ImGui::BeginPopup("QueryEditing"))
-            {
-                ImGui::Text("Edit Query");
-                ImGui::Separator();
-
-                ImGui::Text("name");
-                ImGui::SameLine();
-                ImGui::InputText("##1", &nameText);
-
-                ImGui::Text("arg");
-                ImGui::SameLine();
-                ImGui::InputText("##2", &argText);
-
-                ImGui::Separator();
-                if (ImGui::Button("Close"))
-                {
-                    ImGui::CloseCurrentPopup();
-                }
-                ImGui::SameLine();
-                if (ImGui::Button("Save"))
-                {
-                    queryEditorModule->SaveChangedQuery(nameText, argText, possibleSelectedQuery->guid);
-                    ImGui::CloseCurrentPopup();
-                }
-                ImGui::EndPopup();
             }
         }
 
@@ -554,12 +527,46 @@ void Dockspace::ShowDetails(bool* p_open)
                 wwizarWwiseClient->OpenPropertyInWwise(possibleSelectedQuery->guid);
             }
         }
+        if (ImGui::BeginPopup("QueryEditing"))
+        {
+            ImGui::Text("Edit Query");
+            ImGui::Separator();
+
+            ImGui::Text("name");
+            ImGui::SameLine();
+            ImGui::InputText("##1", &nameText);
+
+            ImGui::Text("arg");
+            ImGui::SameLine();
+            ImGui::InputText("##2", &argText);
+
+            ImGui::Separator();
+            if (ImGui::Button("Delete Query"))
+            {
+                queryEditorModule->DeleteQuery(possibleSelectedQuery->guid);
+                ImGui::CloseCurrentPopup();
+            }
+            ImGui::SameLine();
+            if (ImGui::Button("Close"))
+            {
+                ImGui::CloseCurrentPopup();
+            }
+            ImGui::SameLine();
+            if (ImGui::Button("Save"))
+            {
+                queryEditorModule->SaveChangedQuery(nameText, argText, possibleSelectedQuery->guid);
+                ImGui::CloseCurrentPopup();
+            }
+            ImGui::EndPopup();
+        }
     }
     else if (possibleSelectedFile != nullptr)
     {
         ImGui::Text(("Name : " + possibleSelectedFile->name).c_str());
         ImGui::Text(("Guid : " + possibleSelectedFile->guid).c_str());
     }
+
+    
 
     ImGui::PopStyleVar();
     ImGui::End();
