@@ -132,6 +132,19 @@ void Dockspace::CreateMenuBar()
                 }
             }       
         }
+
+        if (wwizarWwiseClient->IsConnected())
+        {
+            ImGui::PushStyleColor(ImGuiCol_Text, IM_COL32(0, 153, 0, 255));
+            ImGui::Text("Connected");
+            ImGui::PopStyleColor();
+        }
+        else
+        {
+            ImGui::PushStyleColor(ImGuiCol_Text, IM_COL32(153, 0, 0, 255));
+            ImGui::Text("Disconnected");
+            ImGui::PopStyleColor();
+        }
         ImGui::EndMenuBar();
     }
 }

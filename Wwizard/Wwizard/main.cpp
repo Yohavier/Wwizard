@@ -2,11 +2,10 @@
 
 /*
 * TODO:
+* - after restart pc first open of app doesnt connect to wwise 
 * - opening wwise, connecting app, close wwise -> app fails to reconnect
-* - create connection icon (green/red)
 * - reconnect button
 * - reflect color coding from wwise in query results
-* - delete queries
 * - implement sort originals 
 */
 
