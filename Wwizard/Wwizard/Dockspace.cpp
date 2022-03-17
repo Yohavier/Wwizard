@@ -477,7 +477,6 @@ void Dockspace::ShowQueryCreator()
             queryEditorModule->CreateNewQuery(nameText, QueryType::WAQLQUERY, argText);
         else
         {
-
             ImGui::OpenPopup("Options");
         }
             
@@ -499,6 +498,45 @@ void Dockspace::ShowDetails(bool* p_open)
 
     if (possibleSelectedQuery != nullptr)
     {
+        if (possibleSelectedQuery->structureType == QueryType::WAAPIQUERY || possibleSelectedQuery->structureType == QueryType::WAQLQUERY)
+        {
+            static std::string nameText;
+            static std::string argText;
+
+            if (ImGui::Button("Edit Query"))
+            {
+                ImGui::OpenPopup("QueryEditing");
+                nameText = possibleSelectedQuery->name;
+                argText = queryEditorModule->GetCurrentArgAsString();
+            }
+            if (ImGui::BeginPopup("QueryEditing"))
+            {
+                ImGui::Text("Edit Query");
+                ImGui::Separator();
+
+                ImGui::Text("name");
+                ImGui::SameLine();
+                ImGui::InputText("##1", &nameText);
+
+                ImGui::Text("arg");
+                ImGui::SameLine();
+                ImGui::InputText("##2", &argText);
+
+                ImGui::Separator();
+                if (ImGui::Button("Close"))
+                {
+                    ImGui::CloseCurrentPopup();
+                }
+                ImGui::SameLine();
+                if (ImGui::Button("Save"))
+                {
+                    queryEditorModule->SaveChangedQuery(nameText, argText, possibleSelectedQuery->guid);
+                    ImGui::CloseCurrentPopup();
+                }
+                ImGui::EndPopup();
+            }
+        }
+
         ImGui::Text(("Name : " + possibleSelectedQuery->name).c_str());
         ImGui::Text(("Guid : " + possibleSelectedQuery->guid).c_str());
         ImGui::Text(("Type : " + queryEditorModule->ConvertQueryTypeToString(possibleSelectedQuery->structureType)).c_str());

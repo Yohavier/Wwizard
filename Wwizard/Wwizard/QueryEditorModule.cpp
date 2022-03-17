@@ -366,3 +366,19 @@ void QueryEditorModule::ResetQueryModule(const std::unique_ptr<WwizardWwiseClien
         wwiseQueryHierarchy.release();
     }
 }
+
+void QueryEditorModule::SaveChangedQuery(std::string newName, std::string newArg, std::string guid)
+{
+    auto it = allQueries.find(guid);
+    if (it != allQueries.end())
+    {
+        it->second.name = newName;
+
+        rapidjson::Document a;
+        a.Parse(newArg.c_str());
+        AkJson waapiQuery;
+        AkJson::FromRapidJson(a, waapiQuery);
+
+        it->second.arg = waapiQuery;
+    }
+}

@@ -6,7 +6,7 @@
 * - create connection icon (green/red)
 * - reconnect button
 * - reflect color coding from wwise in query results
-* - if wwise query create inspect button in details and open in wwise app if it is open
+* - delete queries
 * - implement sort originals 
 */
 
