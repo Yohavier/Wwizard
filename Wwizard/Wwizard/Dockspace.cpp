@@ -17,7 +17,8 @@ Dockspace::Dockspace(std::unique_ptr<WwizardWwiseClient>& wwizardWwiseClient, st
     std::cout << "Initialized Dockspace" << std::endl;
     ImGuiIO& io = ImGui::GetIO();
     float fontSize = 18.0f;// *2.0f;
-    io.FontDefault = io.Fonts->AddFontFromFileTTF("../assets/fonts/OpenSans-Bold.ttf", fontSize);
+    auto fontpath = static_cast<std::string>(SOLUTION_DIR) + "assets/fonts/OpenSans-Bold.ttf";
+    io.FontDefault = io.Fonts->AddFontFromFileTTF(fontpath.c_str(), fontSize);
     SetDefaultStyle();
 }
 

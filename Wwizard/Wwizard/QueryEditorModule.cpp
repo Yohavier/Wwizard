@@ -158,58 +158,62 @@ void QueryEditorModule::RunActiveQueries()
 
 void QueryEditorModule::LoadWaqlQueriesFromJson()
 {
-    FILE* fp = fopen("../SavedData/test.json", "rb");
-    char* readBuffer = new char[65536];
-    rapidjson::FileReadStream is(fp, readBuffer, sizeof(readBuffer));
-
-    rapidjson::Document d;
-    d.ParseStream(is);
-    fclose(fp);
-
-    assert(d["WaqlQueries"].IsArray());
-
-    for (int i = 0; i < static_cast<int>(d["WaqlQueries"].Size()); i++)
+    auto path = static_cast<std::string>(SOLUTION_DIR) + "SavedData/test.json";
+    FILE* fp = fopen(path.c_str(), "rb");
+    if (fp != 0)
     {
-        AkJson test;
-        test.FromRapidJson(d["WaqlQueries"][i]["arg"], test);
+        char* readBuffer = new char[65536];
+        rapidjson::FileReadStream is(fp, readBuffer, sizeof(readBuffer));
 
-        BaseQueryStructure newQuery = BaseQueryStructure(d["WaqlQueries"][i]["name"].GetString(), d["WaqlQueries"][i]["guid"].GetString(), d["WaqlQueries"][i]["path"].GetString(), QueryType::WAQLQUERY, test);
-        AddQueryToAllQueriesMap(newQuery);
+        rapidjson::Document d;
+        d.ParseStream(is);
+        fclose(fp);
 
-        auto it = allQueries.find(d["WaqlQueries"][i]["guid"].GetString());
-        if (it != allQueries.end())
+        for (int i = 0; i < static_cast<int>(d["WaqlQueries"].Size()); i++)
         {
-            waqlQueries.insert({ it->second.guid, it->second });
+            AkJson test;
+            test.FromRapidJson(d["WaqlQueries"][i]["arg"], test);
+
+            BaseQueryStructure newQuery = BaseQueryStructure(d["WaqlQueries"][i]["name"].GetString(), d["WaqlQueries"][i]["guid"].GetString(), d["WaqlQueries"][i]["path"].GetString(), QueryType::WAQLQUERY, test);
+            AddQueryToAllQueriesMap(newQuery);
+
+            auto it = allQueries.find(d["WaqlQueries"][i]["guid"].GetString());
+            if (it != allQueries.end())
+            {
+                waqlQueries.insert({ it->second.guid, it->second });
+            }
         }
     }
 }
 
 void QueryEditorModule::LoadWaapiQueriesFromJson()
 {
-    using namespace rapidjson;
-
-    FILE* fp = fopen("../SavedData/test.json", "rb"); 
-    char* readBuffer = new char[65536];
-    FileReadStream is(fp, readBuffer, sizeof(readBuffer));
-    
-    Document d;
-    d.ParseStream(is);
-    fclose(fp);
-
-    assert(d["WaapiQueries"].IsArray());
-
-    for (int i = 0; i < static_cast<int>(d["WaapiQueries"].Size()); i++)
+    auto path = static_cast<std::string>(SOLUTION_DIR) + "SavedData/test.json";
+    FILE* fp = fopen(path.c_str(), "rb"); 
+    if (fp != 0)
     {
-        AkJson test;
-        test.FromRapidJson(d["WaapiQueries"][i]["arg"], test);
-        
-        BaseQueryStructure newQuery = BaseQueryStructure(d["WaapiQueries"][i]["name"].GetString(), d["WaapiQueries"][i]["guid"].GetString(), d["WaapiQueries"][i]["path"].GetString(), QueryType::WAAPIQUERY, test);
-        AddQueryToAllQueriesMap(newQuery);
+        char* readBuffer = new char[65536];
+        rapidjson::FileReadStream is(fp, readBuffer, sizeof(readBuffer));
 
-        auto it = allQueries.find(d["WaapiQueries"][i]["guid"].GetString());
-        if (it != allQueries.end())
+        rapidjson::Document d;
+        d.ParseStream(is);
+        fclose(fp);
+
+        assert(d["WaapiQueries"].IsArray());
+
+        for (int i = 0; i < static_cast<int>(d["WaapiQueries"].Size()); i++)
         {
-            waapiQueries.insert({ it->second.guid, it->second });
+            AkJson test;
+            test.FromRapidJson(d["WaapiQueries"][i]["arg"], test);
+
+            BaseQueryStructure newQuery = BaseQueryStructure(d["WaapiQueries"][i]["name"].GetString(), d["WaapiQueries"][i]["guid"].GetString(), d["WaapiQueries"][i]["path"].GetString(), QueryType::WAAPIQUERY, test);
+            AddQueryToAllQueriesMap(newQuery);
+
+            auto it = allQueries.find(d["WaapiQueries"][i]["guid"].GetString());
+            if (it != allQueries.end())
+            {
+                waapiQueries.insert({ it->second.guid, it->second });
+            }
         }
     }
 }
@@ -275,15 +279,18 @@ void QueryEditorModule::SaveCustomQueriesToJson()
     }
     d.AddMember("WaqlQueries", waqlQueries, d.GetAllocator());
 
+    auto path = static_cast<std::string>(SOLUTION_DIR) + "SavedData/test.json";
+    FILE* fp = fopen(path.c_str(), "wb");
+    if (fp != 0)
+    {
+        char* writeBuffer = new char[65536];
+        rapidjson::FileWriteStream os(fp, writeBuffer, sizeof(writeBuffer));
 
-    FILE* fp = fopen("../SavedData/test.json", "wb");
-    char* writeBuffer = new char[65536];
-    rapidjson::FileWriteStream os(fp, writeBuffer, sizeof(writeBuffer));
+        rapidjson::Writer<rapidjson::FileWriteStream> writer(os);
+        d.Accept(writer);
 
-    rapidjson::Writer<rapidjson::FileWriteStream> writer(os);
-    d.Accept(writer);
-
-    fclose(fp);
+        fclose(fp);
+    }
 }
 
 void QueryEditorModule::CreateNewQuery(std::string name, QueryType type, std::string arg)

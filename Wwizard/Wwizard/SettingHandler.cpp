@@ -12,23 +12,27 @@ void SettingHandler::SaveSettings(const std::string wwiseProjectPath, const std:
 
 void SettingHandler::LoadSettings()
 {
-    FILE* fp = fopen("../SavedData/Settings.json", "rb");
-    char* readBuffer = new char[65536];
-    rapidjson::FileReadStream is(fp, readBuffer, sizeof(readBuffer));
+    auto path = static_cast<std::string>(SOLUTION_DIR) + "SavedData/Settings.json";
+    FILE* fp = fopen(path.c_str(), "rb");
+    if (fp != 0)
+    {
+        char* readBuffer = new char[65536];
+        rapidjson::FileReadStream is(fp, readBuffer, sizeof(readBuffer));
 
-    rapidjson::Document settingDoc;
-    settingDoc.ParseStream(is);
-    fclose(fp);
+        rapidjson::Document settingDoc;
+        settingDoc.ParseStream(is);
+        fclose(fp);
 
-    assert(settingDoc["wwiseProjectPath"].IsString());
-    assert(settingDoc["sdkPath"].IsString());
-    assert(settingDoc["waapiIP"].IsString());
-    assert(settingDoc["waapiPort"].IsInt());
+        assert(settingDoc["wwiseProjectPath"].IsString());
+        assert(settingDoc["sdkPath"].IsString());
+        assert(settingDoc["waapiIP"].IsString());
+        assert(settingDoc["waapiPort"].IsInt());
 
-    this->wwiseProjectPath = settingDoc["wwiseProjectPath"].GetString();
-    this->sdkPath = settingDoc["sdkPath"].GetString();
-    this->waapiIP = settingDoc["waapiIP"].GetString();
-    this->waapiPort = settingDoc["waapiPort"].GetInt();
+        this->wwiseProjectPath = settingDoc["wwiseProjectPath"].GetString();
+        this->sdkPath = settingDoc["sdkPath"].GetString();
+        this->waapiIP = settingDoc["waapiIP"].GetString();
+        this->waapiPort = settingDoc["waapiPort"].GetInt();
+    }   
 }
 
 void SettingHandler::WriteToJson()
@@ -52,12 +56,16 @@ void SettingHandler::WriteToJson()
     waapiPortValue.SetInt(waapiPort);
     d.AddMember("waapiPort", waapiPortValue, d.GetAllocator());
 
-    FILE* fp = fopen("../SavedData/Settings.json", "wb");
-    char* writeBuffer = new char[65536];
-    rapidjson::FileWriteStream os(fp, writeBuffer, sizeof(writeBuffer));
+    auto path = static_cast<std::string>(SOLUTION_DIR) + "SavedData/Settings.json";
+    FILE* fp = fopen(path.c_str(), "wb");
+    if (fp != 0)
+    {
+        char* writeBuffer = new char[65536];
+        rapidjson::FileWriteStream os(fp, writeBuffer, sizeof(writeBuffer));
 
-    rapidjson::Writer<rapidjson::FileWriteStream> writer(os);
-    d.Accept(writer);
+        rapidjson::Writer<rapidjson::FileWriteStream> writer(os);
+        d.Accept(writer);
 
-    fclose(fp);
+        fclose(fp);
+    }
 }
