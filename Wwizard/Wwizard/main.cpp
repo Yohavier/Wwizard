@@ -3,10 +3,7 @@
 /*
 * TODO:
 * - after restart pc first open of app doesnt connect to wwise 
-* - opening wwise, connecting app, close wwise -> app fails to reconnect
-* - reconnect button
 * - implement sort originals 
-* - closing wwise console properly
 */
 
 int main()

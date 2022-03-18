@@ -83,12 +83,16 @@ void Dockspace::Render(bool* p_open)
 void Dockspace::CreateMenuBar()
 {
     if (ImGui::BeginMenuBar())
-    {
+    {   
         if (ImGui::BeginMenu("Wwizard"))
         {
             if (ImGui::MenuItem("Home", NULL))
             {
                 SetLayout(Layout::HOME);
+            }
+            if (ImGui::MenuItem("Reconnect", NULL))
+            {
+                wwizarWwiseClient->Connect(settingHandler);
             }
             if (ImGui::MenuItem("Settings", NULL))
             {
