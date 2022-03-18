@@ -135,7 +135,7 @@ void QueryEditorModule::RunActiveQueries()
             {
                 for (const auto& object : queryResult["return"].GetArray())
                 {
-                    queryResultFiles.insert({ object["id"].GetVariant().GetString(), QueryResult(object["name"].GetVariant().GetString(), object["id"].GetVariant().GetString(), object["path"].GetVariant().GetString(), object["type"].GetVariant().GetString()) });
+                    queryResultFiles.insert({ object["id"].GetVariant().GetString(), QueryResult(object["name"].GetVariant().GetString(), object["id"].GetVariant().GetString(), object["path"].GetVariant().GetString(), object["type"].GetVariant().GetString(), object["color"].GetVariant()) });
                 }
             }
         } 
@@ -148,7 +148,7 @@ void QueryEditorModule::RunActiveQueries()
                 {
                     for (const auto& object : queryResult["return"].GetArray())
                     {
-                        queryResultFiles.insert({ object["id"].GetVariant().GetString(), QueryResult(object["name"].GetVariant().GetString(), object["id"].GetVariant().GetString(), object["path"].GetVariant().GetString(), object["type"].GetVariant().GetString()) });
+                        queryResultFiles.insert({ object["id"].GetVariant().GetString(), QueryResult(object["name"].GetVariant().GetString(), object["id"].GetVariant().GetString(), object["path"].GetVariant().GetString(), object["type"].GetVariant().GetString(), object["color"].GetVariant()) });
                     }
                 }
             }

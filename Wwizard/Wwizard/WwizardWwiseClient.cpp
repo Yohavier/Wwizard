@@ -123,7 +123,7 @@ AkJson WwizardWwiseClient::RunQueryFromGuuid(const std::string guid)
        { "from", AkJson::Map{{ "query", AkJson::Array{AkVariant(guid)}}}}});
 
     AkJson options(AkJson::Map{
-    { "return", AkJson::Array{ AkVariant("id"), AkVariant("name"), AkVariant("type"), AkVariant("path")}} });
+    { "return", AkJson::Array{ AkVariant("id"), AkVariant("name"), AkVariant("type"), AkVariant("path"), AkVariant("color")}}});
 
     AkJson queryResult;
     wwiseClient.Call(ak::wwise::core::object::get, arg, options, queryResult, 100);

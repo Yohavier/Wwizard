@@ -39,6 +39,7 @@ private:
 	void ShowQueryCreator();
 	void ShowDetails(bool* p_open);
 	void SetDefaultStyle();
+	ImColor ConvertWwiseColorToRGB(int wwiseColor);
 
 private:
 	Layout currentLayout;

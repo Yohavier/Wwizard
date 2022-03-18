@@ -45,12 +45,14 @@ struct QueryResult
 	std::string guid;
 	std::string path;
 	std::string type;
+	int color;
 
-	QueryResult(std::string name, std::string guid, std::string path, std::string type)
+	QueryResult(std::string name, std::string guid, std::string path, std::string type, int color)
 		: name(name)
 		, guid(guid)
 		, path(path)
 		, type(type)
+		, color(color)
 	{}
 };
 

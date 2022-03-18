@@ -425,8 +425,14 @@ void Dockspace::ShowQueryResults()
 
     for (auto& object : queryEditorModule->queryResultFiles)
     {
+        auto col = ConvertWwiseColorToRGB(object.second.color);
+
+        ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(col.Value.x, col.Value.y, col.Value.z, 1));
+        ImGui::Text("|=|");
+        ImGui::SameLine();
+        ImGui::PopStyleColor();
         const bool is_selected = (queryEditorModule->GetCurrentSelectionGuid() == object.second.guid && ImGui::IsWindowFocused());
-        if (ImGui::Selectable(object.second.name.c_str(), false, ImGuiSelectableFlags_AllowDoubleClick))
+        if (ImGui::Selectable(object.second.name.c_str(), is_selected, ImGuiSelectableFlags_AllowDoubleClick))
         {
             if (is_selected)
                 ImGui::SetItemDefaultFocus();
@@ -437,9 +443,9 @@ void Dockspace::ShowQueryResults()
             {
                 wwizarWwiseClient->OpenPropertyInWwise(object.second.guid);
             }
-        }          
+        }  
+        ImGui::Separator();
     }
-
     ImGui::PopID();
 }
 
@@ -620,4 +626,67 @@ void Dockspace::SetDefaultStyle()
     colors[ImGuiCol_TitleBg] = ImVec4{ 0.15f, 0.1505f, 0.151f, 1.0f };
     colors[ImGuiCol_TitleBgActive] = ImVec4{ 0.15f, 0.1505f, 0.151f, 1.0f };
     colors[ImGuiCol_TitleBgCollapsed] = ImVec4{ 0.15f, 0.1505f, 0.151f, 1.0f };
+}
+
+ImColor Dockspace::ConvertWwiseColorToRGB(int wwiseColor)
+{
+    switch (wwiseColor)
+    {
+        case 0:
+            return ImColor(83, 83, 83);
+        case 1:
+            return ImColor(54, 62, 200);
+        case 3:
+            return ImColor(25, 85, 203);
+        case 4:
+            return ImColor(7, 104, 104);
+        case 5:
+            return ImColor(86, 115, 12);
+        case 6:
+            return ImColor(120, 113, 16);
+        case 7:
+            return ImColor(121, 87, 21);
+        case 8:
+            return ImColor(120, 66, 12);
+        case 9:
+            return ImColor(114, 56, 43);
+        case 10:
+            return ImColor(137, 35, 36);
+        case 11:
+            return ImColor(124, 38, 125);
+        case 12:
+            return ImColor(115, 42, 151);
+        case 13:
+            return ImColor(88, 54, 174);
+        case 14:
+            return ImColor(135, 135, 135);
+        case 15:
+            return ImColor(106, 111, 194);
+        case 16:
+            return ImColor(99, 131, 197);
+        case 17:
+            return ImColor(67, 137, 137);
+        case 18:
+            return ImColor(83, 147, 83);
+        case 19:
+            return ImColor(128, 152, 61);
+        case 20:
+            return ImColor(160, 151, 38);
+        case 21:
+            return ImColor(171, 135, 62);
+        case 22:
+            return ImColor(174, 121, 65);
+        case 23:
+            return ImColor(174, 100, 85);
+        case 24:
+            return ImColor(185, 91, 91);
+        case 25:
+            return ImColor(169, 80, 170);
+        case 26:
+            return ImColor(187, 85, 189);
+        case 27:
+            return ImColor(134, 96, 226);
+        default:
+            return ImColor(83, 83, 83, 83);
+    }
 }
