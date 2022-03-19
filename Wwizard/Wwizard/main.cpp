@@ -7,6 +7,7 @@
 * - implement sort originals 
 * - create Default layout
 * - editing waql queries is not right 
+* - waql query editing always adds characters
 */
 
 int main()

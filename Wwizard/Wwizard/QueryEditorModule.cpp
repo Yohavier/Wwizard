@@ -345,11 +345,23 @@ const std::string QueryEditorModule::GetCurrentArgAsString()
     if (query != nullptr)
     {
         rapidjson::Document doc;
-        RapidJsonUtils::ToRapidJson(query->arg, doc, doc.GetAllocator());
-        rapidjson::StringBuffer buffer; 
-        rapidjson::Writer<rapidjson::StringBuffer> writer(buffer);
-        doc.Accept(writer);
-        return buffer.GetString();
+
+        if (query->structureType == QueryType::WAQLQUERY)
+        {
+            RapidJsonUtils::ToRapidJson(query->arg["waql"], doc, doc.GetAllocator());
+            rapidjson::StringBuffer buffer;
+            rapidjson::Writer<rapidjson::StringBuffer> writer(buffer);
+            doc.Accept(writer);
+            return buffer.GetString();
+        }
+        else if (query->structureType == QueryType::WAAPIQUERY)
+        {
+            RapidJsonUtils::ToRapidJson(query->arg, doc, doc.GetAllocator());
+            rapidjson::StringBuffer buffer;
+            rapidjson::Writer<rapidjson::StringBuffer> writer(buffer);
+            doc.Accept(writer);
+            return buffer.GetString();
+        }
     }
     return "";
 }
@@ -395,11 +407,18 @@ void QueryEditorModule::SaveChangedQuery(std::string newName, std::string newArg
         it->second.name = newName;
 
         rapidjson::Document a;
-        a.Parse(newArg.c_str());
-        AkJson waapiQuery;
-        AkJson::FromRapidJson(a, waapiQuery);
-
-        it->second.arg = waapiQuery;
+        if (it->second.structureType == QueryType::WAQLQUERY)
+        {
+            AkJson query(AkJson::Map{ {{"waql", AkVariant(newArg)}} });
+            it->second.arg = query;
+        }
+        else if (it->second.structureType == QueryType::WAAPIQUERY)
+        {
+            a.Parse(newArg.c_str());
+            AkJson query;
+            AkJson::FromRapidJson(a, query);
+            it->second.arg = query;
+        }
     }
 }
 
