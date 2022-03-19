@@ -130,12 +130,18 @@ void QueryEditorModule::RunActiveQueries()
         if (it->second.structureType == QueryType::WWISEQUERY)
         {
             AkJson queryResult = wwizardClient->RunQueryFromGuuid(it->second.guid);
-
             if (!queryResult["return"].IsEmpty())
             {
                 for (const auto& object : queryResult["return"].GetArray())
                 {
-                    queryResultFiles.insert({ object["id"].GetVariant().GetString(), QueryResult(object["name"].GetVariant().GetString(), object["id"].GetVariant().GetString(), object["path"].GetVariant().GetString(), object["type"].GetVariant().GetString(), object["color"].GetVariant()) });
+                    if (object["color"].IsEmpty())
+                    {
+                        queryResultFiles.insert({ object["id"].GetVariant().GetString(), QueryResult(object["name"].GetVariant().GetString(), object["id"].GetVariant().GetString(), object["path"].GetVariant().GetString(), object["type"].GetVariant().GetString(), 0) });
+                    }
+                    else
+                    {
+                        queryResultFiles.insert({ object["id"].GetVariant().GetString(), QueryResult(object["name"].GetVariant().GetString(), object["id"].GetVariant().GetString(), object["path"].GetVariant().GetString(), object["type"].GetVariant().GetString(), object["color"].GetVariant().GetInt32()) });
+                    } 
                 }
             }
         } 
@@ -148,7 +154,14 @@ void QueryEditorModule::RunActiveQueries()
                 {
                     for (const auto& object : queryResult["return"].GetArray())
                     {
-                        queryResultFiles.insert({ object["id"].GetVariant().GetString(), QueryResult(object["name"].GetVariant().GetString(), object["id"].GetVariant().GetString(), object["path"].GetVariant().GetString(), object["type"].GetVariant().GetString(), object["color"].GetVariant()) });
+                        if (object["color"].IsEmpty())
+                        {
+                            queryResultFiles.insert({ object["id"].GetVariant().GetString(), QueryResult(object["name"].GetVariant().GetString(), object["id"].GetVariant().GetString(), object["path"].GetVariant().GetString(), object["type"].GetVariant().GetString(), 0) });
+                        }
+                        else
+                        {
+                            queryResultFiles.insert({ object["id"].GetVariant().GetString(), QueryResult(object["name"].GetVariant().GetString(), object["id"].GetVariant().GetString(), object["path"].GetVariant().GetString(), object["type"].GetVariant().GetString(), object["color"].GetVariant().GetInt32()) });
+                        }
                     }
                 }
             }

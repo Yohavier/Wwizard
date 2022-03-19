@@ -136,7 +136,7 @@ AkJson WwizardWwiseClient::RunCustomQuery(const AkJson arg)
 {
     AkJson queryResult;
     AkJson options(AkJson::Map{
-    { "return", AkJson::Array{ AkVariant("id"), AkVariant("name"), AkVariant("type"), AkVariant("path")}} });
+    { "return", AkJson::Array{ AkVariant("id"), AkVariant("name"), AkVariant("type"), AkVariant("path"), AkVariant("color")}}});
 
     wwiseClient.Call(ak::wwise::core::object::get, arg, options, queryResult, 100);
 
