@@ -352,7 +352,31 @@ const std::string QueryEditorModule::GetCurrentArgAsString()
             rapidjson::StringBuffer buffer;
             rapidjson::Writer<rapidjson::StringBuffer> writer(buffer);
             doc.Accept(writer);
-            return buffer.GetString();
+    
+            std::string rawArg = buffer.GetString();
+    
+            //remove " in the front and back
+            rawArg.erase(0, 1);
+            rawArg.erase(rawArg.size() - 1);
+
+            std::string processedArg = "";
+            for (int i = 0; i < rawArg.size(); i++)
+            {
+                if (rawArg.at(i) == '\\')
+                {
+                    if (rawArg.at(i + 1) == '\\')
+                    {
+                        processedArg += "\\";
+                        i++;
+                    }
+                }
+                else
+                {
+                    processedArg += rawArg.at(i);
+                }
+            }
+
+            return processedArg;
         }
         else if (query->structureType == QueryType::WAAPIQUERY)
         {

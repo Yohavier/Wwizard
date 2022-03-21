@@ -530,7 +530,7 @@ void Dockspace::ShowDetails(bool* p_open)
             {
                 ImGui::OpenPopup("QueryEditing");
                 nameText = possibleSelectedQuery->name;
-                argText = queryEditorModule->GetCurrentArgAsString();
+                argText = queryEditorModule->GetCurrentArgAsString().c_str();
             }
         }
 
