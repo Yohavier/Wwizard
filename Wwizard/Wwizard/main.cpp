@@ -1,11 +1,9 @@
 #include "Application.h"    
 
 /*
-* TODO:
-* - after restart pc first open of app doesnt connect to wwise 
 * - implement sort originals 
 * - create Default layout
-* - implement right click options for certain stuff
+* - reconnecting breaks query editor
 */
 
 int main()

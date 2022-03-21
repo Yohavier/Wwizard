@@ -45,7 +45,7 @@ void SettingHandler::WriteToJson()
     d.AddMember("wwiseProjectPath", wwiseProjectPathValue, d.GetAllocator());
 
     rapidjson::Value sdkPathValue;
-    sdkPathValue.SetString("asd");
+    sdkPathValue.SetString(rapidjson::StringRef(sdkPath.c_str()));
     d.AddMember("sdkPath", sdkPathValue, d.GetAllocator());
 
     rapidjson::Value waapiIPValue;

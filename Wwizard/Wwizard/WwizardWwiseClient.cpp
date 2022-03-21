@@ -45,7 +45,7 @@ bool WwizardWwiseClient::Connect(const std::unique_ptr<SettingHandler>& settings
 bool WwizardWwiseClient::ForceOpenWwiseInstance(const std::unique_ptr<SettingHandler>& settings)
 {
     system("taskkill /F /T /IM WwiseConsole.exe");
-    std::string commandline = "\"E:\\Wwise 2021.1.6.7774\\Authoring\\x64\\Release\\bin\\WwiseConsole.exe\" waapi-server \"D:\\ue\\BubbleSpace\\BubbleSpace_WwiseProject\\BubbleSpace_WwiseProject.wproj\" --allow-migration --wamp-port " + std::to_string(settings->waapiPort);
+    std::string commandline = settings->GetSDKPath() + " waapi-server " + settings->GetWwisProjectPathRef() + " --allow-migration --wamp-port " + std::to_string(settings->waapiPort);
     WinExec(commandline.c_str(), 0);
 
     if (wwiseClient.Connect(settings->waapiIP.c_str(), settings->waapiPort))

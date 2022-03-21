@@ -171,7 +171,7 @@ void QueryEditorModule::RunActiveQueries()
 
 void QueryEditorModule::LoadWaqlQueriesFromJson()
 {
-    auto path = static_cast<std::string>(SOLUTION_DIR) + "SavedData/test.json";
+    auto path = static_cast<std::string>(SOLUTION_DIR) + "SavedData/CustomQueries.json";
     FILE* fp = fopen(path.c_str(), "rb");
     if (fp != 0)
     {
@@ -201,7 +201,7 @@ void QueryEditorModule::LoadWaqlQueriesFromJson()
 
 void QueryEditorModule::LoadWaapiQueriesFromJson()
 {
-    auto path = static_cast<std::string>(SOLUTION_DIR) + "SavedData/test.json";
+    auto path = static_cast<std::string>(SOLUTION_DIR) + "SavedData/CustomQueries.json";
     FILE* fp = fopen(path.c_str(), "rb"); 
     if (fp != 0)
     {
@@ -292,7 +292,7 @@ void QueryEditorModule::SaveCustomQueriesToJson()
     }
     d.AddMember("WaqlQueries", waqlQueries, d.GetAllocator());
 
-    auto path = static_cast<std::string>(SOLUTION_DIR) + "SavedData/test.json";
+    auto path = static_cast<std::string>(SOLUTION_DIR) + "SavedData/CustomQueries.json";
     FILE* fp = fopen(path.c_str(), "wb");
     if (fp != 0)
     {
@@ -411,7 +411,6 @@ void QueryEditorModule::ResetQueryModule(const std::unique_ptr<WwizardWwiseClien
 
     if (wwizardClient->IsConnected())
     {
-        wwiseQueryHierarchy.release();
         wwiseQueryHierarchy.reset(new BaseQueryStructure());
         FetchWwiseQueries();
         LoadWaapiQueriesFromJson();

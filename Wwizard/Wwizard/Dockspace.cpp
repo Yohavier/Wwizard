@@ -94,6 +94,7 @@ void Dockspace::CreateMenuBar()
             if (ImGui::MenuItem("Reconnect", NULL))
             {
                 wwizarWwiseClient->Connect(settingHandler);
+                queryEditorModule->ResetQueryModule(wwizarWwiseClient);
             }
             if (ImGui::MenuItem("Settings", NULL))
             {
