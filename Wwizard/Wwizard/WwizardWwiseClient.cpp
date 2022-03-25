@@ -142,6 +142,17 @@ AkJson WwizardWwiseClient::RunCustomQuery(const AkJson arg)
 
     return queryResult;
 }
+//Not used atm
+void WwizardWwiseClient::GetProjectInfo()
+{
+    AkJson queryResult;
+    AkJson arg(AkJson::Map{});
+    AkJson opt(AkJson::Map{});
+
+    wwiseClient.Call(ak::wwise::core::getInfo, arg, opt, queryResult, 100);
+
+    const auto objects = queryResult["directories"];
+}
 
 void WwizardWwiseClient::OpenPropertyInWwise(std::string& guid)
 {

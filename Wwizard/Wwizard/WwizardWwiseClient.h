@@ -31,6 +31,8 @@ public:
 	
 	AkJson RunCustomQuery(const AkJson arg);
 
+	void GetProjectInfo();
+
 	bool IsConnected()
 	{
 		return wwiseClient.IsConnected();

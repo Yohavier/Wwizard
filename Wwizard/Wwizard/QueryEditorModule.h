@@ -5,11 +5,6 @@
 #include <map>
 #include <guiddef.h>
 
-/*
-* TODO :
-*-after restart pc first open of app doesnt connect to wwise
-*/
-
 enum class QueryType
 {
 	WWISEQUERY,

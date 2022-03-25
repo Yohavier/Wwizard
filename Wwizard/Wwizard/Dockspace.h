@@ -5,6 +5,7 @@
 #include "imgui_internal.h"
 #include "QueryEditorModule.h"
 #include "SettingHandler.h"
+#include "SortOriginalsModule.h"
 
 enum class Layout
 {
@@ -38,6 +39,11 @@ private:
 	void ShowWwiseQueries(const BaseQueryStructure& queryObject);
 	void ShowQueryCreator();
 	void ShowDetails(bool* p_open);
+
+	//Sort Originals
+	void ShowSortOriginalsModule();
+
+	//Misc
 	void SetDefaultStyle();
 	ImColor ConvertWwiseColorToRGB(int wwiseColor);
 
@@ -48,6 +54,7 @@ private:
 	std::unique_ptr<SettingHandler>& settingHandler;
 
 	std::unique_ptr<QueryEditorModule> queryEditorModule = nullptr;
+	std::unique_ptr<SortOriginalsModule> sortOriginalsModule = nullptr;
 };
 
 

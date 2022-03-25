@@ -14,6 +14,8 @@ Dockspace::Dockspace(std::unique_ptr<WwizardWwiseClient>& wwizardWwiseClient, st
 { 
     //Init all modules
     queryEditorModule.reset(new QueryEditorModule(wwizardWwiseClient));
+    sortOriginalsModule.reset(new SortOriginalsModule());
+
     std::cout << "Initialized Dockspace" << std::endl;
     ImGuiIO& io = ImGui::GetIO();
     float fontSize = 18.0f;// *2.0f;
@@ -73,6 +75,10 @@ void Dockspace::Render(bool* p_open)
     {
         ShowSettings(p_open);
     }
+    else if (currentLayout == Layout::SORTORIGINALS)
+    {
+        ShowSortOriginalsModule();
+    }
     else //Default Home Layout
     {
         ShowHome();
@@ -118,6 +124,7 @@ void Dockspace::CreateMenuBar()
     
             if (ImGui::MenuItem("Sort Originals", NULL))
             {
+                sortOriginalsModule->LoadModule(settingHandler->GetWwisProjectPathRef());
                 SetLayout(Layout::SORTORIGINALS);
             }
 
@@ -160,6 +167,7 @@ void Dockspace::SetLayout(Layout newLayout)
     currentLayout = newLayout;
 }
 
+
 //Settings Layout
 void Dockspace::ShowSettings(bool* p_open)
 {
@@ -201,6 +209,7 @@ void Dockspace::ShowSettings(bool* p_open)
     }
     ImGui::End();
 }
+
 
 //QueryLayouts
 void Dockspace::CreateQueryEditor(bool* p_open)
@@ -597,43 +606,61 @@ void Dockspace::ShowDetails(bool* p_open)
     ImGui::End();
 }
 
-void Dockspace::SetDefaultStyle()
+//Sort Originals
+void Dockspace::ShowSortOriginalsModule()
 {
-    ImGuiStyle& style = ImGui::GetStyle();
-    style.WindowPadding = ImVec2(10, 10);
-    style.WindowRounding = 0.0f;
-    style.Colors[ImGuiCol_WindowBg].w = 1.0f;
+    ImGui::SetNextWindowSize(ImVec2(430, 450), ImGuiCond_FirstUseEver);
+    if (!ImGui::Begin("Sort Originals"))
+    {
+        ImGui::End();
+        return;
+    }
+    ImGui::Text("Originals Count: ");
+    ImGui::SameLine();
+    ImGui::Text(std::to_string(sortOriginalsModule->GetOriginalsCount()).c_str());
+    ImGui::Text("OriginalsPath: ");
+    ImGui::SameLine();
+    ImGui::Text(sortOriginalsModule->GetOriginalPath().c_str());
 
-    auto& colors = ImGui::GetStyle().Colors;
-    colors[ImGuiCol_WindowBg] = ImVec4{ 0.1f, 0.105f, 0.11f, 1.0f };
+    ImGui::Button("Start Sorting", ImVec2(200, 50));
+    if (ImGui::Button("Delete unused Originals", ImVec2(200, 50)))
+    {
+        sortOriginalsModule->DeleteUnusedOriginals();
+    }
+    ImGui::End();
 
-    // Headers
-    colors[ImGuiCol_Header] = ImColor(219, 152, 80);
-    colors[ImGuiCol_HeaderHovered] = ImColor(219, 152, 80);
-    colors[ImGuiCol_HeaderActive] = ImColor(219, 152, 80);
 
-    // Buttons
-    colors[ImGuiCol_Button] = ImVec4{ 0.2f, 0.205f, 0.21f, 1.0f };
-    colors[ImGuiCol_ButtonHovered] = ImColor(219, 152, 80);
-    colors[ImGuiCol_ButtonActive] = ImVec4{ 0.15f, 0.1505f, 0.151f, 1.0f };
+    ImGui::SetNextWindowSize(ImVec2(430, 450), ImGuiCond_FirstUseEver);
+    if (!ImGui::Begin("Sorting Settings"))
+    {
+        ImGui::End();
+        return;
+    }
 
-    // Frame BG
-    colors[ImGuiCol_FrameBg] = ImVec4{ 0.2f, 0.205f, 0.21f, 1.0f };
-    colors[ImGuiCol_FrameBgHovered] = ImVec4{ 0.3f, 0.305f, 0.31f, 1.0f };
-    colors[ImGuiCol_FrameBgActive] = ImVec4{ 0.15f, 0.1505f, 0.151f, 1.0f };
-
-    // Tabs
-    colors[ImGuiCol_TabHovered] = ImColor(219, 152, 80);
-    colors[ImGuiCol_TabActive] = ImColor(219, 152, 80);
-    colors[ImGuiCol_TabUnfocused] = ImColor(219, 152, 80);
-    colors[ImGuiCol_TabUnfocusedActive] = ImColor(219, 152, 80);
-
-    // Title
-    colors[ImGuiCol_TitleBg] = ImVec4{ 0.15f, 0.1505f, 0.151f, 1.0f };
-    colors[ImGuiCol_TitleBgActive] = ImVec4{ 0.15f, 0.1505f, 0.151f, 1.0f };
-    colors[ImGuiCol_TitleBgCollapsed] = ImVec4{ 0.15f, 0.1505f, 0.151f, 1.0f };
+    ImGui::Text("Containers that can create Folders");
+    ImGui::Separator();
+    ImGui::Text("Actor-Mixer Hierarchy");
+    ImGui::Checkbox("Work Unit", &sortOriginalsModule->workUnit);
+    ImGui::Checkbox("Physical Folder", &sortOriginalsModule->physicalFolder);
+    ImGui::Checkbox("Virtual Folder", &sortOriginalsModule->virtualFolder);
+    ImGui::Checkbox("Actor-Mixer", &sortOriginalsModule->actorMixer);
+    ImGui::Checkbox("Random Container", &sortOriginalsModule->randomContainer);
+    ImGui::Checkbox("Sequence Container", &sortOriginalsModule->sequenceContainer);
+    ImGui::Checkbox("Switch Container", &sortOriginalsModule->switchContainer);
+    ImGui::Checkbox("Blend Container", &sortOriginalsModule->blendContainer);
+    ImGui::Checkbox("Sound SFX", &sortOriginalsModule->soundSFX);
+    ImGui::Checkbox("Voice Sound", &sortOriginalsModule->voiceSound);
+    ImGui::Separator();
+    ImGui::Text("Interactive Music Hierarchy");
+    ImGui::Checkbox("Music Switch Container", &sortOriginalsModule->musicSwitchContainer);
+    ImGui::Checkbox("Music Playlist Container", &sortOriginalsModule->musicPlaylistContainer);
+    ImGui::Checkbox("Music Segment", &sortOriginalsModule->musicSegment);
+    ImGui::Checkbox("Music Track", &sortOriginalsModule->musicTrack);
+    ImGui::End();
 }
 
+
+//Misc
 ImColor Dockspace::ConvertWwiseColorToRGB(int wwiseColor)
 {
     switch (wwiseColor)
@@ -695,4 +722,41 @@ ImColor Dockspace::ConvertWwiseColorToRGB(int wwiseColor)
         default:
             return ImColor(83, 83, 83, 83);
     }
+}
+
+void Dockspace::SetDefaultStyle()
+{
+    ImGuiStyle& style = ImGui::GetStyle();
+    style.WindowPadding = ImVec2(10, 10);
+    style.WindowRounding = 0.0f;
+    style.Colors[ImGuiCol_WindowBg].w = 1.0f;
+
+    auto& colors = ImGui::GetStyle().Colors;
+    colors[ImGuiCol_WindowBg] = ImVec4{ 0.1f, 0.105f, 0.11f, 1.0f };
+
+    // Headers
+    colors[ImGuiCol_Header] = ImColor(219, 152, 80);
+    colors[ImGuiCol_HeaderHovered] = ImColor(219, 152, 80);
+    colors[ImGuiCol_HeaderActive] = ImColor(219, 152, 80);
+
+    // Buttons
+    colors[ImGuiCol_Button] = ImVec4{ 0.2f, 0.205f, 0.21f, 1.0f };
+    colors[ImGuiCol_ButtonHovered] = ImColor(219, 152, 80);
+    colors[ImGuiCol_ButtonActive] = ImVec4{ 0.15f, 0.1505f, 0.151f, 1.0f };
+
+    // Frame BG
+    colors[ImGuiCol_FrameBg] = ImVec4{ 0.2f, 0.205f, 0.21f, 1.0f };
+    colors[ImGuiCol_FrameBgHovered] = ImVec4{ 0.3f, 0.305f, 0.31f, 1.0f };
+    colors[ImGuiCol_FrameBgActive] = ImVec4{ 0.15f, 0.1505f, 0.151f, 1.0f };
+
+    // Tabs
+    colors[ImGuiCol_TabHovered] = ImColor(219, 152, 80);
+    colors[ImGuiCol_TabActive] = ImColor(219, 152, 80);
+    colors[ImGuiCol_TabUnfocused] = ImColor(219, 152, 80);
+    colors[ImGuiCol_TabUnfocusedActive] = ImColor(219, 152, 80);
+
+    // Title
+    colors[ImGuiCol_TitleBg] = ImVec4{ 0.15f, 0.1505f, 0.151f, 1.0f };
+    colors[ImGuiCol_TitleBgActive] = ImVec4{ 0.15f, 0.1505f, 0.151f, 1.0f };
+    colors[ImGuiCol_TitleBgCollapsed] = ImVec4{ 0.15f, 0.1505f, 0.151f, 1.0f };
 }
