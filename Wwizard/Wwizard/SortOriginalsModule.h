@@ -34,7 +34,8 @@ public:
 	void ScanOriginalsPath(std::string path);
 	void LoadModule(std::string wwiseProjPath);
 
-	void DeleteUnusedOriginals();
+	void CreateUnusedOriginalsList();
+	void FinalizeDeleteUnusedOriginals(bool wantDelete);
 	void SortOriginals();
 
 private:
@@ -48,6 +49,7 @@ private:
 
 	void CreateFolderStructureFromWorkUnitPath(const std::string wwuFolderPath);
 	void CreateFolderStructureFomWwu(pugi::xml_node& parent, std::string currentOriginalsPath);
+
 	bool DeleteEmptyFolders(std::string directory);
 
 public:
@@ -66,6 +68,7 @@ public:
 	bool musicPlaylistContainerFlag;
 	bool musicSegmentFlag;	
 	bool musicTrackFlag;
+	std::vector<std::string> unusedOriginalsPaths;
 
 private:
 	std::string originalsPath;

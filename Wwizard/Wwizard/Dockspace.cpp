@@ -626,10 +626,45 @@ void Dockspace::ShowSortOriginalsModule()
     {
         sortOriginalsModule->SortOriginals();
     }
+
     if (ImGui::Button("Delete unused Originals", ImVec2(200, 50)))
     {
-        sortOriginalsModule->DeleteUnusedOriginals();
+        sortOriginalsModule->CreateUnusedOriginalsList();
+        ImGui::OpenPopup("Unused wav in Originals Path");
     }
+
+    if (ImGui::BeginPopup("Unused wav in Originals Path", ImGuiWindowFlags_AlwaysAutoResize))
+    {
+        if (ImGui::Button("Abort"))
+        {
+            sortOriginalsModule->FinalizeDeleteUnusedOriginals(false);
+            ImGui::CloseCurrentPopup();
+        }
+        ImGui::SameLine();
+        if (ImGui::Button("Delete"))
+        {
+            sortOriginalsModule->FinalizeDeleteUnusedOriginals(true);
+            ImGui::CloseCurrentPopup();
+        }
+        ImGui::Separator();
+
+        if (ImGui::BeginTable("Unused .wav", 1, ImGuiTableFlags_BordersOuter | ImGuiTableFlags_ScrollY | ImGuiTableFlags_ScrollX, ImVec2(600, 300)))
+        {
+            ImGui::PushID(0);
+            ImGui::TableNextRow();
+            ImGui::TableSetColumnIndex(0);
+            ImGui::AlignTextToFramePadding();
+
+            for (auto& object : sortOriginalsModule->unusedOriginalsPaths)
+            {
+                ImGui::Selectable(object.c_str(), false);
+            }
+            ImGui::PopID();
+            ImGui::EndTable();
+        }
+        ImGui::EndPopup();
+    }
+
     ImGui::End();
 
 

@@ -145,21 +145,30 @@ void SortOriginalsModule::ScanWorkUnitXMLByGuid(std::string guid)
 }
 
 
-void SortOriginalsModule::DeleteUnusedOriginals()
+void SortOriginalsModule::CreateUnusedOriginalsList()
 {
-	std::vector<std::string> deletedPaths;
+	unusedOriginalsPaths.clear();
 	for (auto& originalWav : originalsDic)
 	{
 		if (originalWav.second == 0)
 		{
-			std::filesystem::remove(std::filesystem::path(originalWav.first));
-			deletedPaths.push_back(originalWav.first);
+			unusedOriginalsPaths.push_back(originalWav.first);
 		}
 	}
-	for (auto& dPath : deletedPaths)
+
+}
+
+void SortOriginalsModule::FinalizeDeleteUnusedOriginals(bool wantDelete)
+{
+	if (wantDelete)
 	{
-		originalsDic.erase(dPath);
+		for (auto& dPath : unusedOriginalsPaths)
+		{
+			std::filesystem::remove(std::filesystem::path(dPath));
+			originalsDic.erase(dPath);
+		}
 	}
+	unusedOriginalsPaths.clear();
 }
 
 
