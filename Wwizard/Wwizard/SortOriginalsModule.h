@@ -48,6 +48,7 @@ private:
 
 	void CreateFolderStructureFromWorkUnitPath(const std::string wwuFolderPath);
 	void CreateFolderStructureFomWwu(pugi::xml_node& parent, std::string currentOriginalsPath);
+	bool DeleteEmptyFolders(std::string directory);
 
 public:
 	bool workUnitFlag;

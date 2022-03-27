@@ -173,6 +173,7 @@ void SortOriginalsModule::SortOriginals()
 
 	CreateFolderStructureFromWorkUnitPath(actorMixerWwuPath);
 	CreateFolderStructureFromWorkUnitPath(interactiveMuisicWwuPath);
+	DeleteEmptyFolders(originalsPath);
 }
 
 
@@ -379,4 +380,29 @@ void SortOriginalsModule::CreateFolderStructureFomWwu(pugi::xml_node& parent, st
 			CreateFolderStructureFomWwu(children, currentOriginalsPath);
 		}
 	}
+}
+
+bool SortOriginalsModule::DeleteEmptyFolders(std::string directory)
+{
+	bool deleteFlag = true;
+	for (auto& subfolder : std::filesystem::directory_iterator(directory))
+	{
+		if (std::filesystem::is_directory(subfolder))
+		{
+			if (!DeleteEmptyFolders(subfolder.path().u8string()))
+			{
+				deleteFlag = false;
+			}
+		}
+		else if (subfolder.path().extension() == ".wav")
+		{
+			deleteFlag = false;
+		}
+	}
+
+	if (deleteFlag)
+	{
+		std::filesystem::remove_all(directory);
+	}
+	return deleteFlag;
 }
