@@ -622,7 +622,10 @@ void Dockspace::ShowSortOriginalsModule()
     ImGui::SameLine();
     ImGui::Text(sortOriginalsModule->GetOriginalPath().c_str());
 
-    ImGui::Button("Start Sorting", ImVec2(200, 50));
+    if (ImGui::Button("Start Sorting", ImVec2(200, 50)))
+    {
+        sortOriginalsModule->SortOriginals();
+    }
     if (ImGui::Button("Delete unused Originals", ImVec2(200, 50)))
     {
         sortOriginalsModule->DeleteUnusedOriginals();
@@ -640,22 +643,22 @@ void Dockspace::ShowSortOriginalsModule()
     ImGui::Text("Containers that can create Folders");
     ImGui::Separator();
     ImGui::Text("Actor-Mixer Hierarchy");
-    ImGui::Checkbox("Work Unit", &sortOriginalsModule->workUnit);
-    ImGui::Checkbox("Physical Folder", &sortOriginalsModule->physicalFolder);
-    ImGui::Checkbox("Virtual Folder", &sortOriginalsModule->virtualFolder);
-    ImGui::Checkbox("Actor-Mixer", &sortOriginalsModule->actorMixer);
-    ImGui::Checkbox("Random Container", &sortOriginalsModule->randomContainer);
-    ImGui::Checkbox("Sequence Container", &sortOriginalsModule->sequenceContainer);
-    ImGui::Checkbox("Switch Container", &sortOriginalsModule->switchContainer);
-    ImGui::Checkbox("Blend Container", &sortOriginalsModule->blendContainer);
-    ImGui::Checkbox("Sound SFX", &sortOriginalsModule->soundSFX);
-    ImGui::Checkbox("Voice Sound", &sortOriginalsModule->voiceSound);
+    ImGui::Checkbox("Work Unit", &sortOriginalsModule->workUnitFlag);
+    ImGui::Checkbox("Physical Folder", &sortOriginalsModule->physicalFolderFlag);
+    ImGui::Checkbox("Virtual Folder", &sortOriginalsModule->virtualFolderFlag);
+    ImGui::Checkbox("Actor-Mixer", &sortOriginalsModule->actorMixerFlag);
+    ImGui::Checkbox("Random Container", &sortOriginalsModule->randomContainerFlag);
+    ImGui::Checkbox("Sequence Container", &sortOriginalsModule->sequenceContainerFlag);
+    ImGui::Checkbox("Switch Container", &sortOriginalsModule->switchContainerFlag);
+    ImGui::Checkbox("Blend Container", &sortOriginalsModule->blendContainerFlag);
+    ImGui::Checkbox("Sound SFX", &sortOriginalsModule->soundSFXFlag);
+    ImGui::Checkbox("Voice Sound", &sortOriginalsModule->voiceSoundFlag);
     ImGui::Separator();
     ImGui::Text("Interactive Music Hierarchy");
-    ImGui::Checkbox("Music Switch Container", &sortOriginalsModule->musicSwitchContainer);
-    ImGui::Checkbox("Music Playlist Container", &sortOriginalsModule->musicPlaylistContainer);
-    ImGui::Checkbox("Music Segment", &sortOriginalsModule->musicSegment);
-    ImGui::Checkbox("Music Track", &sortOriginalsModule->musicTrack);
+    ImGui::Checkbox("Music Switch Container", &sortOriginalsModule->musicSwitchContainerFlag);
+    ImGui::Checkbox("Music Playlist Container", &sortOriginalsModule->musicPlaylistContainerFlag);
+    ImGui::Checkbox("Music Segment", &sortOriginalsModule->musicSegmentFlag);
+    ImGui::Checkbox("Music Track", &sortOriginalsModule->musicTrackFlag);
     ImGui::End();
 }
 

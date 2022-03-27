@@ -265,7 +265,7 @@ namespace ak
 				/*! Sent at the end of an import operation. */
 				static const char* imported = "ak.wwise.core.audio.imported";
 			}
-			namespace switchContainer
+			namespace switchContainerFlag
 			{
 				/*! Removes an assignment between a Switch Container's child and a State. */
 				static const char* removeAssignment = "ak.wwise.core.switchContainer.removeAssignment";

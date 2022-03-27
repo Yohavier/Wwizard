@@ -1,5 +1,5 @@
 #include "SortOriginalsModule.h"
-
+#include <regex>
 void SortOriginalsModule::LoadModule(std::string wwiseProjPath)
 {
 	wwiseProjPath.erase(0, 1);
@@ -12,6 +12,7 @@ void SortOriginalsModule::LoadModule(std::string wwiseProjPath)
 			wwiseProjPath.erase(i);
 	}
 
+	projectPath = wwiseProjPath;
 	originalsPath = wwiseProjPath + "Originals\\SFX";
 	actorMixerWwuPath = wwiseProjPath + "Actor-Mixer Hierarchy";
 	interactiveMuisicWwuPath = wwiseProjPath + "Interactive Music Hierarchy";
@@ -159,3 +160,203 @@ void SortOriginalsModule::DeleteUnusedOriginals()
 	}
 }
 
+
+void SortOriginalsModule::SortOriginals()
+{
+	std::filesystem::create_directory(originalsPath + "\\Multiuse");
+
+	CreateFolderStructureFromWorkUnitPath(actorMixerWwuPath);
+	CreateFolderStructureFromWorkUnitPath(interactiveMuisicWwuPath);
+}
+
+
+void SortOriginalsModule::CreateFolderStructureFromWorkUnitPath(const std::string wwuFolderPath)
+{
+	std::string modWwuPath = wwuFolderPath;
+	if (physicalFolderFlag)
+	{
+		auto extension = modWwuPath.find(projectPath);
+		if (extension != std::string::npos)
+			modWwuPath.erase(extension, projectPath.length());
+		modWwuPath = "\\" + modWwuPath;
+		std::filesystem::create_directory(originalsPath + modWwuPath);
+	}
+	else
+	{
+		modWwuPath = "";
+	}
+
+
+	for (const auto& entry : std::filesystem::directory_iterator(wwuFolderPath))
+	{
+		if (std::filesystem::is_directory(entry))
+		{
+			CreateFolderStructureFromWorkUnitPath(entry.path().u8string());
+		}
+		else
+		{
+			if (entry.path().extension() == ".wwu")
+			{
+				pugi::xml_document doc;
+				pugi::xml_parse_result result = doc.load_file(entry.path().u8string().c_str());
+				if (!result)
+					return;
+				
+				if (static_cast<std::string>(doc.child("WwiseDocument").child("AudioObjects").child("WorkUnit").attribute("PersistMode").value()) == "Standalone")
+				{
+					auto root = doc.child("WwiseDocument").child("AudioObjects");
+					CreateFolderStructureFomWwu(root, originalsPath + modWwuPath);
+				}
+				doc.save_file(entry.path().u8string().c_str());
+			}
+		}
+	}
+}
+
+void SortOriginalsModule::CreateFolderStructureFomWwu(pugi::xml_node& parent, std::string currentOriginalsPath)
+{
+	for (pugi::xml_node children : parent)
+	{
+		if (static_cast<std::string>(children.name()) == "WorkUnit")
+		{
+			if (static_cast<std::string>(children.attribute("PersistMode").value()) == "Standalone")
+			{	
+				std::string newPath = currentOriginalsPath + "\\" + children.attribute("Name").as_string();
+				if (workUnitFlag)
+				{
+					std::filesystem::create_directory(newPath);
+					CreateFolderStructureFomWwu(children, newPath);
+				}
+				else
+				{
+					CreateFolderStructureFomWwu(children, currentOriginalsPath);
+				}
+				
+			}
+			else if (static_cast<std::string>(children.attribute("PersistMode").value()) == "Reference")
+			{
+				for (const auto& data : wwuData)
+				{
+					if (data.guid == static_cast<std::string>(children.attribute("ID").value()))
+					{
+						pugi::xml_document doc;
+						pugi::xml_parse_result result = doc.load_file(data.path.c_str());
+						if (result)
+						{
+							std::string newPath = currentOriginalsPath + "\\" + children.attribute("Name").as_string();
+							
+							if (workUnitFlag)
+							{
+								std::filesystem::create_directory(newPath);
+								auto root = doc.child("WwiseDocument").child("AudioObjects").child("WorkUnit");
+								CreateFolderStructureFomWwu(root, newPath);
+							}
+							else
+							{
+								auto root = doc.child("WwiseDocument").child("AudioObjects").child("WorkUnit");
+								CreateFolderStructureFomWwu(root, currentOriginalsPath);
+							}
+						}
+						doc.save_file(data.path.c_str());
+					}
+				}
+			}
+		}
+		else if (static_cast<std::string>(children.name()) == "Folder")
+		{
+			std::string newPath = currentOriginalsPath + "\\" + children.attribute("Name").as_string();
+			if (virtualFolderFlag)
+			{
+				std::filesystem::create_directory(newPath);
+				CreateFolderStructureFomWwu(children, newPath);
+			}
+			else
+			{
+				CreateFolderStructureFomWwu(children, currentOriginalsPath);
+			}
+		}
+		else if (static_cast<std::string>(children.name()) == "SwitchContainer")
+		{
+			std::string newPath = currentOriginalsPath + "\\" + children.attribute("Name").as_string();
+			if (switchContainerFlag)
+			{
+				std::filesystem::create_directory(newPath);
+				CreateFolderStructureFomWwu(children, newPath);
+			}
+			else
+			{
+				CreateFolderStructureFomWwu(children, currentOriginalsPath);
+			}
+		}
+		else if (static_cast<std::string>(children.name()) == "BlendContainer")
+		{
+			std::string newPath = currentOriginalsPath + "\\" + children.attribute("Name").as_string();
+			if (blendContainerFlag)
+			{
+				std::filesystem::create_directory(newPath);
+				CreateFolderStructureFomWwu(children, newPath);
+			}
+			else
+			{
+				CreateFolderStructureFomWwu(children, currentOriginalsPath);
+			}
+		}
+		else if (static_cast<std::string>(children.name()) == "RandomSequenceContainer")
+		{
+			std::string newPath = currentOriginalsPath + "\\" + children.attribute("Name").as_string();
+			if (randomContainerFlag)
+			{
+				std::filesystem::create_directory(newPath);
+				CreateFolderStructureFomWwu(children, newPath);
+			}
+			else
+			{
+				CreateFolderStructureFomWwu(children, currentOriginalsPath);
+			}
+		}
+		else if (static_cast<std::string>(children.name()) == "ActorMixer")
+		{
+			std::string newPath = currentOriginalsPath + "\\" + children.attribute("Name").as_string();
+			if (actorMixerFlag)
+			{
+				std::filesystem::create_directory(newPath);
+				CreateFolderStructureFomWwu(children, newPath);
+			}
+			else
+			{
+				CreateFolderStructureFomWwu(children, currentOriginalsPath);
+			}
+		}
+		else if (static_cast<std::string>(children.name()) == "Sound")
+		{
+			std::string newPath = currentOriginalsPath + "\\" + children.attribute("Name").as_string();
+			if (soundSFXFlag)
+			{
+				std::filesystem::create_directory(newPath);
+				CreateFolderStructureFomWwu(children, newPath);
+			}
+			else
+			{
+				CreateFolderStructureFomWwu(children, currentOriginalsPath);
+			}
+		}
+		else if (static_cast<std::string>(children.name()) == "AudioFile")
+		{
+			std::string oldPath = originalsPath + "\\" + children.text().as_string();
+			std::string newPath = currentOriginalsPath + "\\" + std::filesystem::path(children.text().as_string()).filename().u8string();
+			
+			auto modWwuPath = newPath;
+			auto extension = modWwuPath.find(originalsPath);
+			if (extension != std::string::npos)
+				modWwuPath.erase(extension, originalsPath.length()+1);
+			modWwuPath = modWwuPath;
+			children.text().set(modWwuPath.c_str());
+			
+			std::filesystem::rename(std::filesystem::path(oldPath), std::filesystem::path(newPath));
+		}
+		else
+		{
+			CreateFolderStructureFomWwu(children, currentOriginalsPath);
+		}
+	}
+}

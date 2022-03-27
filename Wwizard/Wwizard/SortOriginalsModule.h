@@ -35,6 +35,7 @@ public:
 	void LoadModule(std::string wwiseProjPath);
 
 	void DeleteUnusedOriginals();
+	void SortOriginals();
 
 private:
 	void ScanWorkUnitXMLByPath(std::string wwuPath);
@@ -45,33 +46,36 @@ private:
 	void FetchWwuData(std::string wwuPath);
 	void ScanWorkUnitOriginalsUse();
 
-public:
-	bool workUnit;
-	bool physicalFolder;
-	bool virtualFolder;
-	bool actorMixer;
-	bool randomContainer;
-	bool sequenceContainer;
-	bool switchContainer;
-	bool blendContainer;
-	bool soundSFX;
-	bool voiceSound;
+	void CreateFolderStructureFromWorkUnitPath(const std::string wwuFolderPath);
+	void CreateFolderStructureFomWwu(pugi::xml_node& parent, std::string currentOriginalsPath);
 
-	bool musicSwitchContainer;
-	bool musicPlaylistContainer;
-	bool musicSegment;	
-	bool musicTrack;
+public:
+	bool workUnitFlag;
+	bool physicalFolderFlag;
+	bool virtualFolderFlag;
+	bool actorMixerFlag;
+	bool randomContainerFlag;
+	bool sequenceContainerFlag;
+	bool switchContainerFlag;
+	bool blendContainerFlag;
+	bool soundSFXFlag;
+	bool voiceSoundFlag;
+
+	bool musicSwitchContainerFlag;
+	bool musicPlaylistContainerFlag;
+	bool musicSegmentFlag;	
+	bool musicTrackFlag;
 
 private:
 	std::string originalsPath;
 	std::string actorMixerWwuPath;
 	std::string interactiveMuisicWwuPath;
+	std::string projectPath;
 
 	std::map<std::string, int> originalsDic;
 
 	std::string container[6] = { "WorkUnit", "Folder", "BlendContainer", "RandomSequenceContainer", "ActorMixer", "SwitchContainer" };
 
 	std::vector<WwuLookUpData> wwuData;
-
 };
 
