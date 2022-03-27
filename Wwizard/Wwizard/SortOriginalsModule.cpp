@@ -25,6 +25,7 @@ void SortOriginalsModule::LoadModule(std::string wwiseProjPath)
 //Originals 
 void SortOriginalsModule::ScanOriginalsPath(std::string path)
 {
+	originalsDic.clear();
 	for (const auto& entry : std::filesystem::directory_iterator(path))
 	{
 		if (std::filesystem::is_directory(entry))
@@ -47,6 +48,7 @@ void SortOriginalsModule::ScanOriginalsPath(std::string path)
 //Wwu 
 void SortOriginalsModule::ScanWorkUnitData(std::string directory)
 {
+	wwuData.clear();
 	for (const auto& entry : std::filesystem::directory_iterator(directory))
 	{
 		if (std::filesystem::is_directory(entry))
@@ -163,6 +165,10 @@ void SortOriginalsModule::DeleteUnusedOriginals()
 
 void SortOriginalsModule::SortOriginals()
 {
+	ScanOriginalsPath(originalsPath);
+	ScanWorkUnitData(actorMixerWwuPath);
+	ScanWorkUnitOriginalsUse();
+
 	std::filesystem::create_directory(originalsPath + "\\Multiuse");
 
 	CreateFolderStructureFromWorkUnitPath(actorMixerWwuPath);
@@ -343,16 +349,30 @@ void SortOriginalsModule::CreateFolderStructureFomWwu(pugi::xml_node& parent, st
 		else if (static_cast<std::string>(children.name()) == "AudioFile")
 		{
 			std::string oldPath = originalsPath + "\\" + children.text().as_string();
-			std::string newPath = currentOriginalsPath + "\\" + std::filesystem::path(children.text().as_string()).filename().u8string();
-			
-			auto modWwuPath = newPath;
-			auto extension = modWwuPath.find(originalsPath);
-			if (extension != std::string::npos)
-				modWwuPath.erase(extension, originalsPath.length()+1);
-			modWwuPath = modWwuPath;
-			children.text().set(modWwuPath.c_str());
-			
-			std::filesystem::rename(std::filesystem::path(oldPath), std::filesystem::path(newPath));
+			std::string newPath;
+
+			if (originalsDic[oldPath] == 1)
+			{
+				newPath = currentOriginalsPath + "\\" + std::filesystem::path(children.text().as_string()).filename().u8string();
+
+				auto modWwuPath = newPath;
+				auto extension = modWwuPath.find(originalsPath);
+				if (extension != std::string::npos)
+					modWwuPath.erase(extension, originalsPath.length() + 1);
+				modWwuPath = modWwuPath;
+				children.text().set(modWwuPath.c_str());
+			}
+			else 
+			{
+				newPath = originalsPath + "\\" + "Multiuse" + "\\" + std::filesystem::path(children.text().as_string()).filename().u8string();
+				std::string xmlPath = "Multiuse\\" + std::filesystem::path(children.text().as_string()).filename().u8string();
+				children.text().set(xmlPath.c_str());	
+			}
+
+			if (std::filesystem::exists(oldPath))
+			{
+				std::filesystem::rename(std::filesystem::path(oldPath), std::filesystem::path(newPath));
+			}
 		}
 		else
 		{
