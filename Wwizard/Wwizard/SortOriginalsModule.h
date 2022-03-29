@@ -52,6 +52,8 @@ private:
 
 	bool DeleteEmptyFolders(std::string directory);
 
+	void ClearPreviousSortData();
+
 public:
 	bool workUnitFlag;
 	bool physicalFolderFlag;
