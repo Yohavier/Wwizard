@@ -9,29 +9,18 @@
 #include <stdio.h>
 #include "pugixml-1.12/src/pugixml.hpp"
 #include <algorithm>
+#include "WwuLookUpData.h"
 
-struct WwuLookUpData
-{
-	WwuLookUpData() = default;
-	WwuLookUpData(std::string name, std::string guid, std::string wwuType, std::string path)
-		:name(name)
-		, guid(guid)
-		, wwuType(wwuType)
-		, path(path)
-	{}
-
-	std::string name;
-	std::string guid;
-	std::string wwuType;
-	std::string path;
-};
+/*Todo
+* count music and sfx originals
+*/
 
 class SortOriginalsModule
 {
 public:
 	int&& GetOriginalsCount() { return static_cast<int>(originalsDic.size()); }
 	std::string& GetOriginalPath() { return originalsPath; }
-	void ScanOriginalsPath(std::string path);
+
 	void LoadModule(std::string wwiseProjPath);
 
 	void CreateUnusedOriginalsList();
@@ -39,6 +28,7 @@ public:
 	void SortOriginals();
 
 private:
+	void ScanOriginalsPath(std::string path);
 	void ScanWorkUnitXMLByPath(std::string wwuPath);
 	void ScanWorkUnitXMLByGuid(std::string guid);
 	void IterateXMLChildren(pugi::xml_node parent);
@@ -53,7 +43,7 @@ private:
 	bool DeleteEmptyFolders(std::string directory);
 
 	void ClearPreviousSortData();
-
+	void Scan();
 public:
 	bool workUnitFlag;
 	bool physicalFolderFlag;

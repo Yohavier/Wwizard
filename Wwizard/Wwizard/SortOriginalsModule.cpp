@@ -17,11 +17,7 @@ void SortOriginalsModule::LoadModule(std::string wwiseProjPath)
 	actorMixerWwuPath = wwiseProjPath + "Actor-Mixer Hierarchy";
 	interactiveMuisicWwuPath = wwiseProjPath + "Interactive Music Hierarchy";
 
-	ClearPreviousSortData();
-	ScanOriginalsPath(originalsPath);
-	ScanWorkUnitData(actorMixerWwuPath);
-	ScanWorkUnitData(interactiveMuisicWwuPath);
-	ScanWorkUnitOriginalsUse();
+	Scan();
 }
 
 void SortOriginalsModule::ClearPreviousSortData() 
@@ -77,12 +73,8 @@ void SortOriginalsModule::FetchWwuData(std::string path)
 	if (!result)
 		return;
 
-	pugi::xml_node data;
-	if(doc.child("WwiseDocument").child("AudioObjects").child("WorkUnit").attribute("Name").value() == "")
-		data = doc.child("WwiseDocument").child("InteractiveMusic").child("WorkUnit");
-	else
-		data = doc.child("WwiseDocument").child("AudioObjects").child("WorkUnit");
-	
+	pugi::xml_node data = doc.child("WwiseDocument").first_child().child("WorkUnit");
+		
 	WwuLookUpData newWwuData = WwuLookUpData(data.attribute("Name").value(), data.attribute("ID").value(), data.attribute("PersistMode").value(), path);
 	wwuData.emplace_back(newWwuData);
 }
@@ -100,7 +92,6 @@ void SortOriginalsModule::ScanWorkUnitOriginalsUse()
 
 void SortOriginalsModule::ScanWorkUnitXMLByPath(std::string wwuPath)
 {
-	//opens wwu file succesfully
 	pugi::xml_document doc;
 	pugi::xml_parse_result result = doc.load_file(wwuPath.c_str());
 	if (!result)
@@ -174,15 +165,9 @@ void SortOriginalsModule::FinalizeDeleteUnusedOriginals(bool wantDelete)
 	unusedOriginalsPaths.clear();
 }
 
-
 void SortOriginalsModule::SortOriginals()
 {
-	ClearPreviousSortData();
-	ScanOriginalsPath(originalsPath);
-	ScanWorkUnitData(actorMixerWwuPath);
-	ScanWorkUnitData(interactiveMuisicWwuPath);
-	ScanWorkUnitOriginalsUse();
-
+	Scan();
 	std::filesystem::create_directory(originalsPath + "\\Multiuse");
 
 	CreateFolderStructureFromWorkUnitPath(actorMixerWwuPath);
@@ -480,4 +465,13 @@ bool SortOriginalsModule::DeleteEmptyFolders(std::string directory)
 		std::filesystem::remove_all(directory);
 	}
 	return deleteFlag;
+}
+
+void SortOriginalsModule::Scan()
+{
+	ClearPreviousSortData();
+	ScanOriginalsPath(originalsPath);
+	ScanWorkUnitData(actorMixerWwuPath);
+	ScanWorkUnitData(interactiveMuisicWwuPath);
+	ScanWorkUnitOriginalsUse();
 }

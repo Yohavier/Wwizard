@@ -6,6 +6,7 @@
 #include "QueryEditorModule.h"
 #include "SettingHandler.h"
 #include "SortOriginalsModule.h"
+#include "NamingConventionModule.h"
 
 enum class Layout
 {
@@ -43,6 +44,9 @@ private:
 	//Sort Originals
 	void ShowSortOriginalsModule();
 
+	//Naming conventions
+	void ShowNamingConventionModule();
+
 	//Misc
 	void SetDefaultStyle();
 	ImColor ConvertWwiseColorToRGB(int wwiseColor);
@@ -55,6 +59,7 @@ private:
 
 	std::unique_ptr<QueryEditorModule> queryEditorModule = nullptr;
 	std::unique_ptr<SortOriginalsModule> sortOriginalsModule = nullptr;
+	std::unique_ptr<NamingConventionModule> namingConventionModule = nullptr;
 };
 
 

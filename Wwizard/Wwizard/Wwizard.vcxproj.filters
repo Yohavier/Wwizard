@@ -78,6 +78,9 @@
     <ClCompile Include="..\ThirdParty\pugixml-1.12\src\pugixml.cpp">
       <Filter>Source Files\plugixml</Filter>
     </ClCompile>
+    <ClCompile Include="NamingConventionModule.cpp">
+      <Filter>Source Files\Modules</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\ThirdParty\backends\imgui_impl_dx10.h">
@@ -124,6 +127,12 @@
     </ClInclude>
     <ClInclude Include="SortOriginalsModule.h">
       <Filter>Header Files\Modules</Filter>
+    </ClInclude>
+    <ClInclude Include="NamingConventionModule.h">
+      <Filter>Header Files\Modules</Filter>
+    </ClInclude>
+    <ClInclude Include="WwuLookUpData.h">
+      <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

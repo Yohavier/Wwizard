@@ -15,6 +15,7 @@ Dockspace::Dockspace(std::unique_ptr<WwizardWwiseClient>& wwizardWwiseClient, st
     //Init all modules
     queryEditorModule.reset(new QueryEditorModule(wwizardWwiseClient));
     sortOriginalsModule.reset(new SortOriginalsModule());
+    namingConventionModule.reset(new NamingConventionModule(settingHandler->GetWwisProjectPathRef())); 
 
     std::cout << "Initialized Dockspace" << std::endl;
     ImGuiIO& io = ImGui::GetIO();
@@ -78,6 +79,10 @@ void Dockspace::Render(bool* p_open)
     else if (currentLayout == Layout::SORTORIGINALS)
     {
         ShowSortOriginalsModule();
+    }
+    else if (currentLayout == Layout::NAMINGCONVENTION)
+    {
+        ShowNamingConventionModule();
     }
     else //Default Home Layout
     {
@@ -621,12 +626,13 @@ void Dockspace::ShowSortOriginalsModule()
     ImGui::Text("OriginalsPath: ");
     ImGui::SameLine();
     ImGui::Text(sortOriginalsModule->GetOriginalPath().c_str());
-
-    if (ImGui::Button("Start Sorting", ImVec2(200, 50)))
+    ImGui::Separator();
+    ImGui::Separator();
+    if (ImGui::Button("Sort Originals", ImVec2(200, 50)))
     {
         sortOriginalsModule->SortOriginals();
     }
-
+    ImGui::SameLine();
     if (ImGui::Button("Delete unused Originals", ImVec2(200, 50)))
     {
         sortOriginalsModule->CreateUnusedOriginalsList();
@@ -677,10 +683,12 @@ void Dockspace::ShowSortOriginalsModule()
 
     ImGui::Text("Containers that can create Folders");
     ImGui::Separator();
-    ImGui::Text("Actor-Mixer Hierarchy");
-    ImGui::Checkbox("Work Unit", &sortOriginalsModule->workUnitFlag);
+    ImGui::Text("Universal");
     ImGui::Checkbox("Physical Folder", &sortOriginalsModule->physicalFolderFlag);
+    ImGui::Checkbox("Work Unit", &sortOriginalsModule->workUnitFlag);
     ImGui::Checkbox("Virtual Folder", &sortOriginalsModule->virtualFolderFlag);
+    ImGui::Separator();
+    ImGui::Text("Actor-Mixer Hierarchy");
     ImGui::Checkbox("Actor-Mixer", &sortOriginalsModule->actorMixerFlag);
     ImGui::Checkbox("Random Container", &sortOriginalsModule->randomContainerFlag);
     ImGui::Checkbox("Sequence Container", &sortOriginalsModule->sequenceContainerFlag);
@@ -697,6 +705,66 @@ void Dockspace::ShowSortOriginalsModule()
     ImGui::End();
 }
 
+//Naming Conventions
+void Dockspace::ShowNamingConventionModule()
+{
+    ImGui::SetNextWindowSize(ImVec2(430, 450), ImGuiCond_FirstUseEver);
+    if (!ImGui::Begin("Naming Convention"))
+    {
+        ImGui::End();
+        return;
+    }
+    if(ImGui::BeginTabBar("NamingConventionTabBar"))
+    {
+        if (ImGui::BeginTabItem("Execute"))
+        {
+            if (ImGui::Button("Check Naming"))
+            {
+                namingConventionModule->CheckNamingConvention();
+            }
+            if (ImGui::BeginTable("Naming Issues", 2, ImGuiTableFlags_BordersOuter | ImGuiTableFlags_Resizable))
+            {
+                ImGui::TableNextColumn();
+                ImGui::Text("Current Name");
+                ImGui::TableNextColumn();
+                ImGui::Text("Desired Name");
+                ImGui::TableNextRow();
+
+                for (auto& issue : namingConventionModule->namingIssueResults)
+                {
+                    ImGui::TableNextColumn();
+                    ImGui::Text(issue.first.c_str());
+                    ImGui::TableNextColumn();
+                    ImGui::Text(issue.second.c_str());
+                    ImGui::TableNextRow();
+                }
+                ImGui::EndTable();
+            }
+            ImGui::EndTabItem();
+        }
+        if (ImGui::BeginTabItem("Prefix Settings"))
+        {
+            for (auto& wwuType : namingConventionModule->whitelistedWwuTypes)
+            {
+                ImGui::Checkbox(namingConventionModule->stringToReplace[wwuType].c_str(), &(namingConventionModule->wwuSpaceSettings[wwuType].applyPrefix));
+                ImGui::SameLine();
+                std::string identificationName = "##" + namingConventionModule->stringToReplace[wwuType];
+                ImGui::InputText(identificationName.c_str(), &(namingConventionModule->wwuSpaceSettings[wwuType].prefixToApply));
+            }
+            ImGui::EndTabItem();
+        }
+        if (ImGui::BeginTabItem("Apply for..."))
+        {
+            for (auto& wwuType : namingConventionModule->whitelistedWwuTypes)
+            {
+                ImGui::Checkbox(namingConventionModule->stringToReplace[wwuType].c_str(), &(namingConventionModule->wwuSpaceSettings[wwuType].applyNamingConventionCheck));
+            }
+            ImGui::EndTabItem();
+        }
+        ImGui::EndTabBar();
+    }
+    ImGui::End();
+}
 
 //Misc
 ImColor Dockspace::ConvertWwiseColorToRGB(int wwiseColor)
