@@ -10,10 +10,8 @@
 
 /*
 * TODO
-* allow space in name
-* multiple "_" are not handled correctly yet
 * suffix
-* save and load naming convention as json
+* Exclude Default Work Units
 */
 
 NamingConventionModule::NamingConventionModule()
@@ -128,12 +126,12 @@ void NamingConventionModule::ScanWorkUnitXMLByPath(std::string wwuPath, std::str
 			{
 				ApplyPrefix(namePath, stringToReplace[wwuType], wwuSpaceSettings[wwuType]);
 			}
-			ModularResolve(doc.child("WwiseDocument").child(wwuType.c_str()), namePath);
+			ModularResolve(doc.child("WwiseDocument").child(wwuType.c_str()), namePath, wwuType);
 		}
 	}
 }
 
-void NamingConventionModule::ModularResolve(pugi::xml_node wwuNode, std::string namePath)
+void NamingConventionModule::ModularResolve(pugi::xml_node wwuNode, std::string namePath, std::string wwuType)
 {
 	for (auto& node : wwuNode)
 	{
@@ -150,50 +148,56 @@ void NamingConventionModule::ModularResolve(pugi::xml_node wwuNode, std::string 
 						if (!result)
 							return;
 
-						ModularResolve(doc.child("WwiseDocument"), namePath);
+						ModularResolve(doc.child("WwiseDocument"), namePath, wwuType);
 					}
 				}
 			}
 			else
 			{
 				std::string newNamePath = AddLastNamePathLayer(namePath, static_cast<std::string>(node.attribute("Name").value()));
-				if (static_cast<std::string>(node.attribute("Name").value()) != newNamePath.c_str())
+				if (static_cast<std::string>(node.attribute("Name").value()) != newNamePath.c_str() && namingIssueResults.find(newNamePath) == namingIssueResults.end())
 				{
 					namingIssueResults.emplace(static_cast<std::string>(node.attribute("Name").value()), newNamePath);
 				}
-				ModularResolve(node, newNamePath);
+				CheckNameForSpace(static_cast<std::string>(node.attribute("Name").value()), wwuSpaceSettings[wwuType].allowSpace);
+				ModularResolve(node, newNamePath, wwuType);
 			}
 		}
 		else if (whitelistedContainers.find(static_cast<std::string>(node.name())) != whitelistedContainers.end())
 		{
 			std::string newNamePath = AddLastNamePathLayer(namePath, static_cast<std::string>(node.attribute("Name").value()));
-			if (static_cast<std::string>(node.attribute("Name").value()) != newNamePath.c_str())
+			if (static_cast<std::string>(node.attribute("Name").value()) != newNamePath.c_str() && namingIssueResults.find(newNamePath) == namingIssueResults.end())
 			{
 				namingIssueResults.emplace(static_cast<std::string>(node.attribute("Name").value()), newNamePath);
 			}
-			ModularResolve(node, newNamePath);
+
+			CheckNameForSpace(static_cast<std::string>(node.attribute("Name").value()), wwuSpaceSettings[wwuType].allowSpace);
+			ModularResolve(node, newNamePath, wwuType);
 		}
 		else
 		{
-			ModularResolve(node, namePath);
+			ModularResolve(node, namePath, wwuType);
 		}
 	}
 }
 
 std::string NamingConventionModule::AddLastNamePathLayer(const std::string& currentNamePath, std::string newNodeName)
 {
-	size_t lastLayerStart = newNodeName.rfind(levelSeparator);
-	if (lastLayerStart < newNodeName.size())
-	{
-		newNodeName.erase(0, lastLayerStart + 1);
-	}
 	if (currentNamePath == "")
 	{
+		CheckForMultipleSeparatorsPerLayer(newNodeName, newNodeName);
 		return newNodeName;
 	}
 	else
 	{
-		return currentNamePath + levelSeparator + newNodeName;
+		if (newNodeName.find(levelSeparator) < newNodeName.size())
+		{
+			newNodeName.erase(0, currentNamePath.size() + 1);
+		}
+		std::string newName = currentNamePath + levelSeparator + newNodeName;
+		CheckForMultipleSeparatorsPerLayer(newNodeName, newName);
+
+		return newName;
 	}
 }
 
@@ -223,6 +227,10 @@ void NamingConventionModule::SaveNamingConvention()
 		rapidjson::Value prefixToApply;
 		prefixToApply = rapidjson::StringRef(wwu.second.prefixToApply.c_str());
 		rapidJsonWwuSetting.AddMember("prefixToApply", prefixToApply, d.GetAllocator());
+
+		rapidjson::Value allowSpace;
+		allowSpace.SetBool(wwu.second.allowSpace);
+		rapidJsonWwuSetting.AddMember("allowSpace", allowSpace, d.GetAllocator());
 
 		wwuSettings.AddMember(rapidjson::StringRef(wwu.first.c_str()), rapidJsonWwuSetting, d.GetAllocator());
 	}
@@ -257,7 +265,27 @@ void NamingConventionModule::LoadNamingConvention()
 
 		for(const auto& wwu : whitelistedWwuTypes)
 		{
-			wwuSpaceSettings.emplace(d["WwuSettings"][wwu.c_str()]["name"].GetString(), WwuSpaceSettings(d["WwuSettings"][wwu.c_str()]["prefixToApply"].GetString(), d["WwuSettings"][wwu.c_str()]["applyPrefix"].GetBool(), d["WwuSettings"][wwu.c_str()]["apply"].GetBool()));
+			wwuSpaceSettings.emplace(d["WwuSettings"][wwu.c_str()]["name"].GetString(), WwuSpaceSettings(d["WwuSettings"][wwu.c_str()]["prefixToApply"].GetString(), d["WwuSettings"][wwu.c_str()]["applyPrefix"].GetBool(), d["WwuSettings"][wwu.c_str()]["apply"].GetBool(), d["WwuSettings"][wwu.c_str()]["allowSpace"].GetBool()));
 		}
+	}
+}
+
+void NamingConventionModule::CheckNameForSpace(std::string currentName, bool allowSpace)
+{
+	if (!allowSpace)
+	{
+		size_t loc = currentName.find(" ");
+		if (loc < currentName.size())
+		{
+			namingIssueResults.emplace(currentName, "Doesnt allow Space");
+		}
+	}
+}
+
+void NamingConventionModule::CheckForMultipleSeparatorsPerLayer(std::string newNameLayer, std::string currentName)
+{
+	if (newNameLayer.find("_") < newNameLayer.size())
+	{
+		namingIssueResults.emplace(currentName, "Doesnt allow Muiltiple Separators");
 	}
 }

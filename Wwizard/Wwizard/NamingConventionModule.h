@@ -11,15 +11,17 @@ struct WwuSpaceSettings
 {
 public:
 	WwuSpaceSettings() = default;
-	WwuSpaceSettings(std::string prefixToApply, bool applyPrefix, bool applyNamingConventionCheck)
+	WwuSpaceSettings(std::string prefixToApply, bool applyPrefix, bool applyNamingConventionCheck, bool allowSpace)
 		: prefixToApply(prefixToApply)
 		, applyPrefix(applyPrefix)
 		, applyNamingConventionCheck(applyNamingConventionCheck)
+		, allowSpace(allowSpace)
 	{}
 public:
 	std::string prefixToApply = "";	
 	bool applyPrefix = false;
 	bool applyNamingConventionCheck = false;
+	bool allowSpace = false;
 };
 
 class NamingConventionModule
@@ -37,10 +39,13 @@ private:
 	void ScanWorkUnitXMLByPath(std::string wwuPath, std::string namePath);
 	void IterateFolder(std::string path, std::string namePath);
 
-	void ModularResolve(pugi::xml_node wwuNode, std::string namePath);
+	void ModularResolve(pugi::xml_node wwuNode, std::string namePath, std::string wwuType);
 	std::string AddLastNamePathLayer(const std::string& currentNamePath, std::string newNodeName);
 	void SaveNamingConvention();
 	void LoadNamingConvention();
+
+	void CheckNameForSpace(std::string currentName, bool allowSpace);
+	void CheckForMultipleSeparatorsPerLayer(std::string newNameLayer, std::string currentName);
 
 public:
 	std::string levelSeparator = "_";

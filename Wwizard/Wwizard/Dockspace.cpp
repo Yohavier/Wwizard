@@ -761,6 +761,14 @@ void Dockspace::ShowNamingConventionModule()
             }
             ImGui::EndTabItem();
         }
+        if (ImGui::BeginTabItem("Space Settigns"))
+        {
+            for (auto& wwuType : namingConventionModule->whitelistedWwuTypes)
+            {
+                ImGui::Checkbox(namingConventionModule->stringToReplace[wwuType].c_str(), &(namingConventionModule->wwuSpaceSettings[wwuType].allowSpace));
+            }
+            ImGui::EndTabItem();
+        }
         ImGui::EndTabBar();
     }
     ImGui::End();
