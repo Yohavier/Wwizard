@@ -1,5 +1,12 @@
 #include "NamingConventionModule.h"
 #include <iostream>
+#include <fstream>
+#include <cstdlib>
+#include <rapidjson/filereadstream.h>
+#include <rapidjson/filewritestream.h>
+#include <rapidjson/writer.h>
+#include <rapidjson/document.h>
+#include "rapidjson/RapidJsonUtils.h"
 
 /*
 * TODO
@@ -11,10 +18,28 @@
 
 NamingConventionModule::NamingConventionModule()
 {
-	for (auto& tab : whitelistedWwuTypes)
+	LoadNamingConvention();
+}
+
+NamingConventionModule::NamingConventionModule(std::string wwiseProjPath)
+{
+	wwiseProjPath.erase(0, 1);
+	wwiseProjPath.erase(wwiseProjPath.size() - 1);
+	for (int i = static_cast<int>(wwiseProjPath.size()) - 1; i > 0; i--)
 	{
-		wwuSpaceSettings.emplace(tab, WwuSpaceSettings());
+		if (wwiseProjPath.at(i) == '\\')
+			break;
+		else
+			wwiseProjPath.erase(i);
 	}
+	projectPath = wwiseProjPath;
+
+	LoadNamingConvention();
+}
+
+NamingConventionModule::~NamingConventionModule()
+{
+	SaveNamingConvention();
 }
 
 void NamingConventionModule::ScanWorkUnitData(std::string directory)
@@ -169,5 +194,70 @@ std::string NamingConventionModule::AddLastNamePathLayer(const std::string& curr
 	else
 	{
 		return currentNamePath + levelSeparator + newNodeName;
+	}
+}
+
+void NamingConventionModule::SaveNamingConvention()
+{
+	rapidjson::Document d;
+	d.SetObject();
+
+	rapidjson::Value wwuSettings(rapidjson::kObjectType);
+
+	for (const auto& wwu : wwuSpaceSettings)
+	{
+		rapidjson::Value rapidJsonWwuSetting(rapidjson::kObjectType);
+		
+		rapidjson::Value name;
+		name = rapidjson::StringRef(wwu.first.c_str());
+		rapidJsonWwuSetting.AddMember("name", name, d.GetAllocator());
+
+		rapidjson::Value apply;
+		apply.SetBool(wwu.second.applyNamingConventionCheck);
+		rapidJsonWwuSetting.AddMember("apply", apply, d.GetAllocator());
+
+		rapidjson::Value applyPrefix;
+		applyPrefix.SetBool(wwu.second.applyPrefix);
+		rapidJsonWwuSetting.AddMember("applyPrefix", applyPrefix, d.GetAllocator());
+
+		rapidjson::Value prefixToApply;
+		prefixToApply = rapidjson::StringRef(wwu.second.prefixToApply.c_str());
+		rapidJsonWwuSetting.AddMember("prefixToApply", prefixToApply, d.GetAllocator());
+
+		wwuSettings.AddMember(rapidjson::StringRef(wwu.first.c_str()), rapidJsonWwuSetting, d.GetAllocator());
+	}
+	d.AddMember("WwuSettings",wwuSettings, d.GetAllocator());
+
+	auto path = static_cast<std::string>(SOLUTION_DIR) + "SavedData/NamingConventionSettings.json";
+	FILE* fp = fopen(path.c_str(), "wb");
+	if (fp != 0)
+	{
+		char* writeBuffer = new char[65536];
+		rapidjson::FileWriteStream os(fp, writeBuffer, sizeof(writeBuffer));
+
+		rapidjson::Writer<rapidjson::FileWriteStream> writer(os);
+		d.Accept(writer);
+
+		fclose(fp);
+	}
+}
+
+void NamingConventionModule::LoadNamingConvention()
+{
+	auto path = static_cast<std::string>(SOLUTION_DIR) + "SavedData/NamingConventionSettings.json";
+	FILE* fp = fopen(path.c_str(), "rb");
+	if (fp != 0)
+	{
+		char* readBuffer = new char[65536];
+		rapidjson::FileReadStream is(fp, readBuffer, sizeof(readBuffer));
+
+		rapidjson::Document d;
+		d.ParseStream(is);
+		fclose(fp);
+
+		for(const auto& wwu : whitelistedWwuTypes)
+		{
+			wwuSpaceSettings.emplace(d["WwuSettings"][wwu.c_str()]["name"].GetString(), WwuSpaceSettings(d["WwuSettings"][wwu.c_str()]["prefixToApply"].GetString(), d["WwuSettings"][wwu.c_str()]["applyPrefix"].GetBool(), d["WwuSettings"][wwu.c_str()]["apply"].GetBool()));
+		}
 	}
 }

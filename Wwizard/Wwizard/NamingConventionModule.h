@@ -10,6 +10,13 @@
 struct WwuSpaceSettings
 {
 public:
+	WwuSpaceSettings() = default;
+	WwuSpaceSettings(std::string prefixToApply, bool applyPrefix, bool applyNamingConventionCheck)
+		: prefixToApply(prefixToApply)
+		, applyPrefix(applyPrefix)
+		, applyNamingConventionCheck(applyNamingConventionCheck)
+	{}
+public:
 	std::string prefixToApply = "";	
 	bool applyPrefix = false;
 	bool applyNamingConventionCheck = false;
@@ -19,20 +26,9 @@ class NamingConventionModule
 { 
 public:
 	NamingConventionModule();
+	~NamingConventionModule();
 	void CheckNamingConvention();
-	NamingConventionModule(std::string wwiseProjPath)
-	{
-		wwiseProjPath.erase(0, 1);
-		wwiseProjPath.erase(wwiseProjPath.size() - 1);
-		for (int i = static_cast<int>(wwiseProjPath.size()) - 1; i > 0; i--)
-		{
-			if (wwiseProjPath.at(i) == '\\')
-				break;
-			else
-				wwiseProjPath.erase(i);
-		}
-		projectPath = wwiseProjPath;
-	}
+	NamingConventionModule(std::string wwiseProjPath);
 
 private:
 	void ScanWorkUnitData(std::string directory);
@@ -43,7 +39,8 @@ private:
 
 	void ModularResolve(pugi::xml_node wwuNode, std::string namePath);
 	std::string AddLastNamePathLayer(const std::string& currentNamePath, std::string newNodeName);
-
+	void SaveNamingConvention();
+	void LoadNamingConvention();
 
 public:
 	std::string levelSeparator = "_";
