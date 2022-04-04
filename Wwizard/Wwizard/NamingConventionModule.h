@@ -47,6 +47,8 @@ private:
 	void CheckNameForSpace(std::string currentName, bool allowSpace);
 	void CheckForMultipleSeparatorsPerLayer(std::string newNameLayer, std::string currentName);
 
+	void HandleSuffix();
+
 public:
 	std::string levelSeparator = "_";
 

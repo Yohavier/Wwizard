@@ -11,7 +11,6 @@
 /*
 * TODO
 * suffix
-* Exclude Default Work Units
 */
 
 NamingConventionModule::NamingConventionModule()
@@ -118,15 +117,18 @@ void NamingConventionModule::ScanWorkUnitXMLByPath(std::string wwuPath, std::str
 
 	std::string wwuType = static_cast<std::string>(doc.child("WwiseDocument").first_child().name());
 
-	if (static_cast<std::string>(doc.child("WwiseDocument").child(wwuType.c_str()).child("WorkUnit").attribute("PersistMode").value()) == "Standalone")
+	if (static_cast<std::string>(doc.child("WwiseDocument").child(wwuType.c_str()).child("WorkUnit").attribute("Name").value()) != "Default Work Unit")
 	{
-		if (wwuSpaceSettings[wwuType].applyNamingConventionCheck)
+		if (static_cast<std::string>(doc.child("WwiseDocument").child(wwuType.c_str()).child("WorkUnit").attribute("PersistMode").value()) == "Standalone")
 		{
-			if (whitelistedWwuTypes.find(wwuType) != whitelistedWwuTypes.end())
+			if (wwuSpaceSettings[wwuType].applyNamingConventionCheck)
 			{
-				ApplyPrefix(namePath, stringToReplace[wwuType], wwuSpaceSettings[wwuType]);
+				if (whitelistedWwuTypes.find(wwuType) != whitelistedWwuTypes.end())
+				{
+					ApplyPrefix(namePath, stringToReplace[wwuType], wwuSpaceSettings[wwuType]);
+				}
+				ModularResolve(doc.child("WwiseDocument").child(wwuType.c_str()), namePath, wwuType);
 			}
-			ModularResolve(doc.child("WwiseDocument").child(wwuType.c_str()), namePath, wwuType);
 		}
 	}
 }
@@ -288,4 +290,9 @@ void NamingConventionModule::CheckForMultipleSeparatorsPerLayer(std::string newN
 	{
 		namingIssueResults.emplace(currentName, "Doesnt allow Muiltiple Separators");
 	}
+}
+
+void NamingConventionModule::HandleSuffix()
+{
+
 }
