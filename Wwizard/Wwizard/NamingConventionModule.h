@@ -28,14 +28,23 @@ struct WwuSettings
 struct ContainerSettings
 {
 	ContainerSettings() = default;
-	
-	bool allowNumberSuffix;
-	bool allowStringSuffix;
+	ContainerSettings(bool allowNumberSuffix, bool allowStringSuffix, int suffixLayers, int maxNumberAllowed, std::string stringSuffixes)
+		: allowNumberSuffix(allowNumberSuffix)
+		, allowStringSuffix(allowStringSuffix)
+		, suffixLayers(suffixLayers)
+		, maxNumberAllowed(maxNumberAllowed)
+		, stringSuffixes(stringSuffixes)
+	{
 
-	int suffixLayers;
-	int maxNumberAllowed;
+	}
 
-	std::string stringSuffixes;
+	bool allowNumberSuffix = false;
+	bool allowStringSuffix = false;
+
+	int suffixLayers = 0;
+	int maxNumberAllowed =  0;
+
+	std::string stringSuffixes ="";
 
 	bool IsStringInSuffixList(std::string layer) 
 	{

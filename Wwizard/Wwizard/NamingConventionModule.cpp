@@ -208,8 +208,8 @@ void NamingConventionModule::SaveNamingConvention()
 	rapidjson::Document d;
 	d.SetObject();
 
+	//wwu settings
 	rapidjson::Value rapidjsonWwuSettings(rapidjson::kObjectType);
-
 	for (const auto& wwu : wwuSettings)
 	{
 		rapidjson::Value settings(rapidjson::kObjectType);
@@ -237,6 +237,40 @@ void NamingConventionModule::SaveNamingConvention()
 		rapidjsonWwuSettings.AddMember(rapidjson::StringRef(wwu.first.c_str()), settings, d.GetAllocator());
 	}
 	d.AddMember("WwuSettings", rapidjsonWwuSettings, d.GetAllocator());
+
+	//container settings
+	rapidjson::Value rapidjsonContainerSettings(rapidjson::kObjectType);
+	for (const auto& container : containerSettings)
+	{
+		rapidjson::Value cSettings(rapidjson::kObjectType);
+
+		rapidjson::Value name;
+		name = rapidjson::StringRef(container.first.c_str());
+		cSettings.AddMember("name", name, d.GetAllocator());
+
+		rapidjson::Value allowNumberSuffix;
+		allowNumberSuffix.SetBool(container.second.allowNumberSuffix);
+		cSettings.AddMember("allowNumberSuffix", allowNumberSuffix , d.GetAllocator());
+
+		rapidjson::Value allowStringSuffix;
+		allowStringSuffix.SetBool(container.second.allowStringSuffix);
+		cSettings.AddMember("allowStringSuffix", allowStringSuffix, d.GetAllocator());
+
+		rapidjson::Value suffixLayers;
+		suffixLayers.SetInt(container.second.suffixLayers);
+		cSettings.AddMember("suffixLayers", suffixLayers, d.GetAllocator());
+
+		rapidjson::Value maxNumberAllowed;
+		maxNumberAllowed.SetInt(container.second.maxNumberAllowed);
+		cSettings.AddMember("maxNumberAllowed", maxNumberAllowed, d.GetAllocator());
+
+		rapidjson::Value stringSuffixes;
+		stringSuffixes = rapidjson::StringRef(container.second.stringSuffixes.c_str());
+		cSettings.AddMember("stringSuffixes", stringSuffixes, d.GetAllocator());
+
+		rapidjsonContainerSettings.AddMember(rapidjson::StringRef(container.first.c_str()), cSettings, d.GetAllocator());
+	}
+	d.AddMember("ContainerSettings", rapidjsonContainerSettings, d.GetAllocator());
 
 	auto path = static_cast<std::string>(SOLUTION_DIR) + "SavedData/NamingConventionSettings.json";
 	FILE* fp = fopen(path.c_str(), "wb");
@@ -272,11 +306,14 @@ void NamingConventionModule::LoadNamingConvention()
 																										 d["WwuSettings"][wwu.c_str()]["apply"].GetBool(), 
 																										 d["WwuSettings"][wwu.c_str()]["allowSpace"].GetBool()));
 		}
-	}
-
-	for (const auto& container : whitelistedContainers)
-	{
-		containerSettings.emplace(container.c_str(), ContainerSettings());
+		for (const auto& container : whitelistedContainers)
+		{
+			containerSettings.emplace(container.c_str(), ContainerSettings(d["ContainerSettings"][container.c_str()]["allowNumberSuffix"].GetBool(),
+																		   d["ContainerSettings"][container.c_str()]["allowStringSuffix"].GetBool(),
+																		   d["ContainerSettings"][container.c_str()]["suffixLayers"].GetInt(),
+																		   d["ContainerSettings"][container.c_str()]["maxNumberAllowed"].GetInt(),
+																		   d["ContainerSettings"][container.c_str()]["stringSuffixes"].GetString()));
+		}
 	}
 }
 
@@ -303,8 +340,6 @@ void NamingConventionModule::CheckForMultipleSeparatorsPerLayer(std::string newN
 	}
 }
 
-//split into functions 
-//determine when it calls false and when true
 bool NamingConventionModule::IsCorrectSuffix(std::string currentName, std::string newNameLayer, std::string containerName)
 {
 	auto container = containerSettings.find(containerName);
