@@ -80,6 +80,7 @@ struct ContainerSettings
 
 	bool IsNumberInRange(std::string number)
 	{
+
 		if (std::to_string(maxNumberAllowed).size() == number.size())
 		{
 			int numLayer = std::stoi(number);
@@ -99,6 +100,27 @@ struct ContainerSettings
 		}
 		return false;
 	}
+
+	bool IsNumber(const std::string& s)
+	{
+		std::string::const_iterator it = s.begin();
+		while (it != s.end() && std::isdigit(*it)) ++it;
+		return !s.empty() && it == s.end();
+	}
+};
+
+struct NamingIssueResult
+{
+	NamingIssueResult() = delete;
+	NamingIssueResult(std::string guid, std::string currentName, std::string solution)
+		: guid(guid)
+		, currentName(currentName)
+		, solution(solution)
+	{}
+
+	std::string guid;
+	std::string currentName;
+	std::string solution;
 };
 
 class NamingConventionModule
@@ -117,15 +139,14 @@ private:
 	void IterateFolder(std::string path, std::string namePath);
 
 	void ModularResolve(pugi::xml_node wwuNode, std::string namePath, std::string wwuType);
-	std::string AddLastNamePathLayer(const std::string& currentNamePath, std::string newNodeName, std::string containerName);
+	std::string AddLastNamePathLayer(const std::string& currentNamePath, pugi::xml_node& newNode, std::string containerName);
 	void SaveNamingConvention();
 	void LoadNamingConvention();
 
-	void CheckNameForSpace(std::string currentName, bool allowSpace);
-	void CheckForMultipleSeparatorsPerLayer(std::string newNameLayer, std::string currentName, std::string containerName);
+	void CheckNameForSpace(pugi::xml_node& currentNode, bool allowSpace);
+	void CheckForMultipleSeparatorsPerLayer(std::string newNameLayer, pugi::xml_node& currentNode, std::string containerName);
 
 	bool IsCorrectSuffix(std::string currentName, std::string newNameLayer, std::string containerName);
-	bool IsNumber(const std::string& s);
 
 public:
 	std::string levelSeparator = "_";
@@ -136,8 +157,7 @@ public:
 	std::string projectPath;	
 	std::vector<WwuLookUpData> wwuData;
 
-	std::map<std::string, std::string> namingIssueResults;
-
+	std::map<std::string, NamingIssueResult> namingIssueResults;
 
 	std::set<std::string> whitelistedContainers = { "Folder", "Switch", "AudioDevice", "SwitchGroup", 
 		"SoundBank", "Event", "DialogueEvent", "Bus", "AuxBus", "MusicSegment", "MusicTrack", "MusicSwitchContainer", 

@@ -730,34 +730,32 @@ void Dockspace::ShowNamingConventionModule()
                 ImGui::Text("Desired Name");
                 ImGui::TableNextRow();
 
+                
                 for (auto& issue : namingConventionModule->namingIssueResults)
                 {
                     ImGui::TableNextColumn();
-                    ImGui::Text(issue.first.c_str());
+                    if (ImGui::Selectable(("##", issue.second.currentName.c_str()), false, ImGuiSelectableFlags_AllowDoubleClick))
+                    {
+                        if (ImGui::IsMouseDoubleClicked(0))
+                        {
+                            wwizarWwiseClient->OpenPropertyInWwise(issue.second.guid);
+                        }
+                    }
+            
                     ImGui::TableNextColumn();
-                    ImGui::Text(issue.second.c_str());
+                    ImGui::Text(issue.second.solution.c_str());
                     ImGui::TableNextRow();
                 }
                 ImGui::EndTable();
             }
             ImGui::EndTabItem();
         }
-        if (ImGui::BeginTabItem("Prefix Settings"))
+        if (ImGui::BeginTabItem("Activation Settings"))
         {
+            ImGui::Text("Select in which field the naming convention should be checked.");
             for (auto& wwuType : namingConventionModule->whitelistedWwuTypes)
             {
-                ImGui::Checkbox(namingConventionModule->stringToReplace[wwuType].c_str(), &(namingConventionModule->wwuSettings[wwuType].applyPrefix));
-                ImGui::SameLine();
-                std::string identificationName = "##" + namingConventionModule->stringToReplace[wwuType];
-                ImGui::InputText(identificationName.c_str(), &(namingConventionModule->wwuSettings[wwuType].prefixToApply));
-            }
-            ImGui::EndTabItem();
-        }
-        if (ImGui::BeginTabItem("Apply for..."))
-        {
-            for (auto& wwuType : namingConventionModule->whitelistedWwuTypes)
-            {
-                ImGui::Checkbox(namingConventionModule->stringToReplace[wwuType].c_str(), &(namingConventionModule->wwuSettings[wwuType].applyNamingConventionCheck));
+                ImGui::Checkbox(namingConventionModule->stringToReplace[wwuType].substr(1).c_str(), &(namingConventionModule->wwuSettings[wwuType].applyNamingConventionCheck));
             }
             ImGui::EndTabItem();
         }
@@ -765,7 +763,18 @@ void Dockspace::ShowNamingConventionModule()
         {
             for (auto& wwuType : namingConventionModule->whitelistedWwuTypes)
             {
-                ImGui::Checkbox(namingConventionModule->stringToReplace[wwuType].c_str(), &(namingConventionModule->wwuSettings[wwuType].allowSpace));
+                ImGui::Checkbox(namingConventionModule->stringToReplace[wwuType].substr(1).c_str(), &(namingConventionModule->wwuSettings[wwuType].allowSpace));
+            }
+            ImGui::EndTabItem();
+        }
+        if (ImGui::BeginTabItem("Prefix Settings"))
+        {
+            for (auto& wwuType : namingConventionModule->whitelistedWwuTypes)
+            {
+                ImGui::Checkbox(namingConventionModule->stringToReplace[wwuType].substr(1).c_str(), &(namingConventionModule->wwuSettings[wwuType].applyPrefix));
+                ImGui::SameLine();
+                std::string identificationName = "##" + namingConventionModule->stringToReplace[wwuType];
+                ImGui::InputText(identificationName.c_str(), &(namingConventionModule->wwuSettings[wwuType].prefixToApply));
             }
             ImGui::EndTabItem();
         }
@@ -800,6 +809,10 @@ void Dockspace::ShowNamingConventionModule()
                 ImGui::InputInt((currentContainerID + "MaxNumber").c_str(), &(namingConventionModule->containerSettings[containerType].maxNumberAllowed), ImGuiInputTextFlags_NoHorizontalScroll);
                 ImGui::Separator();
             }
+            ImGui::EndTabItem();
+        }
+        if (ImGui::BeginTabItem("Info"))
+        {
             ImGui::EndTabItem();
         }
         ImGui::EndTabBar();

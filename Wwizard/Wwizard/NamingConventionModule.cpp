@@ -8,11 +8,6 @@
 #include <rapidjson/document.h>
 #include "rapidjson/RapidJsonUtils.h"
 
-/*
-* TODO
-* suffix
-*/
-
 NamingConventionModule::NamingConventionModule()
 {
 	LoadNamingConvention();
@@ -156,24 +151,28 @@ void NamingConventionModule::ModularResolve(pugi::xml_node wwuNode, std::string 
 			}
 			else
 			{
-				std::string newNamePath = AddLastNamePathLayer(namePath, static_cast<std::string>(node.attribute("Name").value()), node.name());
+				std::string newNamePath = AddLastNamePathLayer(namePath, node, node.name());
 				if (static_cast<std::string>(node.attribute("Name").value()) != newNamePath.c_str() && namingIssueResults.find(newNamePath) == namingIssueResults.end())
 				{
-					namingIssueResults.emplace(static_cast<std::string>(node.attribute("Name").value()), newNamePath);
+					namingIssueResults.emplace(static_cast<std::string>(node.attribute("ID").value()), NamingIssueResult(static_cast<std::string>(node.attribute("ID").value()), 
+																														 static_cast<std::string>(node.attribute("Name").value()), 
+																														 "Hierarchy doesnt match"));
 				}
-				CheckNameForSpace(static_cast<std::string>(node.attribute("Name").value()), wwuSettings[wwuType].allowSpace);
+				CheckNameForSpace(node, wwuSettings[wwuType].allowSpace);
 				ModularResolve(node, newNamePath, wwuType);
 			}
 		}
 		else if (whitelistedContainers.find(static_cast<std::string>(node.name())) != whitelistedContainers.end())
 		{
-			std::string newNamePath = AddLastNamePathLayer(namePath, static_cast<std::string>(node.attribute("Name").value()), static_cast<std::string>(node.name()));
+			std::string newNamePath = AddLastNamePathLayer(namePath, node, static_cast<std::string>(node.name()));
 			if (static_cast<std::string>(node.attribute("Name").value()) != newNamePath.c_str() && namingIssueResults.find(newNamePath) == namingIssueResults.end())
 			{
-				namingIssueResults.emplace(static_cast<std::string>(node.attribute("Name").value()), newNamePath);
+				namingIssueResults.emplace(static_cast<std::string>(node.attribute("ID").value()), NamingIssueResult(static_cast<std::string>(node.attribute("ID").value()),
+																													 static_cast<std::string>(node.attribute("Name").value()),
+																													 "Hierarchy doesnt match"));
 			}
 
-			CheckNameForSpace(static_cast<std::string>(node.attribute("Name").value()), wwuSettings[wwuType].allowSpace);
+			CheckNameForSpace(node, wwuSettings[wwuType].allowSpace);
 			ModularResolve(node, newNamePath, wwuType);
 		}
 		else
@@ -183,11 +182,12 @@ void NamingConventionModule::ModularResolve(pugi::xml_node wwuNode, std::string 
 	}
 }
 
-std::string NamingConventionModule::AddLastNamePathLayer(const std::string& currentNamePath, std::string newNodeName, std::string containerName)
+std::string NamingConventionModule::AddLastNamePathLayer(const std::string& currentNamePath, pugi::xml_node& newNode, std::string containerName)
 {
+	std::string newNodeName = static_cast<std::string>(newNode.attribute("Name").value());
 	if (currentNamePath == "")
 	{
-		CheckForMultipleSeparatorsPerLayer(newNodeName, newNodeName, containerName);
+		CheckForMultipleSeparatorsPerLayer(newNodeName, newNode, containerName);
 		return newNodeName;
 	}
 	else
@@ -197,7 +197,7 @@ std::string NamingConventionModule::AddLastNamePathLayer(const std::string& curr
 			newNodeName.erase(0, currentNamePath.size() + 1);
 		}
 		std::string newName = currentNamePath + levelSeparator + newNodeName;
-		CheckForMultipleSeparatorsPerLayer(newNodeName, newName, containerName);
+		CheckForMultipleSeparatorsPerLayer(newNodeName, newNode, containerName);
 
 		return newName;
 	}
@@ -317,25 +317,29 @@ void NamingConventionModule::LoadNamingConvention()
 	}
 }
 
-void NamingConventionModule::CheckNameForSpace(std::string currentName, bool allowSpace)
+void NamingConventionModule::CheckNameForSpace(pugi::xml_node& currentNode, bool allowSpace)
 {
+	std::string currentName = static_cast<std::string>(currentNode.attribute("Name").value());
 	if (!allowSpace)
 	{
 		size_t loc = currentName.find(" ");
 		if (loc < currentName.size())
 		{
-			namingIssueResults.emplace(currentName, "Doesnt allow Space");
+			namingIssueResults.emplace(static_cast<std::string>(currentNode.attribute("ID").value()), NamingIssueResult(static_cast<std::string>(currentNode.attribute("ID").value()),
+																	  currentName, "No Space allowed"));
 		}
 	}
 }
 
-void NamingConventionModule::CheckForMultipleSeparatorsPerLayer(std::string newNameLayer, std::string currentName, std::string containerName)
+void NamingConventionModule::CheckForMultipleSeparatorsPerLayer(std::string newNameLayer, pugi::xml_node& currentNode, std::string containerName)
 {
+	std::string currentName = static_cast<std::string>(currentNode.attribute("Name").value());
 	if (newNameLayer.find("_") < newNameLayer.size())
 	{
 		if (!IsCorrectSuffix(currentName, newNameLayer.substr(newNameLayer.find("_") + 1), containerName))
 		{
-			namingIssueResults.emplace(currentName, "Multiple Separators or wrong suffix");
+			namingIssueResults.emplace(static_cast<std::string>(currentNode.attribute("ID").value()), NamingIssueResult(static_cast<std::string>(currentNode.attribute("ID").value()),
+																	  currentName, "Multiple Separators or wrong suffix"));
 		}
 	}
 }
@@ -371,7 +375,7 @@ bool NamingConventionModule::IsCorrectSuffix(std::string currentName, std::strin
 						readIndex = separatorLocations[sep] + 1;
 					}
 
-					if (IsNumber(layer) && !numLayerAppeared && container->second.allowNumberSuffix)
+					if (container->second.IsNumber(layer) && !numLayerAppeared && container->second.allowNumberSuffix)
 					{
 						numLayerAppeared = true;
 						if (!container->second.IsNumberInRange(layer))
@@ -404,11 +408,4 @@ bool NamingConventionModule::IsCorrectSuffix(std::string currentName, std::strin
 		return false;
 	}
 	return true;
-}
-
-bool NamingConventionModule::IsNumber(const std::string& s)
-{
-	std::string::const_iterator it = s.begin();
-	while (it != s.end() && std::isdigit(*it)) ++it;
-	return !s.empty() && it == s.end();
 }
