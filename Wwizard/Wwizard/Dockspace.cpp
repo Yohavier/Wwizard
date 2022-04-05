@@ -753,6 +753,7 @@ void Dockspace::ShowNamingConventionModule()
         if (ImGui::BeginTabItem("Activation Settings"))
         {
             ImGui::Text("Select in which field the naming convention should be checked.");
+            ImGui::Separator();
             for (auto& wwuType : namingConventionModule->whitelistedWwuTypes)
             {
                 ImGui::Checkbox(namingConventionModule->stringToReplace[wwuType].substr(1).c_str(), &(namingConventionModule->wwuSettings[wwuType].applyNamingConventionCheck));
@@ -761,6 +762,8 @@ void Dockspace::ShowNamingConventionModule()
         }
         if (ImGui::BeginTabItem("Space Settigns"))
         {
+            ImGui::Text("Is a Space in the name allowed. You can define that for each different type of work unit seperately.");
+            ImGui::Separator();
             for (auto& wwuType : namingConventionModule->whitelistedWwuTypes)
             {
                 ImGui::Checkbox(namingConventionModule->stringToReplace[wwuType].substr(1).c_str(), &(namingConventionModule->wwuSettings[wwuType].allowSpace));
@@ -769,6 +772,8 @@ void Dockspace::ShowNamingConventionModule()
         }
         if (ImGui::BeginTabItem("Prefix Settings"))
         {
+            ImGui::Text("This tab lets you add a prefix to each Physical Folder of Wwise (Type of Work Units).");
+            ImGui::Separator();
             for (auto& wwuType : namingConventionModule->whitelistedWwuTypes)
             {
                 ImGui::Checkbox(namingConventionModule->stringToReplace[wwuType].substr(1).c_str(), &(namingConventionModule->wwuSettings[wwuType].applyPrefix));
@@ -780,6 +785,10 @@ void Dockspace::ShowNamingConventionModule()
         }
         if (ImGui::BeginTabItem("Suffix Settings"))
         {
+            ImGui::Text("This tab lets you add a suffix to each container. To the naming convention.");
+            ImGui::Text("If you have multiple text suffixes you want to make possible, please separate them with a comma.");
+            ImGui::Text("Max Layers lets you define how many layers the suffix has. 'tree_lp_01' has two suffix layers. You can only have one number suffixlayer.");
+            ImGui::Separator();
             for (auto& containerType : namingConventionModule->whitelistedContainers)
             {
                 ImGui::Text(containerType.c_str());
@@ -813,6 +822,20 @@ void Dockspace::ShowNamingConventionModule()
         }
         if (ImGui::BeginTabItem("Info"))
         {
+            if (ImGui::CollapsingHeader("Issues messages"))
+            {
+                ImGui::Separator();
+                ImGui::Text("Hierarchy doesnt match");
+                ImGui::Text("muiltiple separators");
+                ImGui::Text("Space is not allowed");
+                ImGui::Separator();
+            }
+            if (ImGui::CollapsingHeader("Naming Convention"))
+            {
+                ImGui::Separator();
+                ImGui::Text("The separator to differentiate layers is '_'. Each underscore indicates that there is a new layer of description.");
+                ImGui::Separator();
+            }
             ImGui::EndTabItem();
         }
         ImGui::EndTabBar();
