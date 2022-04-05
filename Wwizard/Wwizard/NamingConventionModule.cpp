@@ -76,7 +76,7 @@ void NamingConventionModule::CheckNamingConvention()
 	IterateFolder(projectPath, "");
 }
 
-void NamingConventionModule::ApplyPrefix(std::string& namePath, std::string fullFolderName, const WwuSpaceSettings& newPrefix)
+void NamingConventionModule::ApplyPrefix(std::string& namePath, std::string fullFolderName, const WwuSettings& newPrefix)
 {
 	size_t stringLoc = namePath.find(fullFolderName);
 	if (stringLoc < namePath.size())
@@ -121,11 +121,11 @@ void NamingConventionModule::ScanWorkUnitXMLByPath(std::string wwuPath, std::str
 	{
 		if (static_cast<std::string>(doc.child("WwiseDocument").child(wwuType.c_str()).child("WorkUnit").attribute("PersistMode").value()) == "Standalone")
 		{
-			if (wwuSpaceSettings[wwuType].applyNamingConventionCheck)
+			if (wwuSettings[wwuType].applyNamingConventionCheck)
 			{
 				if (whitelistedWwuTypes.find(wwuType) != whitelistedWwuTypes.end())
 				{
-					ApplyPrefix(namePath, stringToReplace[wwuType], wwuSpaceSettings[wwuType]);
+					ApplyPrefix(namePath, stringToReplace[wwuType], wwuSettings[wwuType]);
 				}
 				ModularResolve(doc.child("WwiseDocument").child(wwuType.c_str()), namePath, wwuType);
 			}
@@ -156,24 +156,24 @@ void NamingConventionModule::ModularResolve(pugi::xml_node wwuNode, std::string 
 			}
 			else
 			{
-				std::string newNamePath = AddLastNamePathLayer(namePath, static_cast<std::string>(node.attribute("Name").value()));
+				std::string newNamePath = AddLastNamePathLayer(namePath, static_cast<std::string>(node.attribute("Name").value()), node.name());
 				if (static_cast<std::string>(node.attribute("Name").value()) != newNamePath.c_str() && namingIssueResults.find(newNamePath) == namingIssueResults.end())
 				{
 					namingIssueResults.emplace(static_cast<std::string>(node.attribute("Name").value()), newNamePath);
 				}
-				CheckNameForSpace(static_cast<std::string>(node.attribute("Name").value()), wwuSpaceSettings[wwuType].allowSpace);
+				CheckNameForSpace(static_cast<std::string>(node.attribute("Name").value()), wwuSettings[wwuType].allowSpace);
 				ModularResolve(node, newNamePath, wwuType);
 			}
 		}
 		else if (whitelistedContainers.find(static_cast<std::string>(node.name())) != whitelistedContainers.end())
 		{
-			std::string newNamePath = AddLastNamePathLayer(namePath, static_cast<std::string>(node.attribute("Name").value()));
+			std::string newNamePath = AddLastNamePathLayer(namePath, static_cast<std::string>(node.attribute("Name").value()), static_cast<std::string>(node.name()));
 			if (static_cast<std::string>(node.attribute("Name").value()) != newNamePath.c_str() && namingIssueResults.find(newNamePath) == namingIssueResults.end())
 			{
 				namingIssueResults.emplace(static_cast<std::string>(node.attribute("Name").value()), newNamePath);
 			}
 
-			CheckNameForSpace(static_cast<std::string>(node.attribute("Name").value()), wwuSpaceSettings[wwuType].allowSpace);
+			CheckNameForSpace(static_cast<std::string>(node.attribute("Name").value()), wwuSettings[wwuType].allowSpace);
 			ModularResolve(node, newNamePath, wwuType);
 		}
 		else
@@ -183,11 +183,11 @@ void NamingConventionModule::ModularResolve(pugi::xml_node wwuNode, std::string 
 	}
 }
 
-std::string NamingConventionModule::AddLastNamePathLayer(const std::string& currentNamePath, std::string newNodeName)
+std::string NamingConventionModule::AddLastNamePathLayer(const std::string& currentNamePath, std::string newNodeName, std::string containerName)
 {
 	if (currentNamePath == "")
 	{
-		CheckForMultipleSeparatorsPerLayer(newNodeName, newNodeName);
+		CheckForMultipleSeparatorsPerLayer(newNodeName, newNodeName, containerName);
 		return newNodeName;
 	}
 	else
@@ -197,7 +197,7 @@ std::string NamingConventionModule::AddLastNamePathLayer(const std::string& curr
 			newNodeName.erase(0, currentNamePath.size() + 1);
 		}
 		std::string newName = currentNamePath + levelSeparator + newNodeName;
-		CheckForMultipleSeparatorsPerLayer(newNodeName, newName);
+		CheckForMultipleSeparatorsPerLayer(newNodeName, newName, containerName);
 
 		return newName;
 	}
@@ -208,35 +208,35 @@ void NamingConventionModule::SaveNamingConvention()
 	rapidjson::Document d;
 	d.SetObject();
 
-	rapidjson::Value wwuSettings(rapidjson::kObjectType);
+	rapidjson::Value rapidjsonWwuSettings(rapidjson::kObjectType);
 
-	for (const auto& wwu : wwuSpaceSettings)
+	for (const auto& wwu : wwuSettings)
 	{
-		rapidjson::Value rapidJsonWwuSetting(rapidjson::kObjectType);
+		rapidjson::Value settings(rapidjson::kObjectType);
 		
 		rapidjson::Value name;
 		name = rapidjson::StringRef(wwu.first.c_str());
-		rapidJsonWwuSetting.AddMember("name", name, d.GetAllocator());
+		settings.AddMember("name", name, d.GetAllocator());
 
 		rapidjson::Value apply;
 		apply.SetBool(wwu.second.applyNamingConventionCheck);
-		rapidJsonWwuSetting.AddMember("apply", apply, d.GetAllocator());
+		settings.AddMember("apply", apply, d.GetAllocator());
 
 		rapidjson::Value applyPrefix;
 		applyPrefix.SetBool(wwu.second.applyPrefix);
-		rapidJsonWwuSetting.AddMember("applyPrefix", applyPrefix, d.GetAllocator());
+		settings.AddMember("applyPrefix", applyPrefix, d.GetAllocator());
 
 		rapidjson::Value prefixToApply;
 		prefixToApply = rapidjson::StringRef(wwu.second.prefixToApply.c_str());
-		rapidJsonWwuSetting.AddMember("prefixToApply", prefixToApply, d.GetAllocator());
+		settings.AddMember("prefixToApply", prefixToApply, d.GetAllocator());
 
 		rapidjson::Value allowSpace;
 		allowSpace.SetBool(wwu.second.allowSpace);
-		rapidJsonWwuSetting.AddMember("allowSpace", allowSpace, d.GetAllocator());
+		settings.AddMember("allowSpace", allowSpace, d.GetAllocator());
 
-		wwuSettings.AddMember(rapidjson::StringRef(wwu.first.c_str()), rapidJsonWwuSetting, d.GetAllocator());
+		rapidjsonWwuSettings.AddMember(rapidjson::StringRef(wwu.first.c_str()), settings, d.GetAllocator());
 	}
-	d.AddMember("WwuSettings",wwuSettings, d.GetAllocator());
+	d.AddMember("WwuSettings", rapidjsonWwuSettings, d.GetAllocator());
 
 	auto path = static_cast<std::string>(SOLUTION_DIR) + "SavedData/NamingConventionSettings.json";
 	FILE* fp = fopen(path.c_str(), "wb");
@@ -267,8 +267,16 @@ void NamingConventionModule::LoadNamingConvention()
 
 		for(const auto& wwu : whitelistedWwuTypes)
 		{
-			wwuSpaceSettings.emplace(d["WwuSettings"][wwu.c_str()]["name"].GetString(), WwuSpaceSettings(d["WwuSettings"][wwu.c_str()]["prefixToApply"].GetString(), d["WwuSettings"][wwu.c_str()]["applyPrefix"].GetBool(), d["WwuSettings"][wwu.c_str()]["apply"].GetBool(), d["WwuSettings"][wwu.c_str()]["allowSpace"].GetBool()));
+			wwuSettings.emplace(d["WwuSettings"][wwu.c_str()]["name"].GetString(), WwuSettings(d["WwuSettings"][wwu.c_str()]["prefixToApply"].GetString(),
+																										 d["WwuSettings"][wwu.c_str()]["applyPrefix"].GetBool(), 
+																										 d["WwuSettings"][wwu.c_str()]["apply"].GetBool(), 
+																										 d["WwuSettings"][wwu.c_str()]["allowSpace"].GetBool()));
 		}
+	}
+
+	for (const auto& container : whitelistedContainers)
+	{
+		containerSettings.emplace(container.c_str(), ContainerSettings());
 	}
 }
 
@@ -284,15 +292,88 @@ void NamingConventionModule::CheckNameForSpace(std::string currentName, bool all
 	}
 }
 
-void NamingConventionModule::CheckForMultipleSeparatorsPerLayer(std::string newNameLayer, std::string currentName)
+void NamingConventionModule::CheckForMultipleSeparatorsPerLayer(std::string newNameLayer, std::string currentName, std::string containerName)
 {
 	if (newNameLayer.find("_") < newNameLayer.size())
 	{
-		namingIssueResults.emplace(currentName, "Doesnt allow Muiltiple Separators");
+		if (!IsCorrectSuffix(currentName, newNameLayer.substr(newNameLayer.find("_") + 1), containerName))
+		{
+			namingIssueResults.emplace(currentName, "Multiple Separators or wrong suffix");
+		}
 	}
 }
 
-void NamingConventionModule::HandleSuffix()
+//split into functions 
+//determine when it calls false and when true
+bool NamingConventionModule::IsCorrectSuffix(std::string currentName, std::string newNameLayer, std::string containerName)
 {
+	auto container = containerSettings.find(containerName);
+	if (container != containerSettings.end())
+	{
+		if (container->second.allowNumberSuffix || container->second.allowStringSuffix)
+		{
+			std::vector<int> separatorLocations;
+			bool numLayerAppeared = false;
+			for (int i = 0; i< newNameLayer.size(); i++)
+			{
+				if (newNameLayer.at(i) == '_')
+					separatorLocations.push_back(i);
+			}
 
+			if (container->second.IsSuffixCountInRange(separatorLocations.size()))
+			{
+				int readIndex = 0;
+				for (int sep = 0; sep < separatorLocations.size() + 1; sep++)
+				{
+					std::string layer;
+					if (sep >= separatorLocations.size())
+					{
+						layer = newNameLayer.substr(readIndex);
+					}
+					else
+					{
+						layer = newNameLayer.substr(readIndex, separatorLocations[sep] - readIndex);
+						readIndex = separatorLocations[sep] + 1;
+					}
+
+					if (IsNumber(layer) && !numLayerAppeared && container->second.allowNumberSuffix)
+					{
+						numLayerAppeared = true;
+						if (!container->second.IsNumberInRange(layer))
+						{
+							return false;
+						}
+					}
+					else if (container->second.IsStringInSuffixList(layer) && container->second.allowStringSuffix)
+					{
+						//passed test	
+					}
+					else
+					{
+						return false;
+					}
+				}
+			}
+			else
+			{
+				return false;
+			}
+		}
+		else
+		{
+			return false;
+		}
+	}
+	else
+	{
+		return false;
+	}
+	return true;
+}
+
+bool NamingConventionModule::IsNumber(const std::string& s)
+{
+	std::string::const_iterator it = s.begin();
+	while (it != s.end() && std::isdigit(*it)) ++it;
+	return !s.empty() && it == s.end();
 }

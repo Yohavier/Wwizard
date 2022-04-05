@@ -1,4 +1,4 @@
-#pragma onceo
+#pragma once
 #include <string>
 #include <filesystem>
 #include "pugixml-1.12/src/pugixml.hpp"
@@ -7,21 +7,89 @@
 #include <map>
 
 
-struct WwuSpaceSettings
+struct WwuSettings
 {
-public:
-	WwuSpaceSettings() = default;
-	WwuSpaceSettings(std::string prefixToApply, bool applyPrefix, bool applyNamingConventionCheck, bool allowSpace)
+	WwuSettings() = default;
+	WwuSettings(std::string prefixToApply, bool applyPrefix, bool applyNamingConventionCheck, bool allowSpace)
 		: prefixToApply(prefixToApply)
 		, applyPrefix(applyPrefix)
 		, applyNamingConventionCheck(applyNamingConventionCheck)
 		, allowSpace(allowSpace)
 	{}
-public:
+
 	std::string prefixToApply = "";	
+
 	bool applyPrefix = false;
 	bool applyNamingConventionCheck = false;
 	bool allowSpace = false;
+
+};
+
+struct ContainerSettings
+{
+	ContainerSettings() = default;
+	
+	bool allowNumberSuffix;
+	bool allowStringSuffix;
+
+	int suffixLayers;
+	int maxNumberAllowed;
+
+	std::string stringSuffixes;
+
+	bool IsStringInSuffixList(std::string layer) 
+	{
+		std::string newSuffix;
+		for (auto& c : stringSuffixes)
+		{
+			if (c != ' ')
+			{
+				if (c == ',')
+				{
+					if (newSuffix == layer)
+					{
+						return true;
+					}
+					newSuffix = "";
+				}
+				else
+				{
+					newSuffix += c;
+				}
+			}
+		}
+		if (newSuffix != "")
+		{
+			if (newSuffix == layer)
+			{
+				return true;
+			}
+		}
+
+		return false;
+	}
+
+	bool IsNumberInRange(std::string number)
+	{
+		if (std::to_string(maxNumberAllowed).size() == number.size())
+		{
+			int numLayer = std::stoi(number);
+			if (numLayer <= maxNumberAllowed)
+			{
+				return true;
+			}
+		}
+		return false;
+	}
+
+	bool IsSuffixCountInRange(int layerCount)
+	{
+		if (layerCount <= maxNumberAllowed)
+		{
+			return true;
+		}
+		return false;
+	}
 };
 
 class NamingConventionModule
@@ -35,25 +103,26 @@ public:
 private:
 	void ScanWorkUnitData(std::string directory);
 	void FetchWwuData(std::string path);
-	void ApplyPrefix(std::string& namePath, std::string fullFolderName, const WwuSpaceSettings& newPrefix);
+	void ApplyPrefix(std::string& namePath, std::string fullFolderName, const WwuSettings& newPrefix);
 	void ScanWorkUnitXMLByPath(std::string wwuPath, std::string namePath);
 	void IterateFolder(std::string path, std::string namePath);
 
 	void ModularResolve(pugi::xml_node wwuNode, std::string namePath, std::string wwuType);
-	std::string AddLastNamePathLayer(const std::string& currentNamePath, std::string newNodeName);
+	std::string AddLastNamePathLayer(const std::string& currentNamePath, std::string newNodeName, std::string containerName);
 	void SaveNamingConvention();
 	void LoadNamingConvention();
 
 	void CheckNameForSpace(std::string currentName, bool allowSpace);
-	void CheckForMultipleSeparatorsPerLayer(std::string newNameLayer, std::string currentName);
+	void CheckForMultipleSeparatorsPerLayer(std::string newNameLayer, std::string currentName, std::string containerName);
 
-	void HandleSuffix();
+	bool IsCorrectSuffix(std::string currentName, std::string newNameLayer, std::string containerName);
+	bool IsNumber(const std::string& s);
 
 public:
 	std::string levelSeparator = "_";
 
-	bool applyActorMixerHierarchyPrefix = false;
-	std::map<std::string, WwuSpaceSettings> wwuSpaceSettings;
+	std::map<std::string, WwuSettings> wwuSettings;
+	std::map<std::string, ContainerSettings> containerSettings;
 
 	std::string projectPath;	
 	std::vector<WwuLookUpData> wwuData;

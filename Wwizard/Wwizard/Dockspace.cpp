@@ -746,10 +746,10 @@ void Dockspace::ShowNamingConventionModule()
         {
             for (auto& wwuType : namingConventionModule->whitelistedWwuTypes)
             {
-                ImGui::Checkbox(namingConventionModule->stringToReplace[wwuType].c_str(), &(namingConventionModule->wwuSpaceSettings[wwuType].applyPrefix));
+                ImGui::Checkbox(namingConventionModule->stringToReplace[wwuType].c_str(), &(namingConventionModule->wwuSettings[wwuType].applyPrefix));
                 ImGui::SameLine();
                 std::string identificationName = "##" + namingConventionModule->stringToReplace[wwuType];
-                ImGui::InputText(identificationName.c_str(), &(namingConventionModule->wwuSpaceSettings[wwuType].prefixToApply));
+                ImGui::InputText(identificationName.c_str(), &(namingConventionModule->wwuSettings[wwuType].prefixToApply));
             }
             ImGui::EndTabItem();
         }
@@ -757,7 +757,7 @@ void Dockspace::ShowNamingConventionModule()
         {
             for (auto& wwuType : namingConventionModule->whitelistedWwuTypes)
             {
-                ImGui::Checkbox(namingConventionModule->stringToReplace[wwuType].c_str(), &(namingConventionModule->wwuSpaceSettings[wwuType].applyNamingConventionCheck));
+                ImGui::Checkbox(namingConventionModule->stringToReplace[wwuType].c_str(), &(namingConventionModule->wwuSettings[wwuType].applyNamingConventionCheck));
             }
             ImGui::EndTabItem();
         }
@@ -765,7 +765,40 @@ void Dockspace::ShowNamingConventionModule()
         {
             for (auto& wwuType : namingConventionModule->whitelistedWwuTypes)
             {
-                ImGui::Checkbox(namingConventionModule->stringToReplace[wwuType].c_str(), &(namingConventionModule->wwuSpaceSettings[wwuType].allowSpace));
+                ImGui::Checkbox(namingConventionModule->stringToReplace[wwuType].c_str(), &(namingConventionModule->wwuSettings[wwuType].allowSpace));
+            }
+            ImGui::EndTabItem();
+        }
+        if (ImGui::BeginTabItem("Suffix Settings"))
+        {
+            for (auto& containerType : namingConventionModule->whitelistedContainers)
+            {
+                ImGui::Text(containerType.c_str());
+                std::string currentContainerID = "##" + containerType;
+               
+                ImGui::Text("Apply String");
+                ImGui::SameLine();
+                ImGui::Checkbox((currentContainerID + "ApplyString").c_str(), &(namingConventionModule->containerSettings[containerType].allowStringSuffix));
+                
+                ImGui::SameLine();
+                ImGui::Text("Apply Number");
+                ImGui::SameLine();
+                ImGui::Checkbox((currentContainerID +"ApplyNumber").c_str(), &(namingConventionModule->containerSettings[containerType].allowNumberSuffix));
+                
+                ImGui::SameLine();
+                ImGui::Text("Max Layers");
+                ImGui::SameLine();
+                ImGui::InputInt((currentContainerID + "MaxSuffixLayers").c_str(), &(namingConventionModule->containerSettings[containerType].suffixLayers));
+
+                ImGui::Text("Layers");
+                ImGui::SameLine();
+                ImGui::InputText((currentContainerID + "Layers").c_str(), &(namingConventionModule->containerSettings[containerType].stringSuffixes));
+
+                ImGui::SameLine();
+                ImGui::Text("Max Number");
+                ImGui::SameLine();
+                ImGui::InputInt((currentContainerID + "MaxNumber").c_str(), &(namingConventionModule->containerSettings[containerType].maxNumberAllowed), ImGuiInputTextFlags_NoHorizontalScroll);
+                ImGui::Separator();
             }
             ImGui::EndTabItem();
         }
