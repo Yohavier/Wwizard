@@ -23,7 +23,7 @@ void SortOriginalsModule::LoadModule(std::string wwiseProjPath)
 void SortOriginalsModule::ClearPreviousSortData() 
 {
 	originalsDic.clear();
-	wwuData.clear();
+	prefetchedWwuData.clear();
 }
 //Originals 
 void SortOriginalsModule::ScanOriginalsPath(std::string path)
@@ -48,25 +48,25 @@ void SortOriginalsModule::ScanOriginalsPath(std::string path)
 }
 
 //Wwu 
-void SortOriginalsModule::ScanWorkUnitData(std::string directory)
+void SortOriginalsModule::PreFetchAllWwuData(std::string directory)
 {
 	for (const auto& entry : std::filesystem::directory_iterator(directory))
 	{
 		if (std::filesystem::is_directory(entry))
 		{
-			ScanWorkUnitData(entry.path().u8string());
+			PreFetchAllWwuData(entry.path().u8string());
 		}
 		else
 		{
 			if (entry.path().extension() == ".wwu")
 			{
-				FetchWwuData(entry.path().u8string());
+				FetchSingleWwuData(entry.path().u8string());
 			}
 		}
 	}
 	}
 
-void SortOriginalsModule::FetchWwuData(std::string path)
+void SortOriginalsModule::FetchSingleWwuData(std::string path)
 {
 	pugi::xml_document doc;
 	pugi::xml_parse_result result = doc.load_file(path.c_str());
@@ -76,12 +76,12 @@ void SortOriginalsModule::FetchWwuData(std::string path)
 	pugi::xml_node data = doc.child("WwiseDocument").first_child().child("WorkUnit");
 		
 	WwuLookUpData newWwuData = WwuLookUpData(data.attribute("Name").value(), data.attribute("ID").value(), data.attribute("PersistMode").value(), path);
-	wwuData.emplace_back(newWwuData);
+	prefetchedWwuData.emplace_back(newWwuData);
 }
 
 void SortOriginalsModule::ScanWorkUnitOriginalsUse()
 {
-	for (const auto& data : wwuData)
+	for (const auto& data : prefetchedWwuData)
 	{
 		if (data.wwuType == "Standalone")
 		{
@@ -124,7 +124,7 @@ void SortOriginalsModule::IterateXMLChildren(pugi::xml_node parent)
 
 void SortOriginalsModule::ScanWorkUnitXMLByGuid(std::string guid)
 {
-	for (auto& data : wwuData)
+	for (auto& data : prefetchedWwuData)
 	{
 		if (data.guid == guid)
 		{
@@ -241,7 +241,7 @@ void SortOriginalsModule::CreateFolderStructureFomWwu(pugi::xml_node& parent, st
 			}
 			else if (static_cast<std::string>(children.attribute("PersistMode").value()) == "Reference")
 			{
-				for (const auto& data : wwuData)
+				for (const auto& data : prefetchedWwuData)
 				{
 					if (data.guid == static_cast<std::string>(children.attribute("ID").value()))
 					{
@@ -471,7 +471,7 @@ void SortOriginalsModule::Scan()
 {
 	ClearPreviousSortData();
 	ScanOriginalsPath(originalsPath);
-	ScanWorkUnitData(actorMixerWwuPath);
-	ScanWorkUnitData(interactiveMuisicWwuPath);
+	PreFetchAllWwuData(actorMixerWwuPath);
+	PreFetchAllWwuData(interactiveMuisicWwuPath);
 	ScanWorkUnitOriginalsUse();
 }

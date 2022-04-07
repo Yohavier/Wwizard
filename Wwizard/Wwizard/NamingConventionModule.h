@@ -6,6 +6,13 @@
 #include <set>
 #include <map>
 
+enum class IssueMessage
+{
+	HIERARCHY,
+	SPACE,
+	UPPERCASE,
+	SEPARATOR
+};
 
 struct WwuSettings
 {
@@ -22,7 +29,7 @@ struct WwuSettings
 	bool applyPrefix = false;
 	bool applyNamingConventionCheck = false;
 	bool allowSpace = false;
-
+	bool allowUpperCase = false;
 };
 
 struct ContainerSettings
@@ -112,41 +119,51 @@ struct ContainerSettings
 struct NamingIssueResult
 {
 	NamingIssueResult() = delete;
-	NamingIssueResult(std::string guid, std::string currentName, std::string solution)
+	NamingIssueResult(std::string guid, std::string currentName, IssueMessage issue)
 		: guid(guid)
 		, currentName(currentName)
-		, solution(solution)
+		, issue(issue)
 	{}
 
 	std::string guid;
 	std::string currentName;
-	std::string solution;
+	IssueMessage issue;
 };
 
 class NamingConventionModule
 { 
 public:
 	NamingConventionModule();
-	~NamingConventionModule();
-	void CheckNamingConvention();
 	NamingConventionModule(std::string wwiseProjPath);
 
+	~NamingConventionModule();
+
+	bool CheckNamingConvention();
+	std::string& GetErrorMessageFromIssue(IssueMessage issue);
+
 private:
-	void ScanWorkUnitData(std::string directory);
-	void FetchWwuData(std::string path);
-	void ApplyPrefix(std::string& namePath, std::string fullFolderName, const WwuSettings& newPrefix);
+	void PreFetchAllWwuData(std::string directory);
+	void FetchSingleWwuData(std::string path);
 	void ScanWorkUnitXMLByPath(std::string wwuPath, std::string namePath);
-	void IterateFolder(std::string path, std::string namePath);
+	void StartCheckingNamingConvention(std::string path, std::string namePath);
+	void IterateThroughWwu(pugi::xml_node wwuNode, std::string namePath, std::string wwuType);
+	
 
-	void ModularResolve(pugi::xml_node wwuNode, std::string namePath, std::string wwuType);
 	std::string AddLastNamePathLayer(const std::string& currentNamePath, pugi::xml_node& newNode, std::string containerName);
-	void SaveNamingConvention();
-	void LoadNamingConvention();
-
-	void CheckNameForSpace(pugi::xml_node& currentNode, bool allowSpace);
+	void CheckNameForSpace(pugi::xml_node& currentNode, bool& allowSpace);
 	void CheckForMultipleSeparatorsPerLayer(std::string newNameLayer, pugi::xml_node& currentNode, std::string containerName);
+	bool IsCorrectSuffix(std::string& currentName, std::string newNameLayer, std::string& containerName);
+	void ApplyPrefix(std::string& namePath, std::string& fullFolderName, const WwuSettings& newPrefix);
+	bool CheckUppercaseRule(pugi::xml_node& currentNode, bool& allowUppercase);
 
-	bool IsCorrectSuffix(std::string currentName, std::string newNameLayer, std::string containerName);
+	bool DetermineResult();
+	void ClearOldData();
+	void AddIssueToList(std::string guid, std::string name, IssueMessage issue);
+
+
+	void SaveNamingConventionSettings();
+	void LoadNamingConventionSettings();
+
 
 public:
 	std::string levelSeparator = "_";
@@ -155,7 +172,7 @@ public:
 	std::map<std::string, ContainerSettings> containerSettings;
 
 	std::string projectPath;	
-	std::vector<WwuLookUpData> wwuData;
+	std::vector<WwuLookUpData> prefetchedWwuData;
 
 	std::map<std::string, NamingIssueResult> namingIssueResults;
 
@@ -177,5 +194,9 @@ public:
 		{"Modulators","_Modulators"},{"Queries","_Queries"},{"SoundBanks","_SoundBanks"},{"SoundcasterSessions","_Soundcaster Sessions"},
 		{"States","_States"},{"Switches","_Switches"},{"Triggers","_Triggers"},{"VirtualAcoustics","_Virtual Acoustics"}
 	};
+
+	std::map<IssueMessage, std::string> issueMessages = { {IssueMessage::HIERARCHY, "Hierarchy doesnt match"},
+		{IssueMessage::SEPARATOR, "Multiple Separators or suffix is wrong"}, {IssueMessage::SPACE, "Space is not allowed"},
+		{IssueMessage::UPPERCASE, "Uppercase is not allowed"} };
 };
 

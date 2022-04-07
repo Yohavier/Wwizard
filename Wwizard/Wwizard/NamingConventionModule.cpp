@@ -7,10 +7,12 @@
 #include <rapidjson/writer.h>
 #include <rapidjson/document.h>
 #include "rapidjson/RapidJsonUtils.h"
+#include <algorithm>
+
 
 NamingConventionModule::NamingConventionModule()
 {
-	LoadNamingConvention();
+	LoadNamingConventionSettings();
 }
 
 NamingConventionModule::NamingConventionModule(std::string wwiseProjPath)
@@ -26,33 +28,45 @@ NamingConventionModule::NamingConventionModule(std::string wwiseProjPath)
 	}
 	projectPath = wwiseProjPath;
 
-	LoadNamingConvention();
+	LoadNamingConventionSettings();
 }
 
 NamingConventionModule::~NamingConventionModule()
 {
-	SaveNamingConvention();
+	SaveNamingConventionSettings();
 }
 
-void NamingConventionModule::ScanWorkUnitData(std::string directory)
+bool NamingConventionModule::CheckNamingConvention()
+{
+	ClearOldData();
+
+	PreFetchAllWwuData(projectPath);
+
+	StartCheckingNamingConvention(projectPath, "");
+
+	return DetermineResult();
+}
+
+//Prefetch
+void NamingConventionModule::PreFetchAllWwuData(std::string directory)
 {
 	for (const auto& entry : std::filesystem::directory_iterator(directory))
 	{
 		if (std::filesystem::is_directory(entry))
 		{
-			ScanWorkUnitData(entry.path().u8string());
+			PreFetchAllWwuData(entry.path().u8string());
 		}
 		else
 		{
 			if (entry.path().extension() == ".wwu")
 			{
-				FetchWwuData(entry.path().u8string());
+				FetchSingleWwuData(entry.path().u8string());
 			}
 		}
 	}
 }
 
-void NamingConventionModule::FetchWwuData(std::string path)
+void NamingConventionModule::FetchSingleWwuData(std::string path)
 {
 	pugi::xml_document doc;
 	pugi::xml_parse_result result = doc.load_file(path.c_str());
@@ -61,30 +75,33 @@ void NamingConventionModule::FetchWwuData(std::string path)
 
 	pugi::xml_node data = doc.child("WwiseDocument").first_child().child("WorkUnit");
 	WwuLookUpData newWwuData = WwuLookUpData(data.attribute("Name").value(), data.attribute("ID").value(), data.attribute("PersistMode").value(), path);
-	wwuData.emplace_back(newWwuData);
+	prefetchedWwuData.emplace_back(newWwuData);
 }
 
-void NamingConventionModule::CheckNamingConvention()
+
+//Helper
+void NamingConventionModule::ClearOldData()
 {
 	namingIssueResults.clear();
-	ScanWorkUnitData(projectPath);
-	IterateFolder(projectPath, "");
 }
 
-void NamingConventionModule::ApplyPrefix(std::string& namePath, std::string fullFolderName, const WwuSettings& newPrefix)
+bool NamingConventionModule::DetermineResult()
 {
-	size_t stringLoc = namePath.find(fullFolderName);
-	if (stringLoc < namePath.size())
-	{
-		namePath.erase(stringLoc, stringLoc + fullFolderName.size() + 1);
-		if (newPrefix.applyPrefix)
-		{
-			namePath = newPrefix.prefixToApply + namePath;
-		}
-	}
+	return namingIssueResults.empty();
 }
 
-void NamingConventionModule::IterateFolder(std::string path, std::string namePath)
+void NamingConventionModule::AddIssueToList(std::string guid, std::string name, IssueMessage issue)
+{
+	namingIssueResults.emplace(guid, NamingIssueResult(guid, name, issue));
+}
+
+std::string& NamingConventionModule::GetErrorMessageFromIssue(IssueMessage issue)
+{
+	return issueMessages[issue];
+}
+
+//Scan Naming Convention
+void NamingConventionModule::StartCheckingNamingConvention(std::string path, std::string namePath)
 {
 	for (const auto& entry : std::filesystem::directory_iterator(path))
 	{
@@ -93,12 +110,25 @@ void NamingConventionModule::IterateFolder(std::string path, std::string namePat
 			if (entry.path().filename().u8string() != ".cache" && entry.path().filename().u8string() != "GeneratedSoundBanks" && entry.path().filename().u8string() != "Originals" && entry.path().filename().u8string() != "Presets")
 			{
 				std::string newPath = namePath + levelSeparator + entry.path().filename().u8string();
-				IterateFolder(entry.path().u8string(), newPath);
+				StartCheckingNamingConvention(entry.path().u8string(), newPath);
 			}
 		}
 		else if (entry.path().extension() == ".wwu")
 		{
 			ScanWorkUnitXMLByPath(entry.path().u8string(), namePath);
+		}
+	}
+}
+
+void NamingConventionModule::ApplyPrefix(std::string& namePath, std::string& fullFolderName, const WwuSettings& newPrefix)
+{
+	size_t stringLoc = namePath.find(fullFolderName);
+	if (stringLoc < namePath.size())
+	{
+		namePath.erase(stringLoc, stringLoc + fullFolderName.size() + 1);
+		if (newPrefix.applyPrefix)
+		{
+			namePath = newPrefix.prefixToApply + namePath;
 		}
 	}
 }
@@ -122,13 +152,13 @@ void NamingConventionModule::ScanWorkUnitXMLByPath(std::string wwuPath, std::str
 				{
 					ApplyPrefix(namePath, stringToReplace[wwuType], wwuSettings[wwuType]);
 				}
-				ModularResolve(doc.child("WwiseDocument").child(wwuType.c_str()), namePath, wwuType);
+				IterateThroughWwu(doc.child("WwiseDocument").child(wwuType.c_str()), namePath, wwuType);
 			}
 		}
 	}
 }
 
-void NamingConventionModule::ModularResolve(pugi::xml_node wwuNode, std::string namePath, std::string wwuType)
+void NamingConventionModule::IterateThroughWwu(pugi::xml_node wwuNode, std::string namePath, std::string wwuType)
 {
 	for (auto& node : wwuNode)
 	{
@@ -136,7 +166,7 @@ void NamingConventionModule::ModularResolve(pugi::xml_node wwuNode, std::string 
 		{
 			if (static_cast<std::string>(node.attribute("PersistMode").value()) == "Reference")
 			{
-				for (auto& data : wwuData)
+				for (auto& data : prefetchedWwuData)
 				{
 					if (data.guid == static_cast<std::string>(node.attribute("ID").value()))
 					{
@@ -145,7 +175,7 @@ void NamingConventionModule::ModularResolve(pugi::xml_node wwuNode, std::string 
 						if (!result)
 							return;
 
-						ModularResolve(doc.child("WwiseDocument"), namePath, wwuType);
+						IterateThroughWwu(doc.child("WwiseDocument"), namePath, wwuType);
 					}
 				}
 			}
@@ -154,12 +184,11 @@ void NamingConventionModule::ModularResolve(pugi::xml_node wwuNode, std::string 
 				std::string newNamePath = AddLastNamePathLayer(namePath, node, node.name());
 				if (static_cast<std::string>(node.attribute("Name").value()) != newNamePath.c_str() && namingIssueResults.find(newNamePath) == namingIssueResults.end())
 				{
-					namingIssueResults.emplace(static_cast<std::string>(node.attribute("ID").value()), NamingIssueResult(static_cast<std::string>(node.attribute("ID").value()), 
-																														 static_cast<std::string>(node.attribute("Name").value()), 
-																														 "Hierarchy doesnt match"));
+					AddIssueToList(static_cast<std::string>(node.attribute("ID").value()), static_cast<std::string>(node.attribute("Name").value()), IssueMessage::HIERARCHY);
 				}
 				CheckNameForSpace(node, wwuSettings[wwuType].allowSpace);
-				ModularResolve(node, newNamePath, wwuType);
+				CheckUppercaseRule(node, wwuSettings[wwuType].allowUpperCase);
+				IterateThroughWwu(node, newNamePath, wwuType);
 			}
 		}
 		else if (whitelistedContainers.find(static_cast<std::string>(node.name())) != whitelistedContainers.end())
@@ -167,17 +196,16 @@ void NamingConventionModule::ModularResolve(pugi::xml_node wwuNode, std::string 
 			std::string newNamePath = AddLastNamePathLayer(namePath, node, static_cast<std::string>(node.name()));
 			if (static_cast<std::string>(node.attribute("Name").value()) != newNamePath.c_str() && namingIssueResults.find(newNamePath) == namingIssueResults.end())
 			{
-				namingIssueResults.emplace(static_cast<std::string>(node.attribute("ID").value()), NamingIssueResult(static_cast<std::string>(node.attribute("ID").value()),
-																													 static_cast<std::string>(node.attribute("Name").value()),
-																													 "Hierarchy doesnt match"));
+				AddIssueToList(static_cast<std::string>(node.attribute("ID").value()), static_cast<std::string>(node.attribute("Name").value()), IssueMessage::HIERARCHY);
 			}
 
 			CheckNameForSpace(node, wwuSettings[wwuType].allowSpace);
-			ModularResolve(node, newNamePath, wwuType);
+			CheckUppercaseRule(node, wwuSettings[wwuType].allowUpperCase);
+			IterateThroughWwu(node, newNamePath, wwuType);
 		}
 		else
 		{
-			ModularResolve(node, namePath, wwuType);
+			IterateThroughWwu(node, namePath, wwuType);
 		}
 	}
 }
@@ -203,121 +231,7 @@ std::string NamingConventionModule::AddLastNamePathLayer(const std::string& curr
 	}
 }
 
-void NamingConventionModule::SaveNamingConvention()
-{
-	rapidjson::Document d;
-	d.SetObject();
-
-	//wwu settings
-	rapidjson::Value rapidjsonWwuSettings(rapidjson::kObjectType);
-	for (const auto& wwu : wwuSettings)
-	{
-		rapidjson::Value settings(rapidjson::kObjectType);
-		
-		rapidjson::Value name;
-		name = rapidjson::StringRef(wwu.first.c_str());
-		settings.AddMember("name", name, d.GetAllocator());
-
-		rapidjson::Value apply;
-		apply.SetBool(wwu.second.applyNamingConventionCheck);
-		settings.AddMember("apply", apply, d.GetAllocator());
-
-		rapidjson::Value applyPrefix;
-		applyPrefix.SetBool(wwu.second.applyPrefix);
-		settings.AddMember("applyPrefix", applyPrefix, d.GetAllocator());
-
-		rapidjson::Value prefixToApply;
-		prefixToApply = rapidjson::StringRef(wwu.second.prefixToApply.c_str());
-		settings.AddMember("prefixToApply", prefixToApply, d.GetAllocator());
-
-		rapidjson::Value allowSpace;
-		allowSpace.SetBool(wwu.second.allowSpace);
-		settings.AddMember("allowSpace", allowSpace, d.GetAllocator());
-
-		rapidjsonWwuSettings.AddMember(rapidjson::StringRef(wwu.first.c_str()), settings, d.GetAllocator());
-	}
-	d.AddMember("WwuSettings", rapidjsonWwuSettings, d.GetAllocator());
-
-	//container settings
-	rapidjson::Value rapidjsonContainerSettings(rapidjson::kObjectType);
-	for (const auto& container : containerSettings)
-	{
-		rapidjson::Value cSettings(rapidjson::kObjectType);
-
-		rapidjson::Value name;
-		name = rapidjson::StringRef(container.first.c_str());
-		cSettings.AddMember("name", name, d.GetAllocator());
-
-		rapidjson::Value allowNumberSuffix;
-		allowNumberSuffix.SetBool(container.second.allowNumberSuffix);
-		cSettings.AddMember("allowNumberSuffix", allowNumberSuffix , d.GetAllocator());
-
-		rapidjson::Value allowStringSuffix;
-		allowStringSuffix.SetBool(container.second.allowStringSuffix);
-		cSettings.AddMember("allowStringSuffix", allowStringSuffix, d.GetAllocator());
-
-		rapidjson::Value suffixLayers;
-		suffixLayers.SetInt(container.second.suffixLayers);
-		cSettings.AddMember("suffixLayers", suffixLayers, d.GetAllocator());
-
-		rapidjson::Value maxNumberAllowed;
-		maxNumberAllowed.SetInt(container.second.maxNumberAllowed);
-		cSettings.AddMember("maxNumberAllowed", maxNumberAllowed, d.GetAllocator());
-
-		rapidjson::Value stringSuffixes;
-		stringSuffixes = rapidjson::StringRef(container.second.stringSuffixes.c_str());
-		cSettings.AddMember("stringSuffixes", stringSuffixes, d.GetAllocator());
-
-		rapidjsonContainerSettings.AddMember(rapidjson::StringRef(container.first.c_str()), cSettings, d.GetAllocator());
-	}
-	d.AddMember("ContainerSettings", rapidjsonContainerSettings, d.GetAllocator());
-
-	auto path = static_cast<std::string>(SOLUTION_DIR) + "SavedData/NamingConventionSettings.json";
-	FILE* fp = fopen(path.c_str(), "wb");
-	if (fp != 0)
-	{
-		char* writeBuffer = new char[65536];
-		rapidjson::FileWriteStream os(fp, writeBuffer, sizeof(writeBuffer));
-
-		rapidjson::Writer<rapidjson::FileWriteStream> writer(os);
-		d.Accept(writer);
-
-		fclose(fp);
-	}
-}
-
-void NamingConventionModule::LoadNamingConvention()
-{
-	auto path = static_cast<std::string>(SOLUTION_DIR) + "SavedData/NamingConventionSettings.json";
-	FILE* fp = fopen(path.c_str(), "rb");
-	if (fp != 0)
-	{
-		char* readBuffer = new char[65536];
-		rapidjson::FileReadStream is(fp, readBuffer, sizeof(readBuffer));
-
-		rapidjson::Document d;
-		d.ParseStream(is);
-		fclose(fp);
-
-		for(const auto& wwu : whitelistedWwuTypes)
-		{
-			wwuSettings.emplace(d["WwuSettings"][wwu.c_str()]["name"].GetString(), WwuSettings(d["WwuSettings"][wwu.c_str()]["prefixToApply"].GetString(),
-																										 d["WwuSettings"][wwu.c_str()]["applyPrefix"].GetBool(), 
-																										 d["WwuSettings"][wwu.c_str()]["apply"].GetBool(), 
-																										 d["WwuSettings"][wwu.c_str()]["allowSpace"].GetBool()));
-		}
-		for (const auto& container : whitelistedContainers)
-		{
-			containerSettings.emplace(container.c_str(), ContainerSettings(d["ContainerSettings"][container.c_str()]["allowNumberSuffix"].GetBool(),
-																		   d["ContainerSettings"][container.c_str()]["allowStringSuffix"].GetBool(),
-																		   d["ContainerSettings"][container.c_str()]["suffixLayers"].GetInt(),
-																		   d["ContainerSettings"][container.c_str()]["maxNumberAllowed"].GetInt(),
-																		   d["ContainerSettings"][container.c_str()]["stringSuffixes"].GetString()));
-		}
-	}
-}
-
-void NamingConventionModule::CheckNameForSpace(pugi::xml_node& currentNode, bool allowSpace)
+void NamingConventionModule::CheckNameForSpace(pugi::xml_node& currentNode, bool& allowSpace)
 {
 	std::string currentName = static_cast<std::string>(currentNode.attribute("Name").value());
 	if (!allowSpace)
@@ -325,8 +239,7 @@ void NamingConventionModule::CheckNameForSpace(pugi::xml_node& currentNode, bool
 		size_t loc = currentName.find(" ");
 		if (loc < currentName.size())
 		{
-			namingIssueResults.emplace(static_cast<std::string>(currentNode.attribute("ID").value()), NamingIssueResult(static_cast<std::string>(currentNode.attribute("ID").value()),
-																	  currentName, "No Space allowed"));
+			AddIssueToList(static_cast<std::string>(currentNode.attribute("ID").value()), static_cast<std::string>(currentNode.attribute("Name").value()), IssueMessage::SPACE);
 		}
 	}
 }
@@ -338,13 +251,12 @@ void NamingConventionModule::CheckForMultipleSeparatorsPerLayer(std::string newN
 	{
 		if (!IsCorrectSuffix(currentName, newNameLayer.substr(newNameLayer.find("_") + 1), containerName))
 		{
-			namingIssueResults.emplace(static_cast<std::string>(currentNode.attribute("ID").value()), NamingIssueResult(static_cast<std::string>(currentNode.attribute("ID").value()),
-																	  currentName, "Multiple Separators or wrong suffix"));
+			AddIssueToList(static_cast<std::string>(currentNode.attribute("ID").value()), static_cast<std::string>(currentNode.attribute("Name").value()), IssueMessage::SEPARATOR);
 		}
 	}
 }
 
-bool NamingConventionModule::IsCorrectSuffix(std::string currentName, std::string newNameLayer, std::string containerName)
+bool NamingConventionModule::IsCorrectSuffix(std::string& currentName, std::string newNameLayer, std::string& containerName)
 {
 	auto container = containerSettings.find(containerName);
 	if (container != containerSettings.end())
@@ -408,4 +320,135 @@ bool NamingConventionModule::IsCorrectSuffix(std::string currentName, std::strin
 		return false;
 	}
 	return true;
+}
+
+bool NamingConventionModule::CheckUppercaseRule(pugi::xml_node& currentNode, bool& allowUpperCase)
+{
+	if (allowUpperCase)
+		return true;
+
+	std::string currentName = static_cast<std::string>(currentNode.attribute("Name").value());
+	
+	if (std::any_of(currentName.begin(), currentName.end(), isupper))
+	{
+		AddIssueToList(static_cast<std::string>(currentNode.attribute("ID").value()), static_cast<std::string>(currentNode.attribute("Name").value()), IssueMessage::UPPERCASE);
+		return false;
+	}
+
+	return true;
+}
+
+// Save and Loading
+void NamingConventionModule::SaveNamingConventionSettings()
+{
+	rapidjson::Document d;
+	d.SetObject();
+
+	//wwu settings
+	rapidjson::Value rapidjsonWwuSettings(rapidjson::kObjectType);
+	for (const auto& wwu : wwuSettings)
+	{
+		rapidjson::Value settings(rapidjson::kObjectType);
+
+		rapidjson::Value name;
+		name = rapidjson::StringRef(wwu.first.c_str());
+		settings.AddMember("name", name, d.GetAllocator());
+
+		rapidjson::Value apply;
+		apply.SetBool(wwu.second.applyNamingConventionCheck);
+		settings.AddMember("apply", apply, d.GetAllocator());
+
+		rapidjson::Value applyPrefix;
+		applyPrefix.SetBool(wwu.second.applyPrefix);
+		settings.AddMember("applyPrefix", applyPrefix, d.GetAllocator());
+
+		rapidjson::Value prefixToApply;
+		prefixToApply = rapidjson::StringRef(wwu.second.prefixToApply.c_str());
+		settings.AddMember("prefixToApply", prefixToApply, d.GetAllocator());
+
+		rapidjson::Value allowSpace;
+		allowSpace.SetBool(wwu.second.allowSpace);
+		settings.AddMember("allowSpace", allowSpace, d.GetAllocator());
+
+		rapidjsonWwuSettings.AddMember(rapidjson::StringRef(wwu.first.c_str()), settings, d.GetAllocator());
+	}
+	d.AddMember("WwuSettings", rapidjsonWwuSettings, d.GetAllocator());
+
+	//container settings
+	rapidjson::Value rapidjsonContainerSettings(rapidjson::kObjectType);
+	for (const auto& container : containerSettings)
+	{
+		rapidjson::Value cSettings(rapidjson::kObjectType);
+
+		rapidjson::Value name;
+		name = rapidjson::StringRef(container.first.c_str());
+		cSettings.AddMember("name", name, d.GetAllocator());
+
+		rapidjson::Value allowNumberSuffix;
+		allowNumberSuffix.SetBool(container.second.allowNumberSuffix);
+		cSettings.AddMember("allowNumberSuffix", allowNumberSuffix, d.GetAllocator());
+
+		rapidjson::Value allowStringSuffix;
+		allowStringSuffix.SetBool(container.second.allowStringSuffix);
+		cSettings.AddMember("allowStringSuffix", allowStringSuffix, d.GetAllocator());
+
+		rapidjson::Value suffixLayers;
+		suffixLayers.SetInt(container.second.suffixLayers);
+		cSettings.AddMember("suffixLayers", suffixLayers, d.GetAllocator());
+
+		rapidjson::Value maxNumberAllowed;
+		maxNumberAllowed.SetInt(container.second.maxNumberAllowed);
+		cSettings.AddMember("maxNumberAllowed", maxNumberAllowed, d.GetAllocator());
+
+		rapidjson::Value stringSuffixes;
+		stringSuffixes = rapidjson::StringRef(container.second.stringSuffixes.c_str());
+		cSettings.AddMember("stringSuffixes", stringSuffixes, d.GetAllocator());
+
+		rapidjsonContainerSettings.AddMember(rapidjson::StringRef(container.first.c_str()), cSettings, d.GetAllocator());
+	}
+	d.AddMember("ContainerSettings", rapidjsonContainerSettings, d.GetAllocator());
+
+	auto path = static_cast<std::string>(SOLUTION_DIR) + "SavedData/NamingConventionSettings.json";
+	FILE* fp = fopen(path.c_str(), "wb");
+	if (fp != 0)
+	{
+		char* writeBuffer = new char[65536];
+		rapidjson::FileWriteStream os(fp, writeBuffer, sizeof(writeBuffer));
+
+		rapidjson::Writer<rapidjson::FileWriteStream> writer(os);
+		d.Accept(writer);
+
+		fclose(fp);
+	}
+}
+
+void NamingConventionModule::LoadNamingConventionSettings()
+{
+	auto path = static_cast<std::string>(SOLUTION_DIR) + "SavedData/NamingConventionSettings.json";
+	FILE* fp = fopen(path.c_str(), "rb");
+	if (fp != 0)
+	{
+		char* readBuffer = new char[65536];
+		rapidjson::FileReadStream is(fp, readBuffer, sizeof(readBuffer));
+
+		rapidjson::Document d;
+		d.ParseStream(is);
+		fclose(fp);
+
+		for (const auto& wwu : whitelistedWwuTypes)
+		{
+			wwuSettings.emplace(d["WwuSettings"][wwu.c_str()]["name"].GetString(), WwuSettings(d["WwuSettings"][wwu.c_str()]["prefixToApply"].GetString(),
+																							   d["WwuSettings"][wwu.c_str()]["applyPrefix"].GetBool(),
+																							   d["WwuSettings"][wwu.c_str()]["apply"].GetBool(),
+																							   d["WwuSettings"][wwu.c_str()]["allowSpace"].GetBool()));
+		}
+		for (const auto& container : whitelistedContainers)
+		{
+			containerSettings.emplace(container.c_str(), ContainerSettings(d["ContainerSettings"][container.c_str()]["allowNumberSuffix"].GetBool(),
+																		   d["ContainerSettings"][container.c_str()]["allowStringSuffix"].GetBool(),
+																		   d["ContainerSettings"][container.c_str()]["suffixLayers"].GetInt(),
+																		   d["ContainerSettings"][container.c_str()]["maxNumberAllowed"].GetInt(),
+																		   d["ContainerSettings"][container.c_str()]["stringSuffixes"].GetString()));
+		}
+	}
 }

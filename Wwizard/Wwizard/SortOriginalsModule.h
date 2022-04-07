@@ -33,8 +33,8 @@ private:
 	void ScanWorkUnitXMLByGuid(std::string guid);
 	void IterateXMLChildren(pugi::xml_node parent);
 
-	void ScanWorkUnitData(std::string directory);
-	void FetchWwuData(std::string wwuPath);
+	void PreFetchAllWwuData(std::string directory);
+	void FetchSingleWwuData(std::string wwuPath);
 	void ScanWorkUnitOriginalsUse();
 
 	void CreateFolderStructureFromWorkUnitPath(const std::string wwuFolderPath);
@@ -72,6 +72,6 @@ private:
 
 	std::string container[6] = { "WorkUnit", "Folder", "BlendContainer", "RandomSequenceContainer", "ActorMixer", "SwitchContainer" };
 
-	std::vector<WwuLookUpData> wwuData;
+	std::vector<WwuLookUpData> prefetchedWwuData;
 };
 

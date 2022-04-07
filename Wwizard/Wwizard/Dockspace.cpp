@@ -743,7 +743,7 @@ void Dockspace::ShowNamingConventionModule()
                     }
             
                     ImGui::TableNextColumn();
-                    ImGui::Text(issue.second.solution.c_str());
+                    ImGui::Text(namingConventionModule->GetErrorMessageFromIssue(issue.second.issue).c_str());
                     ImGui::TableNextRow();
                 }
                 ImGui::EndTable();
@@ -760,13 +760,20 @@ void Dockspace::ShowNamingConventionModule()
             }
             ImGui::EndTabItem();
         }
-        if (ImGui::BeginTabItem("Space Settigns"))
+        if (ImGui::BeginTabItem("Additional Settings"))
         {
-            ImGui::Text("Is a Space in the name allowed. You can define that for each different type of work unit seperately.");
             ImGui::Separator();
             for (auto& wwuType : namingConventionModule->whitelistedWwuTypes)
             {
-                ImGui::Checkbox(namingConventionModule->stringToReplace[wwuType].substr(1).c_str(), &(namingConventionModule->wwuSettings[wwuType].allowSpace));
+                ImGui::Text(namingConventionModule->stringToReplace[wwuType].substr(1).c_str());
+                ImGui::SameLine();
+                ImGui::Checkbox(("## allowSpace" + namingConventionModule->stringToReplace[wwuType].substr(1)).c_str(), &(namingConventionModule->wwuSettings[wwuType].allowSpace));
+                ImGui::SameLine();
+                ImGui::Text("Allow Space");
+                ImGui::SameLine();
+                ImGui::Checkbox(("## allowUpperCase" + namingConventionModule->stringToReplace[wwuType].substr(1)).c_str(), &(namingConventionModule->wwuSettings[wwuType].allowUpperCase));
+                ImGui::SameLine();
+                ImGui::Text("Allow Upper Case");
             }
             ImGui::EndTabItem();
         }
