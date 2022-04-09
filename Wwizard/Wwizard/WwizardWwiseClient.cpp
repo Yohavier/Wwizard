@@ -60,7 +60,7 @@ bool WwizardWwiseClient::ForceOpenWwiseInstance(const std::unique_ptr<SettingHan
 void WwizardWwiseClient::WalkProjectPath(const AkJson& arg, const AkJson& opt, std::vector<AkJson>& outputList)
 {
  	AkJson queryResult;
-	wwiseClient.Call(ak::wwise::core::object::get, arg, opt, queryResult, 100);
+	wwiseClient.Call(ak::wwise::core::object::get, arg, opt, queryResult, 500);
 
     const auto& objects = queryResult["return"].GetArray();
     for (const auto& object : objects)
@@ -80,7 +80,7 @@ void WwizardWwiseClient::WalkChildren(const std::string& guid, const AkJson& opt
                 {"transform", AkJson::Array{ AkJson::Map {{"select", AkJson::Array{ AkVariant("children")}}}}}
             }});
 
-    wwiseClient.Call(ak::wwise::core::object::get, arg, opt, queryResult, 100);
+    wwiseClient.Call(ak::wwise::core::object::get, arg, opt, queryResult, 500);
 
     const auto& objects = queryResult["return"].GetArray();
     for (const auto& object : objects)
@@ -99,7 +99,7 @@ const AkJson WwizardWwiseClient::GetChildrenFromGuid(const std::string guid, con
     } });
     AkJson queryResult;
 
-    wwiseClient.Call(ak::wwise::core::object::get, arg, option, queryResult, 100);
+    wwiseClient.Call(ak::wwise::core::object::get, arg, option, queryResult, 500);
 
     return queryResult;
 }
@@ -113,14 +113,13 @@ AkJson WwizardWwiseClient::GetObjectFromPath(const std::string path, AkJson opti
 
     AkJson queryResult;
 
-    wwiseClient.Call(ak::wwise::core::object::get, arg, option, queryResult, 100);
+    wwiseClient.Call(ak::wwise::core::object::get, arg, option, queryResult, 500);
 
     return queryResult;
 }
 
 AkJson WwizardWwiseClient::RunQueryFromGuuid(const std::string guid)
 {
-    std::cout << guid << std::endl;
     AkJson arg(AkJson::Map{
        { "from", AkJson::Map{{ "query", AkJson::Array{AkVariant(guid)}}}}});
 
@@ -128,7 +127,7 @@ AkJson WwizardWwiseClient::RunQueryFromGuuid(const std::string guid)
     { "return", AkJson::Array{ AkVariant("id"), AkVariant("name"), AkVariant("type"), AkVariant("path"), AkVariant("color")}}});
 
     AkJson queryResult;
-    wwiseClient.Call(ak::wwise::core::object::get, arg, options, queryResult, 100);
+    wwiseClient.Call(ak::wwise::core::object::get, arg, options, queryResult, 500);
 
     return queryResult;
 }
@@ -139,7 +138,7 @@ AkJson WwizardWwiseClient::RunCustomQuery(const AkJson arg)
     AkJson options(AkJson::Map{
     { "return", AkJson::Array{ AkVariant("id"), AkVariant("name"), AkVariant("type"), AkVariant("path"), AkVariant("color")}}});
 
-    wwiseClient.Call(ak::wwise::core::object::get, arg, options, queryResult, 100);
+    wwiseClient.Call(ak::wwise::core::object::get, arg, options, queryResult, 500);
 
     return queryResult;
 }
@@ -150,7 +149,7 @@ void WwizardWwiseClient::GetProjectInfo()
     AkJson arg(AkJson::Map{});
     AkJson opt(AkJson::Map{});
 
-    wwiseClient.Call(ak::wwise::core::getInfo, arg, opt, queryResult, 100);
+    wwiseClient.Call(ak::wwise::core::getInfo, arg, opt, queryResult, 500);
 
     const auto objects = queryResult["directories"];
 }
@@ -163,6 +162,6 @@ void WwizardWwiseClient::OpenPropertyInWwise(std::string& guid)
     AkJson options(AkJson::Map{ });
     AkJson result;
 
-    wwiseClient.Call(ak::wwise::ui::commands::execute, openProperty, options, result, 100);
-    wwiseClient.Call(ak::wwise::ui::commands::execute, openHierarchy, options, result, 100);
+    wwiseClient.Call(ak::wwise::ui::commands::execute, openProperty, options, result, 500);
+    wwiseClient.Call(ak::wwise::ui::commands::execute, openHierarchy, options, result, 500);
 }
