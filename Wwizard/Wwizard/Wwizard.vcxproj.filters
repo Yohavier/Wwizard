@@ -28,6 +28,9 @@
     <Filter Include="Source Files\plugixml">
       <UniqueIdentifier>{246949a0-5e70-4b67-a24c-c1ace78c8a98}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Header Files\Helper">
+      <UniqueIdentifier>{b6e0ad99-fb72-4339-bc68-ee1e9b3d1e21}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp">
@@ -133,6 +136,12 @@
     </ClInclude>
     <ClInclude Include="WwuLookUpData.h">
       <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="ResultFile.h">
+      <Filter>Header Files\Helper</Filter>
+    </ClInclude>
+    <ClInclude Include="Issues.h">
+      <Filter>Header Files\Helper</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

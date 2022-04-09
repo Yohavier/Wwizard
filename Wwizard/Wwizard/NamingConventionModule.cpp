@@ -90,12 +90,12 @@ bool NamingConventionModule::DetermineResult()
 	return namingIssueResults.empty();
 }
 
-void NamingConventionModule::AddIssueToList(std::string guid, std::string name, IssueMessage issue)
+void NamingConventionModule::AddIssueToList(std::string guid, std::string name, Issue issue)
 {
-	namingIssueResults.emplace(guid, NamingIssueResult(guid, name, issue));
+	namingIssueResults.emplace(guid, NamingResultFile(guid, name, issue));
 }
 
-std::string& NamingConventionModule::GetErrorMessageFromIssue(IssueMessage issue)
+std::string& NamingConventionModule::GetErrorMessageFromIssue(Issue issue)
 {
 	return issueMessages[issue];
 }
@@ -184,7 +184,7 @@ void NamingConventionModule::IterateThroughWwu(pugi::xml_node wwuNode, std::stri
 				std::string newNamePath = AddLastNamePathLayer(namePath, node, node.name());
 				if (static_cast<std::string>(node.attribute("Name").value()) != newNamePath.c_str() && namingIssueResults.find(newNamePath) == namingIssueResults.end())
 				{
-					AddIssueToList(static_cast<std::string>(node.attribute("ID").value()), static_cast<std::string>(node.attribute("Name").value()), IssueMessage::HIERARCHY);
+					AddIssueToList(static_cast<std::string>(node.attribute("ID").value()), static_cast<std::string>(node.attribute("Name").value()), Issue::HIERARCHY);
 				}
 				CheckNameForSpace(node, wwuSettings[wwuType].allowSpace);
 				CheckUppercaseRule(node, wwuSettings[wwuType].allowUpperCase);
@@ -196,7 +196,7 @@ void NamingConventionModule::IterateThroughWwu(pugi::xml_node wwuNode, std::stri
 			std::string newNamePath = AddLastNamePathLayer(namePath, node, static_cast<std::string>(node.name()));
 			if (static_cast<std::string>(node.attribute("Name").value()) != newNamePath.c_str() && namingIssueResults.find(newNamePath) == namingIssueResults.end())
 			{
-				AddIssueToList(static_cast<std::string>(node.attribute("ID").value()), static_cast<std::string>(node.attribute("Name").value()), IssueMessage::HIERARCHY);
+				AddIssueToList(static_cast<std::string>(node.attribute("ID").value()), static_cast<std::string>(node.attribute("Name").value()), Issue::HIERARCHY);
 			}
 
 			CheckNameForSpace(node, wwuSettings[wwuType].allowSpace);
@@ -239,7 +239,7 @@ void NamingConventionModule::CheckNameForSpace(pugi::xml_node& currentNode, bool
 		size_t loc = currentName.find(" ");
 		if (loc < currentName.size())
 		{
-			AddIssueToList(static_cast<std::string>(currentNode.attribute("ID").value()), static_cast<std::string>(currentNode.attribute("Name").value()), IssueMessage::SPACE);
+			AddIssueToList(static_cast<std::string>(currentNode.attribute("ID").value()), static_cast<std::string>(currentNode.attribute("Name").value()), Issue::SPACE);
 		}
 	}
 }
@@ -251,7 +251,7 @@ void NamingConventionModule::CheckForMultipleSeparatorsPerLayer(std::string newN
 	{
 		if (!IsCorrectSuffix(currentName, newNameLayer.substr(newNameLayer.find("_") + 1), containerName))
 		{
-			AddIssueToList(static_cast<std::string>(currentNode.attribute("ID").value()), static_cast<std::string>(currentNode.attribute("Name").value()), IssueMessage::SEPARATOR);
+			AddIssueToList(static_cast<std::string>(currentNode.attribute("ID").value()), static_cast<std::string>(currentNode.attribute("Name").value()), Issue::SEPARATOR);
 		}
 	}
 }
@@ -331,7 +331,7 @@ bool NamingConventionModule::CheckUppercaseRule(pugi::xml_node& currentNode, boo
 	
 	if (std::any_of(currentName.begin(), currentName.end(), isupper))
 	{
-		AddIssueToList(static_cast<std::string>(currentNode.attribute("ID").value()), static_cast<std::string>(currentNode.attribute("Name").value()), IssueMessage::UPPERCASE);
+		AddIssueToList(static_cast<std::string>(currentNode.attribute("ID").value()), static_cast<std::string>(currentNode.attribute("Name").value()), Issue::UPPERCASE);
 		return false;
 	}
 

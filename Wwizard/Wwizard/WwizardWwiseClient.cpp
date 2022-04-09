@@ -90,17 +90,17 @@ void WwizardWwiseClient::WalkChildren(const std::string& guid, const AkJson& opt
     }
 }
 
-const AkJson WwizardWwiseClient::GetChildrenFromPath(const std::string path, const AkJson option)
+const AkJson WwizardWwiseClient::GetChildrenFromGuid(const std::string guid, const AkJson option)
 {
     AkJson arg(AkJson::Map{
-        {
-            {"from", AkJson::Map{{ "path", AkJson::Array{ AkVariant(path) }}}},
-            {"transform", AkJson::Array{ AkJson::Map {{"select", AkJson::Array{ AkVariant("children")}}}}}
-        } });
+    {
+        {"from", AkJson::Map{{ "id", AkJson::Array{ AkVariant(guid) }}}},
+        {"transform", AkJson::Array{ AkJson::Map {{"select", AkJson::Array{ AkVariant("children")}}}}}
+    } });
     AkJson queryResult;
- 
+
     wwiseClient.Call(ak::wwise::core::object::get, arg, option, queryResult, 100);
-    
+
     return queryResult;
 }
 

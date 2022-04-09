@@ -4,6 +4,7 @@
 #include "WwizardWwiseClient.h"
 #include <map>
 #include <guiddef.h>
+#include "ResultFile.h"
 
 enum class QueryType
 {
@@ -38,24 +39,6 @@ struct BaseQueryStructure
 		, arg(arg)
 	{}
 };
-
-struct QueryResult
-{
-	std::string name;
-	std::string guid;
-	std::string path;
-	std::string type;
-	int color;
-
-	QueryResult(std::string name, std::string guid, std::string path, std::string type, int color)
-		: name(name)
-		, guid(guid)
-		, path(path)
-		, type(type)
-		, color(color)
-	{}
-};
-
 
 class QueryEditorModule
 {
@@ -108,7 +91,7 @@ private:
 	void FetchWwiseQueries();
 	void FetchWwiseFolderchildren(BaseQueryStructure& parentStructureFolder, const AkJson options);
 	const BaseQueryStructure* const GetCurrentSelectionQuery();
-	const QueryResult* const GetCurrentSelectionFile();
+	const QueryResultFile* const GetCurrentSelectionFile();
 	void LoadWaapiQueriesFromJson();
 	void LoadWaqlQueriesFromJson();
 	void SaveCustomQueriesToJson();
@@ -118,7 +101,7 @@ private:
 public:
 	std::map<std::string, BaseQueryStructure> allQueries;
 	std::unique_ptr<BaseQueryStructure> wwiseQueryHierarchy;
-	std::map<std::string, QueryResult> queryResultFiles;
+	std::map<std::string, QueryResultFile> queryResultFiles;
 
 	std::map<std::string, const BaseQueryStructure&> waapiQueries;
 	std::map<std::string, const BaseQueryStructure&> waqlQueries;

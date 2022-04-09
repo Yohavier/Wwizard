@@ -177,8 +177,10 @@
     <ClInclude Include="..\ThirdParty\imstb_truetype.h" />
     <ClInclude Include="Application.h" />
     <ClInclude Include="Dockspace.h" />
+    <ClInclude Include="Issues.h" />
     <ClInclude Include="NamingConventionModule.h" />
     <ClInclude Include="QueryEditorModule.h" />
+    <ClInclude Include="ResultFile.h" />
     <ClInclude Include="SettingHandler.h" />
     <ClInclude Include="SortOriginalsModule.h" />
     <ClInclude Include="WwizardWwiseClient.h" />

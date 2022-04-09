@@ -5,14 +5,8 @@
 #include "WwuLookUpData.h"
 #include <set>
 #include <map>
-
-enum class IssueMessage
-{
-	HIERARCHY,
-	SPACE,
-	UPPERCASE,
-	SEPARATOR
-};
+#include "Issues.h"
+#include "ResultFile.h"
 
 struct WwuSettings
 {
@@ -116,20 +110,6 @@ struct ContainerSettings
 	}
 };
 
-struct NamingIssueResult
-{
-	NamingIssueResult() = delete;
-	NamingIssueResult(std::string guid, std::string currentName, IssueMessage issue)
-		: guid(guid)
-		, currentName(currentName)
-		, issue(issue)
-	{}
-
-	std::string guid;
-	std::string currentName;
-	IssueMessage issue;
-};
-
 class NamingConventionModule
 { 
 public:
@@ -139,7 +119,7 @@ public:
 	~NamingConventionModule();
 
 	bool CheckNamingConvention();
-	std::string& GetErrorMessageFromIssue(IssueMessage issue);
+	std::string& GetErrorMessageFromIssue(Issue issue);
 
 private:
 	void PreFetchAllWwuData(std::string directory);
@@ -158,7 +138,7 @@ private:
 
 	bool DetermineResult();
 	void ClearOldData();
-	void AddIssueToList(std::string guid, std::string name, IssueMessage issue);
+	void AddIssueToList(std::string guid, std::string name, Issue issue);
 
 
 	void SaveNamingConventionSettings();
@@ -174,7 +154,7 @@ public:
 	std::string projectPath;	
 	std::vector<WwuLookUpData> prefetchedWwuData;
 
-	std::map<std::string, NamingIssueResult> namingIssueResults;
+	std::map<std::string, NamingResultFile> namingIssueResults;
 
 	std::set<std::string> whitelistedContainers = { "Folder", "Switch", "AudioDevice", "SwitchGroup", 
 		"SoundBank", "Event", "DialogueEvent", "Bus", "AuxBus", "MusicSegment", "MusicTrack", "MusicSwitchContainer", 
@@ -195,8 +175,8 @@ public:
 		{"States","_States"},{"Switches","_Switches"},{"Triggers","_Triggers"},{"VirtualAcoustics","_Virtual Acoustics"}
 	};
 
-	std::map<IssueMessage, std::string> issueMessages = { {IssueMessage::HIERARCHY, "Hierarchy doesnt match"},
-		{IssueMessage::SEPARATOR, "Multiple Separators or suffix is wrong"}, {IssueMessage::SPACE, "Space is not allowed"},
-		{IssueMessage::UPPERCASE, "Uppercase is not allowed"} };
+	std::map<Issue, std::string> issueMessages = { {Issue::HIERARCHY, "Hierarchy doesnt match"},
+		{Issue::SEPARATOR, "Multiple Separators or suffix is wrong"}, {Issue::SPACE, "Space is not allowed"},
+		{Issue::UPPERCASE, "Uppercase is not allowed"} };
 };
 

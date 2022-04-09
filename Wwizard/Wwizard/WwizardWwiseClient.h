@@ -23,8 +23,6 @@ public:
 
 	void WalkProjectPath(const AkJson& arg, const AkJson& opt, std::vector<AkJson>& outputList);
 
-	const AkJson GetChildrenFromPath(const std::string path, const AkJson option);
-
 	AkJson GetObjectFromPath(const std::string path, AkJson option);
 
 	AkJson RunQueryFromGuuid(const std::string guuid);
@@ -39,6 +37,8 @@ public:
 	}
 
 	void OpenPropertyInWwise(std::string& guid);
+
+	const AkJson GetChildrenFromGuid(const std::string guid, const AkJson option);
 
 private:
 	void WalkChildren(const std::string& guid, const AkJson& opt, std::vector<AkJson>& outputList);

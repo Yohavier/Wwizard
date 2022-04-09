@@ -44,7 +44,7 @@ void QueryEditorModule::FetchWwiseQueries()
 
 void QueryEditorModule::FetchWwiseFolderchildren(BaseQueryStructure& parentStructureFolder, const AkJson options)
 {
-    AkJson queryResult = wwizardClient->GetChildrenFromPath(parentStructureFolder.path, options);
+    AkJson queryResult = wwizardClient->GetChildrenFromGuid(parentStructureFolder.guid, options);
 
     for (const auto& object : queryResult["return"].GetArray())
     {
@@ -102,7 +102,7 @@ const BaseQueryStructure* const QueryEditorModule::GetCurrentSelectionQuery()
     return nullptr;
 }
 
-const QueryResult* const QueryEditorModule::GetCurrentSelectionFile()
+const QueryResultFile* const QueryEditorModule::GetCurrentSelectionFile()
 {
     auto it = queryResultFiles.find(selectedGuid);
     if (it != queryResultFiles.end())
@@ -136,11 +136,11 @@ void QueryEditorModule::RunActiveQueries()
                 {
                     if (object["color"].IsEmpty())
                     {
-                        queryResultFiles.insert({ object["id"].GetVariant().GetString(), QueryResult(object["name"].GetVariant().GetString(), object["id"].GetVariant().GetString(), object["path"].GetVariant().GetString(), object["type"].GetVariant().GetString(), 0) });
+                        queryResultFiles.insert({ object["id"].GetVariant().GetString(), QueryResultFile(object["name"].GetVariant().GetString(), object["id"].GetVariant().GetString(), object["path"].GetVariant().GetString(), object["type"].GetVariant().GetString(), 0) });
                     }
                     else
                     {
-                        queryResultFiles.insert({ object["id"].GetVariant().GetString(), QueryResult(object["name"].GetVariant().GetString(), object["id"].GetVariant().GetString(), object["path"].GetVariant().GetString(), object["type"].GetVariant().GetString(), object["color"].GetVariant().GetInt32()) });
+                        queryResultFiles.insert({ object["id"].GetVariant().GetString(), QueryResultFile(object["name"].GetVariant().GetString(), object["id"].GetVariant().GetString(), object["path"].GetVariant().GetString(), object["type"].GetVariant().GetString(), object["color"].GetVariant().GetInt32()) });
                     } 
                 }
             }
@@ -156,11 +156,11 @@ void QueryEditorModule::RunActiveQueries()
                     {
                         if (object["color"].IsEmpty())
                         {
-                            queryResultFiles.insert({ object["id"].GetVariant().GetString(), QueryResult(object["name"].GetVariant().GetString(), object["id"].GetVariant().GetString(), object["path"].GetVariant().GetString(), object["type"].GetVariant().GetString(), 0) });
+                            queryResultFiles.insert({ object["id"].GetVariant().GetString(), QueryResultFile(object["name"].GetVariant().GetString(), object["id"].GetVariant().GetString(), object["path"].GetVariant().GetString(), object["type"].GetVariant().GetString(), 0) });
                         }
                         else
                         {
-                            queryResultFiles.insert({ object["id"].GetVariant().GetString(), QueryResult(object["name"].GetVariant().GetString(), object["id"].GetVariant().GetString(), object["path"].GetVariant().GetString(), object["type"].GetVariant().GetString(), object["color"].GetVariant().GetInt32()) });
+                            queryResultFiles.insert({ object["id"].GetVariant().GetString(), QueryResultFile(object["name"].GetVariant().GetString(), object["id"].GetVariant().GetString(), object["path"].GetVariant().GetString(), object["type"].GetVariant().GetString(), object["color"].GetVariant().GetInt32()) });
                         }
                     }
                 }

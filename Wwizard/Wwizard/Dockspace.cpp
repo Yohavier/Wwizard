@@ -533,7 +533,7 @@ void Dockspace::ShowDetails(bool* p_open)
     ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2(2, 2));
 
     auto possibleSelectedQuery = queryEditorModule->FindInMap<BaseQueryStructure*, std::map<std::string, BaseQueryStructure>&>(queryEditorModule->allQueries);
-    auto possibleSelectedFile = queryEditorModule->FindInMap<QueryResult*, std::map<std::string, QueryResult>&>(queryEditorModule->queryResultFiles);
+    auto possibleSelectedFile = queryEditorModule->FindInMap<QueryResultFile*, std::map<std::string, QueryResultFile>&>(queryEditorModule->queryResultFiles);
 
     if (possibleSelectedQuery != nullptr)
     {
@@ -734,7 +734,7 @@ void Dockspace::ShowNamingConventionModule()
                 for (auto& issue : namingConventionModule->namingIssueResults)
                 {
                     ImGui::TableNextColumn();
-                    if (ImGui::Selectable(("##", issue.second.currentName.c_str()), false, ImGuiSelectableFlags_AllowDoubleClick))
+                    if (ImGui::Selectable(("##", issue.second.name.c_str()), false, ImGuiSelectableFlags_AllowDoubleClick))
                     {
                         if (ImGui::IsMouseDoubleClicked(0))
                         {
