@@ -3,6 +3,15 @@
 
 using namespace AK::WwiseAuthoringAPI;
 
+#if defined( AK_ENABLE_ASSERTS )
+
+void SampleAssertHook(const char* in_pszExpression, const char* in_pszFileName, int in_lineNumber)
+{}
+
+AkAssertHook g_pAssertHook = SampleAssertHook;
+
+#endif
+
 WwizardWwiseClient::WwizardWwiseClient() 
 {
     std::cout << "Initialized Wwizard Wwise Client" << std::endl;

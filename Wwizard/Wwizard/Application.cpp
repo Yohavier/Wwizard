@@ -1,14 +1,5 @@
 #include "Application.h" 
 
-#if defined( AK_ENABLE_ASSERTS )
-
-void SampleAssertHook(const char* in_pszExpression, const char* in_pszFileName, int in_lineNumber)
-{}
-
-AkAssertHook g_pAssertHook = SampleAssertHook;
-
-#endif
-
 Application::Application()
 {
     wwizardWwiseClient.reset(new WwizardWwiseClient());
