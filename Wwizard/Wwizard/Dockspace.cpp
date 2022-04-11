@@ -19,7 +19,7 @@ Dockspace::Dockspace(std::unique_ptr<WwizardWwiseClient>& wwizardWwiseClient, st
 
     std::cout << "Initialized Dockspace" << std::endl;
     ImGuiIO& io = ImGui::GetIO();
-    float fontSize = 18.0f;// *2.0f;
+    float fontSize = 18.0f;
     auto fontpath = static_cast<std::string>(SOLUTION_DIR) + "assets/fonts/OpenSans-Bold.ttf";
     io.FontDefault = io.Fonts->AddFontFromFileTTF(fontpath.c_str(), fontSize);
     SetDefaultStyle();
@@ -172,7 +172,6 @@ void Dockspace::SetLayout(Layout newLayout)
     currentLayout = newLayout;
 }
 
-
 //Settings Layout
 void Dockspace::ShowSettings(bool* p_open)
 {
@@ -214,7 +213,6 @@ void Dockspace::ShowSettings(bool* p_open)
     }
     ImGui::End();
 }
-
 
 //QueryLayouts
 void Dockspace::CreateQueryEditor(bool* p_open)
@@ -455,15 +453,18 @@ void Dockspace::ShowQueryResults()
         if (ImGui::Selectable(object.second.name.c_str(), is_selected, ImGuiSelectableFlags_AllowDoubleClick))
         {
             if (is_selected)
+            {
                 ImGui::SetItemDefaultFocus();
+            }
 
             queryEditorModule->SetQuerySelection(object.second.guid);
 
             if (ImGui::IsMouseDoubleClicked(0))
             {
                 wwizarWwiseClient->OpenPropertyInWwise(object.second.guid);
-            }
-        }  
+            }  
+        }   
+
         ImGui::Separator();
     }
     ImGui::PopID();
@@ -950,3 +951,4 @@ void Dockspace::SetDefaultStyle()
     colors[ImGuiCol_TitleBgActive] = ImVec4{ 0.15f, 0.1505f, 0.151f, 1.0f };
     colors[ImGuiCol_TitleBgCollapsed] = ImVec4{ 0.15f, 0.1505f, 0.151f, 1.0f };
 }
+
