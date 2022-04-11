@@ -157,7 +157,7 @@
     <ClCompile Include="..\ThirdParty\imgui_widgets.cpp" />
     <ClCompile Include="..\ThirdParty\pugixml-1.12\src\pugixml.cpp" />
     <ClCompile Include="Application.cpp" />
-    <ClCompile Include="Dockspace.cpp" />
+    <ClCompile Include="GUI.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="NamingConventionModule.cpp" />
     <ClCompile Include="QueryEditorModule.cpp" />
@@ -176,7 +176,7 @@
     <ClInclude Include="..\ThirdParty\imstb_textedit.h" />
     <ClInclude Include="..\ThirdParty\imstb_truetype.h" />
     <ClInclude Include="Application.h" />
-    <ClInclude Include="Dockspace.h" />
+    <ClInclude Include="GUI.h" />
     <ClInclude Include="Issues.h" />
     <ClInclude Include="NamingConventionModule.h" />
     <ClInclude Include="QueryEditorModule.h" />

@@ -57,7 +57,7 @@
     <ClCompile Include="..\ThirdParty\imgui_widgets.cpp">
       <Filter>ImGui</Filter>
     </ClCompile>
-    <ClCompile Include="Dockspace.cpp">
+    <ClCompile Include="GUI.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="WwizardWwiseClient.cpp">
@@ -110,7 +110,7 @@
     <ClInclude Include="..\ThirdParty\imstb_truetype.h">
       <Filter>ImGui</Filter>
     </ClInclude>
-    <ClInclude Include="Dockspace.h">
+    <ClInclude Include="GUI.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="WwizardWwiseClient.h">
