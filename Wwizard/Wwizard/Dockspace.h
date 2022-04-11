@@ -20,7 +20,7 @@ enum class Layout
 class Dockspace
 {
 public:
-	Dockspace(std::unique_ptr<WwizardWwiseClient>& wwizardWwiseClient, std::unique_ptr < SettingHandler>& settingHandler);
+	Dockspace(std::unique_ptr<WwizardWwiseClient>& wwizardWwiseClient, std::unique_ptr<SettingHandler>& settingHandler, std::unique_ptr<QueryEditorModule>&, std::unique_ptr<SortOriginalsModule>&, std::unique_ptr<NamingConventionModule>&);
 	void Render(bool* p_open);
 
 private:
@@ -57,9 +57,9 @@ private:
 	std::unique_ptr<WwizardWwiseClient>& wwizarWwiseClient;
 	std::unique_ptr<SettingHandler>& settingHandler;
 
-	std::unique_ptr<QueryEditorModule> queryEditorModule = nullptr;
-	std::unique_ptr<SortOriginalsModule> sortOriginalsModule = nullptr;
-	std::unique_ptr<NamingConventionModule> namingConventionModule = nullptr;
+	std::unique_ptr<QueryEditorModule>& queryEditorModule;
+	std::unique_ptr<SortOriginalsModule>& sortOriginalsModule;
+	std::unique_ptr<NamingConventionModule>& namingConventionModule;
 };
 
 

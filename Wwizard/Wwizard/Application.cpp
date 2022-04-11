@@ -23,8 +23,11 @@ Application::Application()
 {
     wwizardWwiseClient.reset(new WwizardWwiseClient());
     settingsHandler.reset(new SettingHandler());
-    //Default Connection
     wwizardWwiseClient->Connect(settingsHandler);
+
+    queryEditorModule.reset(new QueryEditorModule(wwizardWwiseClient));
+    sortOriginalsModule.reset(new SortOriginalsModule());
+    namingConventionModule.reset(new NamingConventionModule(settingsHandler->GetWwisProjectPathRef()));
 
     // Create application window
     //ImGui_ImplWin32_EnableDpiAwareness();
@@ -58,7 +61,7 @@ Application::Application()
     ImGui_ImplWin32_Init(hwnd);
     ImGui_ImplDX10_Init(g_pd3dDevice);
 
-    myDock.reset(new Dockspace(wwizardWwiseClient, settingsHandler));
+    myDock.reset(new Dockspace(wwizardWwiseClient, settingsHandler, queryEditorModule, sortOriginalsModule, namingConventionModule));
 }
 
 void Application::Loop()

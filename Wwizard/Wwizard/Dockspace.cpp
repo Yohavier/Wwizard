@@ -7,17 +7,14 @@ static std::string sdkPathSetting;
 static std::string waapiIPSetting;
 static int waapiPortSetting;
 
-Dockspace::Dockspace(std::unique_ptr<WwizardWwiseClient>& wwizardWwiseClient, std::unique_ptr<SettingHandler>& settingHandler)
+Dockspace::Dockspace(std::unique_ptr<WwizardWwiseClient>& wwizardWwiseClient, std::unique_ptr<SettingHandler>& settingHandler, std::unique_ptr<QueryEditorModule>& queryEditorModule, std::unique_ptr<SortOriginalsModule>& sortOriginalsModule, std::unique_ptr<NamingConventionModule>& namingConventionModule)
     : currentLayout(Layout::HOME)
     , wwizarWwiseClient(wwizardWwiseClient)
     , settingHandler(settingHandler)
+    , queryEditorModule(queryEditorModule)
+    , sortOriginalsModule(sortOriginalsModule)
+    , namingConventionModule(namingConventionModule)
 { 
-    //Init all modules
-    queryEditorModule.reset(new QueryEditorModule(wwizardWwiseClient));
-    sortOriginalsModule.reset(new SortOriginalsModule());
-    namingConventionModule.reset(new NamingConventionModule(settingHandler->GetWwisProjectPathRef())); 
-
-    std::cout << "Initialized Dockspace" << std::endl;
     ImGuiIO& io = ImGui::GetIO();
     float fontSize = 18.0f;
     auto fontpath = static_cast<std::string>(SOLUTION_DIR) + "assets/fonts/OpenSans-Bold.ttf";

@@ -2,7 +2,8 @@
 #include <WinUser.h>
 
 
-/*
+/* 
+* TODO:
 * delete invalid/empty events
 * reset faders of selected objects
 * Enable streaming for longer files 
