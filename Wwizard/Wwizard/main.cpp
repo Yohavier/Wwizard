@@ -9,6 +9,8 @@
 * find large files
 * open and import wav file to reaper shortcut select file and ctrl+r
 * multiselect
+* count music and sfx originals
+* Query save Data is sometimes deleted
 */
 
 int main()

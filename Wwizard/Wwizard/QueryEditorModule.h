@@ -6,7 +6,6 @@
 #include <guiddef.h>
 #include "ResultFile.h"
 
-//Todo Query save Data is sometimes deleted
 enum class QueryType
 {
 	WWISEQUERY,

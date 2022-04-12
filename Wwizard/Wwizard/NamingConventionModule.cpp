@@ -9,12 +9,6 @@
 #include "rapidjson/RapidJsonUtils.h"
 #include <algorithm>
 
-
-NamingConventionModule::NamingConventionModule()
-{
-	LoadNamingConventionSettings();
-}
-
 NamingConventionModule::NamingConventionModule(std::string wwiseProjPath)
 {
 	wwiseProjPath.erase(0, 1);
@@ -98,6 +92,16 @@ void NamingConventionModule::AddIssueToList(std::string guid, std::string name, 
 std::string& NamingConventionModule::GetErrorMessageFromIssue(Issue issue)
 {
 	return issueMessages[issue];
+}
+
+const std::vector<NamingResultFile> NamingConventionModule::GetIssueList()
+{
+	std::vector<NamingResultFile> issueList;
+	for (const auto& issue : namingIssueResults)
+	{
+		issueList.push_back(issue.second);
+	}
+	return issueList;
 }
 
 //Scan Naming Convention

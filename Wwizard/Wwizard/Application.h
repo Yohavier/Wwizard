@@ -1,7 +1,12 @@
 #pragma once
 #include <memory>
+
 #include "GUI.h"
 #include "WwizardWwiseClient.h"
+#include "SettingHandler.h"
+#include "NamingConventionModule.h"
+#include "QueryEditorModule.h"
+#include "SortOriginalsModule.h"
 
 class Application
 {

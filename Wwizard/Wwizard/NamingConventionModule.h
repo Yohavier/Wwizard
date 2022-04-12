@@ -113,13 +113,13 @@ struct ContainerSettings
 class NamingConventionModule
 { 
 public:
-	NamingConventionModule();
 	NamingConventionModule(std::string wwiseProjPath);
-
 	~NamingConventionModule();
 
 	bool CheckNamingConvention();
 	std::string& GetErrorMessageFromIssue(Issue issue);
+	
+	const std::vector<NamingResultFile> GetIssueList();
 
 private:
 	void PreFetchAllWwuData(std::string directory);
@@ -146,15 +146,8 @@ private:
 
 
 public:
-	std::string levelSeparator = "_";
-
 	std::map<std::string, WwuSettings> wwuSettings;
 	std::map<std::string, ContainerSettings> containerSettings;
-
-	std::string projectPath;	
-	std::vector<WwuLookUpData> prefetchedWwuData;
-
-	std::map<std::string, NamingResultFile> namingIssueResults;
 
 	std::set<std::string> whitelistedContainers = { "Folder", "Switch", "AudioDevice", "SwitchGroup", 
 		"SoundBank", "Event", "DialogueEvent", "Bus", "AuxBus", "MusicSegment", "MusicTrack", "MusicSwitchContainer", 
@@ -174,6 +167,15 @@ public:
 		{"Modulators","_Modulators"},{"Queries","_Queries"},{"SoundBanks","_SoundBanks"},{"SoundcasterSessions","_Soundcaster Sessions"},
 		{"States","_States"},{"Switches","_Switches"},{"Triggers","_Triggers"},{"VirtualAcoustics","_Virtual Acoustics"}
 	};
+
+	
+
+private:
+	std::map<std::string, NamingResultFile> namingIssueResults;
+	std::string levelSeparator = "_";
+
+	std::string projectPath;
+	std::vector<WwuLookUpData> prefetchedWwuData;
 
 	std::map<Issue, std::string> issueMessages = { {Issue::HIERARCHY, "Hierarchy doesnt match"},
 		{Issue::SEPARATOR, "Multiple Separators or suffix is wrong"}, {Issue::SPACE, "Space is not allowed"},

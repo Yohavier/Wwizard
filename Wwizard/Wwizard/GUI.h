@@ -2,7 +2,6 @@
 #include <iostream>
 #include <tchar.h>
 #include <memory>
-#include <stdio.h>
 
 #include "WwizardWwiseClient.h"
 #include "QueryEditorModule.h"

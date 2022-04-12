@@ -11,10 +11,6 @@
 #include <algorithm>
 #include "WwuLookUpData.h"
 
-/*Todo
-* count music and sfx originals
-*/
-
 class SortOriginalsModule
 {
 public:

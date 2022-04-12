@@ -1,5 +1,6 @@
 #include "SortOriginalsModule.h"
 #include <regex>
+
 void SortOriginalsModule::LoadModule(std::string wwiseProjPath)
 {
 	wwiseProjPath.erase(0, 1);

@@ -163,7 +163,7 @@ void WwizardWwiseClient::GetProjectInfo()
     const auto objects = queryResult["directories"];
 }
 
-void WwizardWwiseClient::OpenPropertyInWwise(std::string& guid)
+void WwizardWwiseClient::OpenPropertyInWwise(const std::string& guid)
 {
     AkJson openHierarchy(AkJson::Map{ {{"command", AkVariant("FindInProjectExplorerSyncGroup1")}, {"objects", AkJson::Array{AkVariant(guid)}}} });
     AkJson openProperty(AkJson::Map{ {{"command", AkVariant("Inspect")}, {"objects", AkJson::Array{AkVariant(guid)}}} });

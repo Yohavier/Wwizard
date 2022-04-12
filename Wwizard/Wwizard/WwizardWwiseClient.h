@@ -36,7 +36,7 @@ public:
 		return wwiseClient.IsConnected();
 	}
 
-	void OpenPropertyInWwise(std::string& guid);
+	void OpenPropertyInWwise(const std::string& guid);
 
 	const AkJson GetChildrenFromGuid(const std::string guid, const AkJson option);
 

@@ -813,19 +813,19 @@ void GUI::ShowNamingConventionModule()
                 ImGui::TableNextRow();
 
                 
-                for (auto& issue : namingConventionModule->namingIssueResults)
+                for (auto& issue : namingConventionModule->GetIssueList())
                 {
                     ImGui::TableNextColumn();
-                    if (ImGui::Selectable(("##", issue.second.name.c_str()), false, ImGuiSelectableFlags_AllowDoubleClick))
+                    if (ImGui::Selectable(("##", issue.name.c_str()), false, ImGuiSelectableFlags_AllowDoubleClick))
                     {
                         if (ImGui::IsMouseDoubleClicked(0))
                         {
-                            wwizarWwiseClient->OpenPropertyInWwise(issue.second.guid);
+                            wwizarWwiseClient->OpenPropertyInWwise(issue.guid);
                         }
                     }
             
                     ImGui::TableNextColumn();
-                    ImGui::Text(namingConventionModule->GetErrorMessageFromIssue(issue.second.issue).c_str());
+                    ImGui::Text(namingConventionModule->GetErrorMessageFromIssue(issue.issue).c_str());
                     ImGui::TableNextRow();
                 }
                 ImGui::EndTable();
@@ -845,7 +845,7 @@ void GUI::ShowNamingConventionModule()
         if (ImGui::BeginTabItem("Additional Settings"))
         {
             ImGui::Separator();
-            for (auto& wwuType : namingConventionModule->whitelistedWwuTypes)
+            for (const auto& wwuType : namingConventionModule->whitelistedWwuTypes)
             {
                 ImGui::Text(namingConventionModule->stringToReplace[wwuType].substr(1).c_str());
                 ImGui::SameLine();
