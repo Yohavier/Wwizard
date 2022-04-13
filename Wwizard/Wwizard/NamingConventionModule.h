@@ -113,35 +113,35 @@ struct ContainerSettings
 class NamingConventionModule
 { 
 public:
-	NamingConventionModule(std::string wwiseProjPath);
+	NamingConventionModule(const std::string& wwiseProjPath);
 	~NamingConventionModule();
 
 	bool CheckNamingConvention();
 
-	const std::string& GetErrorMessageFromIssue(Issue issue);
-	const std::vector<NamingResultFile> GetIssueList();
+	const std::string& GetErrorMessageFromIssue(const Issue& issue);
+	const std::map<std::string, NamingResultFile>& GetNamingIssues();
 	const std::set<std::string>& GetWhiteListedContainers();
 	const std::set<std::string>& GetWhiteListedWwuTypes();
 	const std::string& GetStringToReplace(const std::string& wwuType);
 
 private:
-	void PreFetchAllWwuData(std::string directory);
-	void FetchSingleWwuData(std::string path);
-	void ScanWorkUnitXMLByPath(std::string wwuPath, std::string namePath);
-	void StartCheckingNamingConvention(std::string path, std::string namePath);
-	void IterateThroughWwu(pugi::xml_node wwuNode, std::string namePath, std::string wwuType);
+	void PreFetchAllWwuData(const std::string& directory);
+	void FetchSingleWwuData(const std::string& path);
+	void ScanWorkUnitXMLByPath(const std::string& wwuPath, std::string& namePath);
+	void StartCheckingNamingConvention(const std::string& path, std::string namePath);
+	void IterateThroughWwu(const pugi::xml_node& wwuNode, const std::string& namePath, const std::string& wwuType);
 	
 
-	std::string AddLastNamePathLayer(const std::string& currentNamePath, pugi::xml_node& newNode, std::string containerName);
-	void CheckNameForSpace(pugi::xml_node& currentNode, bool& allowSpace);
-	void CheckForMultipleSeparatorsPerLayer(std::string newNameLayer, pugi::xml_node& currentNode, std::string containerName);
-	bool IsCorrectSuffix(std::string& currentName, std::string newNameLayer, std::string& containerName);
-	void ApplyPrefix(std::string& namePath, std::string& fullFolderName, const WwuSettings& newPrefix);
-	bool CheckUppercaseRule(pugi::xml_node& currentNode, bool& allowUppercase);
+	std::string AddLastNamePathLayer(const std::string& currentNamePath, const pugi::xml_node& newNode, const std::string& containerName);
+	void CheckNameForSpace(const pugi::xml_node& currentNode, bool& allowSpace);
+	void CheckForMultipleSeparatorsPerLayer(const std::string& newNameLayer, const pugi::xml_node& currentNode, const std::string& containerName);
+	bool IsCorrectSuffix(const std::string& currentName, const std::string& newNameLayer, const std::string& containerName);
+	void ApplyPrefix(std::string& namePath, const std::string& fullFolderName, const WwuSettings& newPrefix);
+	bool CheckUppercaseRule(const pugi::xml_node& currentNode, const bool& allowUppercase);
 
 	bool DetermineResult();
 	void ClearOldData();
-	void AddIssueToList(std::string guid, std::string name, Issue issue);
+	void AddIssueToList(const std::string& guid, const std::string& name, const Issue& issue);
 
 
 	void SaveNamingConventionSettings();

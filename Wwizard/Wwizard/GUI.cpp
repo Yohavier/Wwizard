@@ -813,19 +813,19 @@ void GUI::ShowNamingConventionModule()
                 ImGui::TableNextRow();
 
                 
-                for (auto& issue : namingConventionModule->GetIssueList())
+                for (auto& issue : namingConventionModule->GetNamingIssues())
                 {
                     ImGui::TableNextColumn();
-                    if (ImGui::Selectable(("##", issue.name.c_str()), false, ImGuiSelectableFlags_AllowDoubleClick))
+                    if (ImGui::Selectable(("##", issue.second.name.c_str()), false, ImGuiSelectableFlags_AllowDoubleClick))
                     {
                         if (ImGui::IsMouseDoubleClicked(0))
                         {
-                            wwizarWwiseClient->OpenPropertyInWwise(issue.guid);
+                            wwizarWwiseClient->OpenPropertyInWwise(issue.second.guid);
                         }
                     }
             
                     ImGui::TableNextColumn();
-                    ImGui::Text(namingConventionModule->GetErrorMessageFromIssue(issue.issue).c_str());
+                    ImGui::Text(namingConventionModule->GetErrorMessageFromIssue(issue.second.issue).c_str());
                     ImGui::TableNextRow();
                 }
                 ImGui::EndTable();

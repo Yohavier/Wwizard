@@ -9,18 +9,19 @@
 #include "rapidjson/RapidJsonUtils.h"
 #include <algorithm>
 
-NamingConventionModule::NamingConventionModule(std::string wwiseProjPath)
+NamingConventionModule::NamingConventionModule(const std::string& wwiseProjPath)
 {
-	wwiseProjPath.erase(0, 1);
-	wwiseProjPath.erase(wwiseProjPath.size() - 1);
-	for (int i = static_cast<int>(wwiseProjPath.size()) - 1; i > 0; i--)
+	std::string relativeWwiseProjPath = wwiseProjPath;
+	relativeWwiseProjPath.erase(0, 1);
+	relativeWwiseProjPath.erase(relativeWwiseProjPath.size() - 1);
+	for (int i = static_cast<int>(relativeWwiseProjPath.size()) - 1; i > 0; i--)
 	{
-		if (wwiseProjPath.at(i) == '\\')
+		if (relativeWwiseProjPath.at(i) == '\\')
 			break;
 		else
-			wwiseProjPath.erase(i);
+			relativeWwiseProjPath.erase(i);
 	}
-	projectPath = wwiseProjPath;
+	projectPath = relativeWwiseProjPath;
 
 	LoadNamingConventionSettings();
 }
@@ -42,7 +43,7 @@ bool NamingConventionModule::CheckNamingConvention()
 }
 
 //Prefetch
-void NamingConventionModule::PreFetchAllWwuData(std::string directory)
+void NamingConventionModule::PreFetchAllWwuData(const std::string& directory)
 {
 	for (const auto& entry : std::filesystem::directory_iterator(directory))
 	{
@@ -60,7 +61,7 @@ void NamingConventionModule::PreFetchAllWwuData(std::string directory)
 	}
 }
 
-void NamingConventionModule::FetchSingleWwuData(std::string path)
+void NamingConventionModule::FetchSingleWwuData(const std::string& path)
 {
 	pugi::xml_document doc;
 	pugi::xml_parse_result result = doc.load_file(path.c_str());
@@ -84,26 +85,21 @@ bool NamingConventionModule::DetermineResult()
 	return namingIssueResults.empty();
 }
 
-void NamingConventionModule::AddIssueToList(std::string guid, std::string name, Issue issue)
+void NamingConventionModule::AddIssueToList(const std::string& guid, const std::string& name, const Issue& issue)
 {
 	namingIssueResults.emplace(guid, NamingResultFile(guid, name, issue));
 }
 
 
 //Getter
-const std::string& NamingConventionModule::GetErrorMessageFromIssue(Issue issue)
+const std::string& NamingConventionModule::GetErrorMessageFromIssue(const Issue& issue)
 {
 	return issueMessages[issue];
 }
 
-const std::vector<NamingResultFile> NamingConventionModule::GetIssueList()
+const std::map<std::string, NamingResultFile>& NamingConventionModule::GetNamingIssues()
 {
-	std::vector<NamingResultFile> issueList;
-	for (const auto& issue : namingIssueResults)
-	{
-		issueList.push_back(issue.second);
-	}
-	return issueList;
+	return namingIssueResults;
 }
 
 const std::set<std::string>& NamingConventionModule::GetWhiteListedContainers()
@@ -123,7 +119,7 @@ const std::string& NamingConventionModule::GetStringToReplace(const std::string&
 
 
 //Scan Naming Convention
-void NamingConventionModule::StartCheckingNamingConvention(std::string path, std::string namePath)
+void NamingConventionModule::StartCheckingNamingConvention(const std::string& path, std::string namePath)
 {
 	for (const auto& entry : std::filesystem::directory_iterator(path))
 	{
@@ -142,7 +138,7 @@ void NamingConventionModule::StartCheckingNamingConvention(std::string path, std
 	}
 }
 
-void NamingConventionModule::ApplyPrefix(std::string& namePath, std::string& fullFolderName, const WwuSettings& newPrefix)
+void NamingConventionModule::ApplyPrefix(std::string& namePath, const std::string& fullFolderName, const WwuSettings& newPrefix)
 {
 	size_t stringLoc = namePath.find(fullFolderName);
 	if (stringLoc < namePath.size())
@@ -155,7 +151,7 @@ void NamingConventionModule::ApplyPrefix(std::string& namePath, std::string& ful
 	}
 }
 
-void NamingConventionModule::ScanWorkUnitXMLByPath(std::string wwuPath, std::string namePath)
+void NamingConventionModule::ScanWorkUnitXMLByPath(const std::string& wwuPath, std::string& namePath)
 {
 	pugi::xml_document doc;
 	pugi::xml_parse_result result = doc.load_file(wwuPath.c_str());
@@ -180,7 +176,7 @@ void NamingConventionModule::ScanWorkUnitXMLByPath(std::string wwuPath, std::str
 	}
 }
 
-void NamingConventionModule::IterateThroughWwu(pugi::xml_node wwuNode, std::string namePath, std::string wwuType)
+void NamingConventionModule::IterateThroughWwu(const pugi::xml_node& wwuNode, const std::string& namePath, const std::string& wwuType)
 {
 	for (auto& node : wwuNode)
 	{
@@ -232,7 +228,7 @@ void NamingConventionModule::IterateThroughWwu(pugi::xml_node wwuNode, std::stri
 	}
 }
 
-std::string NamingConventionModule::AddLastNamePathLayer(const std::string& currentNamePath, pugi::xml_node& newNode, std::string containerName)
+std::string NamingConventionModule::AddLastNamePathLayer(const std::string& currentNamePath, const pugi::xml_node& newNode, const std::string& containerName)
 {
 	std::string newNodeName = static_cast<std::string>(newNode.attribute("Name").value());
 	if (currentNamePath == "")
@@ -253,7 +249,7 @@ std::string NamingConventionModule::AddLastNamePathLayer(const std::string& curr
 	}
 }
 
-void NamingConventionModule::CheckNameForSpace(pugi::xml_node& currentNode, bool& allowSpace)
+void NamingConventionModule::CheckNameForSpace(const pugi::xml_node& currentNode, bool& allowSpace)
 {
 	std::string currentName = static_cast<std::string>(currentNode.attribute("Name").value());
 	if (!allowSpace)
@@ -266,7 +262,7 @@ void NamingConventionModule::CheckNameForSpace(pugi::xml_node& currentNode, bool
 	}
 }
 
-void NamingConventionModule::CheckForMultipleSeparatorsPerLayer(std::string newNameLayer, pugi::xml_node& currentNode, std::string containerName)
+void NamingConventionModule::CheckForMultipleSeparatorsPerLayer(const std::string& newNameLayer, const pugi::xml_node& currentNode, const std::string& containerName)
 {
 	std::string currentName = static_cast<std::string>(currentNode.attribute("Name").value());
 	if (newNameLayer.find("_") < newNameLayer.size())
@@ -278,7 +274,7 @@ void NamingConventionModule::CheckForMultipleSeparatorsPerLayer(std::string newN
 	}
 }
 
-bool NamingConventionModule::IsCorrectSuffix(std::string& currentName, std::string newNameLayer, std::string& containerName)
+bool NamingConventionModule::IsCorrectSuffix(const std::string& currentName, const std::string& newNameLayer, const std::string& containerName)
 {
 	auto container = containerSettings.find(containerName);
 	if (container != containerSettings.end())
@@ -344,7 +340,7 @@ bool NamingConventionModule::IsCorrectSuffix(std::string& currentName, std::stri
 	return true;
 }
 
-bool NamingConventionModule::CheckUppercaseRule(pugi::xml_node& currentNode, bool& allowUpperCase)
+bool NamingConventionModule::CheckUppercaseRule(const pugi::xml_node& currentNode, const bool& allowUpperCase)
 {
 	if (allowUpperCase)
 		return true;
