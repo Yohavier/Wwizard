@@ -452,3 +452,48 @@ void QueryEditorModule::DeleteQuery(std::string guid)
     waapiQueries.erase(guid);
     activeQueryDictionary.erase(guid);
 }
+
+const std::string QueryEditorModule::GetQueryTypeAsString(const QueryType& queryType)
+{
+    switch (queryType)
+    {
+        case QueryType::WAAPIQUERY:
+            return "Waapi";
+        case QueryType::WAQLQUERY:
+            return "Waql";
+        case QueryType::WWISEQUERY:
+            return "Wwise";
+        default:
+            return "";
+    }
+}
+
+const std::map<std::string, const BaseQueryStructure&>& QueryEditorModule::GetWaapiQueries()
+{
+    return waapiQueries;
+}
+
+const std::map<std::string, const BaseQueryStructure&>& QueryEditorModule::GetWaqlQueries()
+{
+    return waqlQueries;
+}
+
+const std::map<std::string, const BaseQueryStructure&>& QueryEditorModule::GetWwiseQueries()
+{
+    return wwiseQueries;
+}
+
+const std::map<std::string, QueryResultFile>& QueryEditorModule::GetQueryResultFiles()
+{
+    return queryResultFiles;
+}
+
+const std::map<std::string, BaseQueryStructure>& QueryEditorModule::GetAllQueries()
+{
+    return allQueries;
+}
+ 
+const std::unique_ptr<BaseQueryStructure>& QueryEditorModule::GetWwiseQueryHierarchy()
+{
+    return wwiseQueryHierarchy;
+}

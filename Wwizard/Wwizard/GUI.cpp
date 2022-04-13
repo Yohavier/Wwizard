@@ -309,7 +309,7 @@ void GUI::CreateQueryEditor(bool* p_open)
 
     if (ImGui::BeginTable("availableWwiseQueries", 1, ImGuiTableFlags_BordersOuter | ImGuiTableFlags_Resizable))
     {
-        ShowWwiseQueries(*queryEditorModule->wwiseQueryHierarchy);
+        ShowWwiseQueries(*queryEditorModule->GetWwiseQueryHierarchy());
         ShowWaapiQueries();
         ShowWaqlQueries();
         ImGui::EndTable();
@@ -448,7 +448,7 @@ void GUI::ShowWaapiQueries()
     {
         int counter = 0;
             
-        for (auto& object : queryEditorModule->waapiQueries)
+        for (auto& object : queryEditorModule->GetWaapiQueries())
         {
             ImGui::PushID(counter);
             const bool is_selected = (queryEditorModule->GetCurrentSelectionGuid() == object.second.guid && ImGui::IsWindowFocused());
@@ -488,7 +488,7 @@ void GUI::ShowWaqlQueries()
     {
         int counter = 0;
 
-        for (auto& object : queryEditorModule->waqlQueries)
+        for (auto& object : queryEditorModule->GetWaqlQueries())
         {
             ImGui::PushID(counter);
             const bool is_selected = (queryEditorModule->GetCurrentSelectionGuid() == object.second.guid && ImGui::IsWindowFocused());
@@ -522,7 +522,7 @@ void GUI::ShowQueryResults()
     ImGui::TableSetColumnIndex(0);
     ImGui::AlignTextToFramePadding();
 
-    for (auto& object : queryEditorModule->queryResultFiles)
+    for (auto& object : queryEditorModule->GetQueryResultFiles())
     {
         auto col = ConvertWwiseColorToRGB(object.second.color);
 
@@ -614,8 +614,8 @@ void GUI::ShowDetails(bool* p_open)
     }
     ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2(2, 2));
 
-    auto possibleSelectedQuery = queryEditorModule->FindInMap<BaseQueryStructure*, std::map<std::string, BaseQueryStructure>&>(queryEditorModule->allQueries);
-    auto possibleSelectedFile = queryEditorModule->FindInMap<QueryResultFile*, std::map<std::string, QueryResultFile>&>(queryEditorModule->queryResultFiles);
+    auto possibleSelectedQuery = queryEditorModule->FindInMap<const BaseQueryStructure*, const std::map<std::string, BaseQueryStructure>&>(queryEditorModule->GetAllQueries());
+    auto possibleSelectedFile = queryEditorModule->FindInMap<const QueryResultFile*, const std::map<std::string, QueryResultFile>&>(queryEditorModule->GetQueryResultFiles());
 
     if (possibleSelectedQuery != nullptr)
     {
@@ -633,7 +633,7 @@ void GUI::ShowDetails(bool* p_open)
 
         ImGui::Text(("Name : " + possibleSelectedQuery->name).c_str());
         ImGui::Text(("Guid : " + possibleSelectedQuery->guid).c_str());
-        ImGui::Text(("Type : " + queryEditorModule->ConvertQueryTypeToString(possibleSelectedQuery->structureType)).c_str());
+        ImGui::Text(("Type : " + queryEditorModule->GetQueryTypeAsString(possibleSelectedQuery->structureType)).c_str());
 
         if (possibleSelectedQuery->structureType == QueryType::WAAPIQUERY || possibleSelectedQuery->structureType == QueryType::WAQLQUERY)
         {
@@ -743,7 +743,7 @@ void GUI::ShowSortOriginalsModule()
             ImGui::TableSetColumnIndex(0);
             ImGui::AlignTextToFramePadding();
 
-            for (auto& object : sortOriginalsModule->unusedOriginalsPaths)
+            for (auto& object : sortOriginalsModule->GetUnusedOriginals())
             {
                 ImGui::Selectable(object.c_str(), false);
             }
@@ -836,24 +836,24 @@ void GUI::ShowNamingConventionModule()
         {
             ImGui::Text("Select in which field the naming convention should be checked.");
             ImGui::Separator();
-            for (auto& wwuType : namingConventionModule->whitelistedWwuTypes)
+            for (auto& wwuType : namingConventionModule->GetWhiteListedWwuTypes())
             {
-                ImGui::Checkbox(namingConventionModule->stringToReplace[wwuType].substr(1).c_str(), &(namingConventionModule->wwuSettings[wwuType].applyNamingConventionCheck));
+                ImGui::Checkbox(namingConventionModule->GetStringToReplace(wwuType).substr(1).c_str(), &(namingConventionModule->wwuSettings[wwuType].applyNamingConventionCheck));
             }
             ImGui::EndTabItem();
         }
         if (ImGui::BeginTabItem("Additional Settings"))
         {
             ImGui::Separator();
-            for (const auto& wwuType : namingConventionModule->whitelistedWwuTypes)
+            for (const auto& wwuType : namingConventionModule->GetWhiteListedWwuTypes())
             {
-                ImGui::Text(namingConventionModule->stringToReplace[wwuType].substr(1).c_str());
+                ImGui::Text(namingConventionModule->GetStringToReplace(wwuType).substr(1).c_str());
                 ImGui::SameLine();
-                ImGui::Checkbox(("## allowSpace" + namingConventionModule->stringToReplace[wwuType].substr(1)).c_str(), &(namingConventionModule->wwuSettings[wwuType].allowSpace));
+                ImGui::Checkbox(("## allowSpace" + namingConventionModule->GetStringToReplace(wwuType).substr(1)).c_str(), &(namingConventionModule->wwuSettings[wwuType].allowSpace));
                 ImGui::SameLine();
                 ImGui::Text("Allow Space");
                 ImGui::SameLine();
-                ImGui::Checkbox(("## allowUpperCase" + namingConventionModule->stringToReplace[wwuType].substr(1)).c_str(), &(namingConventionModule->wwuSettings[wwuType].allowUpperCase));
+                ImGui::Checkbox(("## allowUpperCase" + namingConventionModule->GetStringToReplace(wwuType).substr(1)).c_str(), &(namingConventionModule->wwuSettings[wwuType].allowUpperCase));
                 ImGui::SameLine();
                 ImGui::Text("Allow Upper Case");
             }
@@ -863,11 +863,11 @@ void GUI::ShowNamingConventionModule()
         {
             ImGui::Text("This tab lets you add a prefix to each Physical Folder of Wwise (Type of Work Units).");
             ImGui::Separator();
-            for (auto& wwuType : namingConventionModule->whitelistedWwuTypes)
+            for (auto& wwuType : namingConventionModule->GetWhiteListedWwuTypes())
             {
-                ImGui::Checkbox(namingConventionModule->stringToReplace[wwuType].substr(1).c_str(), &(namingConventionModule->wwuSettings[wwuType].applyPrefix));
+                ImGui::Checkbox(namingConventionModule->GetStringToReplace(wwuType).substr(1).c_str(), &(namingConventionModule->wwuSettings[wwuType].applyPrefix));
                 ImGui::SameLine();
-                std::string identificationName = "##" + namingConventionModule->stringToReplace[wwuType];
+                std::string identificationName = "##" + namingConventionModule->GetStringToReplace(wwuType);
                 ImGui::InputText(identificationName.c_str(), &(namingConventionModule->wwuSettings[wwuType].prefixToApply));
             }
             ImGui::EndTabItem();
@@ -878,7 +878,7 @@ void GUI::ShowNamingConventionModule()
             ImGui::Text("If you have multiple text suffixes you want to make possible, please separate them with a comma.");
             ImGui::Text("Max Layers lets you define how many layers the suffix has. 'tree_lp_01' has two suffix layers. You can only have one number suffixlayer.");
             ImGui::Separator();
-            for (auto& containerType : namingConventionModule->whitelistedContainers)
+            for (auto& containerType : namingConventionModule->GetWhiteListedContainers())
             {
                 ImGui::Text(containerType.c_str());
                 std::string currentContainerID = "##" + containerType;

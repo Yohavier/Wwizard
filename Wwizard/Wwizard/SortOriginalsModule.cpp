@@ -1,5 +1,4 @@
 #include "SortOriginalsModule.h"
-#include <regex>
 
 void SortOriginalsModule::LoadModule(std::string wwiseProjPath)
 {
@@ -142,6 +141,7 @@ void SortOriginalsModule::ScanWorkUnitXMLByGuid(std::string guid)
 
 void SortOriginalsModule::CreateUnusedOriginalsList()
 {
+	Scan();
 	unusedOriginalsPaths.clear();
 	for (auto& originalWav : originalsDic)
 	{
@@ -475,4 +475,20 @@ void SortOriginalsModule::Scan()
 	PreFetchAllWwuData(actorMixerWwuPath);
 	PreFetchAllWwuData(interactiveMuisicWwuPath);
 	ScanWorkUnitOriginalsUse();
+}
+
+//Getter
+const int&& SortOriginalsModule::GetOriginalsCount() 
+{ 
+	return static_cast<int>(originalsDic.size()); 
+}
+
+const std::string& SortOriginalsModule::GetOriginalPath() 
+{ 
+	return originalsPath; 
+}
+
+const std::vector<std::string> SortOriginalsModule::GetUnusedOriginals()
+{
+	return unusedOriginalsPaths;
 }

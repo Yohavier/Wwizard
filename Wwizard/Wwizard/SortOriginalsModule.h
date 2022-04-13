@@ -9,19 +9,21 @@
 #include <stdio.h>
 #include "pugixml-1.12/src/pugixml.hpp"
 #include <algorithm>
+#include <regex>
 #include "WwuLookUpData.h"
 
 class SortOriginalsModule
 {
 public:
-	int&& GetOriginalsCount() { return static_cast<int>(originalsDic.size()); }
-	std::string& GetOriginalPath() { return originalsPath; }
-
 	void LoadModule(std::string wwiseProjPath);
 
 	void CreateUnusedOriginalsList();
 	void FinalizeDeleteUnusedOriginals(bool wantDelete);
 	void SortOriginals();
+
+	const int&& GetOriginalsCount();
+	const std::string& GetOriginalPath();
+	const std::vector<std::string> GetUnusedOriginals();
 
 private:
 	void ScanOriginalsPath(std::string path);
@@ -40,6 +42,7 @@ private:
 
 	void ClearPreviousSortData();
 	void Scan();
+
 public:
 	bool workUnitFlag;
 	bool physicalFolderFlag;
@@ -56,13 +59,13 @@ public:
 	bool musicPlaylistContainerFlag;
 	bool musicSegmentFlag;	
 	bool musicTrackFlag;
-	std::vector<std::string> unusedOriginalsPaths;
 
 private:
 	std::string originalsPath;
 	std::string actorMixerWwuPath;
 	std::string interactiveMuisicWwuPath;
 	std::string projectPath;
+	std::vector<std::string> unusedOriginalsPaths;
 
 	std::map<std::string, int> originalsDic;
 

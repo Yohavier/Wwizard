@@ -11,6 +11,7 @@ Application::Application()
     namingConventionModule.reset(new NamingConventionModule(settingsHandler->GetWwisProjectPathRef()));
 
     myGUI.reset(new GUI(wwizardWwiseClient, settingsHandler, queryEditorModule, sortOriginalsModule, namingConventionModule));
+    Loop();
 }
 
 void Application::Loop()

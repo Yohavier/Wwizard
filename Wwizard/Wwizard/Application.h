@@ -1,6 +1,4 @@
 #pragma once
-#include <memory>
-
 #include "GUI.h"
 #include "WwizardWwiseClient.h"
 #include "SettingHandler.h"
@@ -8,10 +6,14 @@
 #include "QueryEditorModule.h"
 #include "SortOriginalsModule.h"
 
+#include <memory>
+
 class Application
 {
 public:
 	Application();
+
+private:
 	void Loop();
 
 private:

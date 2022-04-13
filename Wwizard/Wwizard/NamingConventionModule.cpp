@@ -89,7 +89,9 @@ void NamingConventionModule::AddIssueToList(std::string guid, std::string name, 
 	namingIssueResults.emplace(guid, NamingResultFile(guid, name, issue));
 }
 
-std::string& NamingConventionModule::GetErrorMessageFromIssue(Issue issue)
+
+//Getter
+const std::string& NamingConventionModule::GetErrorMessageFromIssue(Issue issue)
 {
 	return issueMessages[issue];
 }
@@ -103,6 +105,22 @@ const std::vector<NamingResultFile> NamingConventionModule::GetIssueList()
 	}
 	return issueList;
 }
+
+const std::set<std::string>& NamingConventionModule::GetWhiteListedContainers()
+{
+	return whitelistedContainers;
+}
+
+const std::set<std::string>& NamingConventionModule::GetWhiteListedWwuTypes()
+{
+	return whitelistedWwuTypes;
+}
+
+const std::string& NamingConventionModule::GetStringToReplace(const std::string& wwuType)
+{
+	return stringToReplace[wwuType];
+}
+
 
 //Scan Naming Convention
 void NamingConventionModule::StartCheckingNamingConvention(std::string path, std::string namePath)
@@ -275,7 +293,7 @@ bool NamingConventionModule::IsCorrectSuffix(std::string& currentName, std::stri
 					separatorLocations.push_back(i);
 			}
 
-			if (container->second.IsSuffixCountInRange(separatorLocations.size()))
+			if (container->second.IsSuffixCountInRange(static_cast<int>(separatorLocations.size())))
 			{
 				int readIndex = 0;
 				for (int sep = 0; sep < separatorLocations.size() + 1; sep++)
@@ -456,3 +474,4 @@ void NamingConventionModule::LoadNamingConventionSettings()
 		}
 	}
 }
+

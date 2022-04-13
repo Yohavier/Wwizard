@@ -53,20 +53,7 @@ public:
 	const std::string& GetCurrentSelectionGuid();
 	void RunActiveQueries();
 	void ResetQueryModule(const std::unique_ptr<WwizardWwiseClient>& wwizardClient);
-	const std::string ConvertQueryTypeToString(QueryType& queryType)
-	{
-		switch (queryType)
-		{
-			case QueryType::WAAPIQUERY:
-				return "Waapi";
-			case QueryType::WAQLQUERY:
-				return "Waql";
-			case QueryType::WWISEQUERY:
-				return "Wwise";
-			default:
-				return "";
-		}
-	}
+	const std::string GetQueryTypeAsString(const QueryType& queryType);
 	
 	template<typename TReturn, typename TMap>
 	TReturn FindInMap(const TMap& findMap)
@@ -81,10 +68,19 @@ public:
 			return nullptr;
 		}
 	}
+
 	void CreateNewQuery(const std::string name, const QueryType type, const std::string arg);
 	const std::string GetCurrentArgAsString();
 	void SaveChangedQuery(std::string newName, std::string newArg, std::string guid);
 	void DeleteQuery(std::string guid);
+
+	//Getter
+	const std::map<std::string, const BaseQueryStructure&>& GetWaapiQueries();
+	const std::map<std::string, const BaseQueryStructure&>& GetWaqlQueries();
+	const std::map<std::string, const BaseQueryStructure&>& GetWwiseQueries();
+	const std::map<std::string, QueryResultFile>& GetQueryResultFiles();
+	const std::map<std::string, BaseQueryStructure>& GetAllQueries();
+	const std::unique_ptr<BaseQueryStructure>& GetWwiseQueryHierarchy();
 
 private:
 	const std::string GenerateGuid();
@@ -97,21 +93,18 @@ private:
 	void SaveCustomQueriesToJson();
 	void AddQueryToAllQueriesMap(BaseQueryStructure& newQuery);
 
-
-public:
+private:
 	std::map<std::string, BaseQueryStructure> allQueries;
-	std::unique_ptr<BaseQueryStructure> wwiseQueryHierarchy;
-	std::map<std::string, QueryResultFile> queryResultFiles;
-
 	std::map<std::string, const BaseQueryStructure&> waapiQueries;
 	std::map<std::string, const BaseQueryStructure&> waqlQueries;
 	std::map<std::string, const BaseQueryStructure&> wwiseQueries;
-	std::string selectedGuid = "";
 
+	std::map<std::string, QueryResultFile> queryResultFiles;
+	std::unique_ptr<BaseQueryStructure> wwiseQueryHierarchy;
 
-private:
 	const std::unique_ptr<WwizardWwiseClient>& wwizardClient;
 	std::map<std::string, BaseQueryStructure&> activeQueryDictionary;
+	std::string selectedGuid = "";
 };
 
 
