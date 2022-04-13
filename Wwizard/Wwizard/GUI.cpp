@@ -129,28 +129,12 @@ void GUI::Render(bool* p_open)
         ImGui::DockSpace(dockspace_id, ImVec2(0.0f, 0.0f), dockspace_flags);
     }
 
-    CreateMenuBar();
+    CreateTaskBar();
         
-    if (currentLayout == Layout::QUERYEDITOR)
+    if (layouts.find(currentLayout) != layouts.end())
     {
-        if(wwizarWwiseClient->IsConnected())
-            CreateQueryEditor(p_open);
-    }
-    else if (currentLayout == Layout::SETTINGS)
-    {
-        ShowSettings(p_open);
-    }
-    else if (currentLayout == Layout::SORTORIGINALS)
-    {
-        ShowSortOriginalsModule();
-    }
-    else if (currentLayout == Layout::NAMINGCONVENTION)
-    {
-        ShowNamingConventionModule();
-    }
-    else //Default Home Layout
-    {
-        ShowHome();
+        func_ptr fp= layouts[currentLayout];
+        (this->*fp)();
     }
 
     ImGui::End();
@@ -173,7 +157,7 @@ void GUI::Render(bool* p_open)
     //g_pSwapChain->Present(0, 0); // Present without vsync
 }
 
-void GUI::CreateMenuBar()
+void GUI::CreateTaskBar()
 {
     if (ImGui::BeginMenuBar())
     {   
@@ -210,13 +194,17 @@ void GUI::CreateMenuBar()
     
             if (ImGui::MenuItem("Sort Originals", NULL))
             {
-                sortOriginalsModule->LoadModule(settingHandler->GetWwisProjectPathRef());
                 SetLayout(Layout::SORTORIGINALS);
             }
 
             if (ImGui::MenuItem("Query Editor", NULL))
             {
                 SetLayout(Layout::QUERYEDITOR);
+            }
+
+            if (ImGui::MenuItem("Toolbox", NULL))
+            {
+                SetLayout(Layout::TOOLBOX);
             }
             ImGui::EndMenu();
         }
@@ -254,10 +242,10 @@ void GUI::SetLayout(Layout newLayout)
 }
 
 //Settings Layout
-void GUI::ShowSettings(bool* p_open)
+void GUI::RenderLayoutSettings()
 {
     ImGui::SetNextWindowSize(ImVec2(430, 450), ImGuiCond_FirstUseEver);
-    if (!ImGui::Begin("Settings", p_open))
+    if (!ImGui::Begin("Settings", (bool*)1))
     {
         ImGui::End();
         return; 
@@ -296,11 +284,13 @@ void GUI::ShowSettings(bool* p_open)
 }
 
 //QueryLayouts
-void GUI::CreateQueryEditor(bool* p_open)
-{       
+void GUI::RenderLayoutQueryEditor()
+{
+    if (!wwizarWwiseClient->IsConnected())
+        return;
     //Available Queries Field
     ImGui::SetNextWindowSize(ImVec2(430, 450), ImGuiCond_FirstUseEver);
-    if (!ImGui::Begin("Available Queries", p_open))
+    if (!ImGui::Begin("Available Queries", (bool*)1))
     {
         ImGui::End();
         return;
@@ -319,7 +309,7 @@ void GUI::CreateQueryEditor(bool* p_open)
 
     //Active Queries Field
     ImGui::SetNextWindowSize(ImVec2(430, 450), ImGuiCond_FirstUseEver);
-    if (!ImGui::Begin("Active Queries", p_open))
+    if (!ImGui::Begin("Active Queries", (bool*)1))
     {
         ImGui::End();
         return;
@@ -335,12 +325,12 @@ void GUI::CreateQueryEditor(bool* p_open)
 
 
     //Details window
-    ShowDetails(p_open);
+    ShowDetails();
         
 
     //Results
     ImGui::SetNextWindowSize(ImVec2(430, 450), ImGuiCond_FirstUseEver);
-    if (!ImGui::Begin("Results", p_open))
+    if (!ImGui::Begin("Results", (bool*)1))
     {
         ImGui::End();
         return;
@@ -551,7 +541,7 @@ void GUI::ShowQueryResults()
     ImGui::PopID();
 }
 
-void GUI::ShowHome()
+void GUI::RenderLayoutHome()
 {
         
 }
@@ -604,10 +594,10 @@ void GUI::ShowQueryCreator()
     }    
 }
     
-void GUI::ShowDetails(bool* p_open)
+void GUI::ShowDetails()
 {
     ImGui::SetNextWindowSize(ImVec2(430, 450), ImGuiCond_FirstUseEver);
-    if (!ImGui::Begin("Details", p_open))
+    if (!ImGui::Begin("Details", (bool*)1))
     {
         ImGui::End();
         return;
@@ -694,8 +684,10 @@ void GUI::ShowDetails(bool* p_open)
 }
 
 //Sort Originals
-void GUI::ShowSortOriginalsModule()
+void GUI::RenderLayoutSortOriginals()
 {
+    if (!wwizarWwiseClient->IsConnected())
+        return;
     ImGui::SetNextWindowSize(ImVec2(430, 450), ImGuiCond_FirstUseEver);
     if (!ImGui::Begin("Sort Originals"))
     {
@@ -788,7 +780,7 @@ void GUI::ShowSortOriginalsModule()
 }
 
 //Naming Conventions
-void GUI::ShowNamingConventionModule()
+void GUI::RenderLayoutNamingConvention()
 {
     ImGui::SetNextWindowSize(ImVec2(430, 450), ImGuiCond_FirstUseEver);
     if (!ImGui::Begin("Naming Convention"))
@@ -1031,6 +1023,11 @@ void GUI::SetDefaultStyle()
     colors[ImGuiCol_TitleBg] = ImVec4{ 0.15f, 0.1505f, 0.151f, 1.0f };
     colors[ImGuiCol_TitleBgActive] = ImVec4{ 0.15f, 0.1505f, 0.151f, 1.0f };
     colors[ImGuiCol_TitleBgCollapsed] = ImVec4{ 0.15f, 0.1505f, 0.151f, 1.0f };
+}
+
+void GUI::RenderLayoutToolBox()
+{
+
 }
 
 //Helper Functions for Iam GUi

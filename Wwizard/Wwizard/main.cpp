@@ -11,6 +11,7 @@
 * multiselect
 * count music and sfx originals
 * Query save Data is sometimes deleted
+* reconnecting breaks naming convention execute
 */
 
 int main()

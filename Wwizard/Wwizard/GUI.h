@@ -1,5 +1,6 @@
 #pragma once
 #include <iostream>
+#include <stdio.h>
 #include <tchar.h>
 #include <memory>
 
@@ -24,7 +25,8 @@ enum class Layout
 	QUERYEDITOR,
 	NAMINGCONVENTION,
 	SORTORIGINALS,
-	SETTINGS
+	SETTINGS,
+	TOOLBOX
 };
 
 class GUI
@@ -35,13 +37,18 @@ public:
 	void Render(bool* p_open);
 
 private:
-	void CreateMenuBar();
-	void CreateQueryEditor(bool* p_open);
-	void ShowHome();
+	void RenderLayoutToolBox();
+	void RenderLayoutQueryEditor();
+	void RenderLayoutHome();
+	void RenderLayoutSettings();
+	void RenderLayoutSortOriginals();
+	void RenderLayoutNamingConvention();
+
+	void CreateTaskBar();
 	void SetLayout(Layout newLayout);
 
 	//Settings
-	void ShowSettings(bool* p_open);
+
 
 	//Query Module
 	void ShowActiveQueries();
@@ -50,15 +57,8 @@ private:
 	void ShowWaqlQueries();
 	void ShowWwiseQueries(const BaseQueryStructure& queryObject);
 	void ShowQueryCreator();
-	void ShowDetails(bool* p_open);
+	void ShowDetails();
 
-	//Sort Originals
-	void ShowSortOriginalsModule();
-
-	//Naming conventions
-	void ShowNamingConventionModule();
-
-	//Misc
 	void SetDefaultStyle();
 	ImColor ConvertWwiseColorToRGB(int wwiseColor);
 
@@ -76,6 +76,14 @@ private:
 	HWND hwnd;
 	WNDCLASSEX wc;
 	ImGuiIO* io = nullptr;
+	typedef void(GUI::* func_ptr) (void);
+	std::map<Layout, func_ptr> layouts = { {Layout::TOOLBOX, &GUI::RenderLayoutToolBox},
+												{Layout::NAMINGCONVENTION, &GUI::RenderLayoutNamingConvention },
+												{Layout::HOME, &GUI::RenderLayoutHome},
+												{Layout::QUERYEDITOR, &GUI::RenderLayoutQueryEditor},
+												{Layout::SETTINGS, &GUI::RenderLayoutSettings},
+												{Layout::SORTORIGINALS, &GUI::RenderLayoutSortOriginals} 
+	};
 };
 
 
