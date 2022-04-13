@@ -1,21 +1,22 @@
 #include "SortOriginalsModule.h"
 
-void SortOriginalsModule::LoadModule(std::string wwiseProjPath)
+void SortOriginalsModule::LoadModule(const std::string& wwiseProjPath)
 {
-	wwiseProjPath.erase(0, 1);
-	wwiseProjPath.erase(wwiseProjPath.size() - 1);
-	for (int i = static_cast<int>(wwiseProjPath.size()) - 1; i > 0; i--)
+	std::string relativeWwiseProjectPath = wwiseProjPath;
+	relativeWwiseProjectPath.erase(0, 1);
+	relativeWwiseProjectPath.erase(relativeWwiseProjectPath.size() - 1);
+	for (int i = static_cast<int>(relativeWwiseProjectPath.size()) - 1; i > 0; i--)
 	{
-		if (wwiseProjPath.at(i) == '\\')
+		if (relativeWwiseProjectPath.at(i) == '\\')
 			break;
 		else
-			wwiseProjPath.erase(i);
+			relativeWwiseProjectPath.erase(i);
 	}
 
-	projectPath = wwiseProjPath;
-	originalsPath = wwiseProjPath + "Originals\\SFX";
-	actorMixerWwuPath = wwiseProjPath + "Actor-Mixer Hierarchy";
-	interactiveMuisicWwuPath = wwiseProjPath + "Interactive Music Hierarchy";
+	projectPath = relativeWwiseProjectPath;
+	originalsPath = relativeWwiseProjectPath + "Originals\\SFX";
+	actorMixerWwuPath = relativeWwiseProjectPath + "Actor-Mixer Hierarchy";
+	interactiveMuisicWwuPath = relativeWwiseProjectPath + "Interactive Music Hierarchy";
 
 	Scan();
 }
@@ -26,7 +27,7 @@ void SortOriginalsModule::ClearPreviousSortData()
 	prefetchedWwuData.clear();
 }
 //Originals 
-void SortOriginalsModule::ScanOriginalsPath(std::string path)
+void SortOriginalsModule::ScanOriginalsPath(const std::string path)
 {
 	for (const auto& entry : std::filesystem::directory_iterator(path))
 	{
@@ -48,7 +49,7 @@ void SortOriginalsModule::ScanOriginalsPath(std::string path)
 }
 
 //Wwu 
-void SortOriginalsModule::PreFetchAllWwuData(std::string directory)
+void SortOriginalsModule::PreFetchAllWwuData(const std::string& directory)
 {
 	for (const auto& entry : std::filesystem::directory_iterator(directory))
 	{
@@ -66,7 +67,7 @@ void SortOriginalsModule::PreFetchAllWwuData(std::string directory)
 	}
 	}
 
-void SortOriginalsModule::FetchSingleWwuData(std::string path)
+void SortOriginalsModule::FetchSingleWwuData(const std::string& path)
 {
 	pugi::xml_document doc;
 	pugi::xml_parse_result result = doc.load_file(path.c_str());
@@ -90,7 +91,7 @@ void SortOriginalsModule::ScanWorkUnitOriginalsUse()
 	}
 }
 
-void SortOriginalsModule::ScanWorkUnitXMLByPath(std::string wwuPath)
+void SortOriginalsModule::ScanWorkUnitXMLByPath(const std::string wwuPath)
 {
 	pugi::xml_document doc;
 	pugi::xml_parse_result result = doc.load_file(wwuPath.c_str());
@@ -100,7 +101,7 @@ void SortOriginalsModule::ScanWorkUnitXMLByPath(std::string wwuPath)
 	IterateXMLChildren(doc.child("WwiseDocument"));
 }
 
-void SortOriginalsModule::IterateXMLChildren(pugi::xml_node parent)
+void SortOriginalsModule::IterateXMLChildren(const pugi::xml_node& parent)
 {
 	for (pugi::xml_node children : parent)
 	{
@@ -122,7 +123,7 @@ void SortOriginalsModule::IterateXMLChildren(pugi::xml_node parent)
 	}
 }
 
-void SortOriginalsModule::ScanWorkUnitXMLByGuid(std::string guid)
+void SortOriginalsModule::ScanWorkUnitXMLByGuid(const std::string& guid)
 {
 	for (auto& data : prefetchedWwuData)
 	{
@@ -139,7 +140,7 @@ void SortOriginalsModule::ScanWorkUnitXMLByGuid(std::string guid)
 }
 
 
-void SortOriginalsModule::CreateUnusedOriginalsList()
+void SortOriginalsModule::CollectUnusedOriginals()
 {
 	Scan();
 	unusedOriginalsPaths.clear();
@@ -147,13 +148,13 @@ void SortOriginalsModule::CreateUnusedOriginalsList()
 	{
 		if (originalWav.second == 0)
 		{
-			unusedOriginalsPaths.push_back(originalWav.first);
+			unusedOriginalsPaths.insert(originalWav.first);
 		}
 	}
 
 }
 
-void SortOriginalsModule::FinalizeDeleteUnusedOriginals(bool wantDelete)
+void SortOriginalsModule::DeleteUnusedOriginals(const bool wantDelete)
 {
 	if (wantDelete)
 	{
@@ -177,7 +178,7 @@ void SortOriginalsModule::SortOriginals()
 }
 
 
-void SortOriginalsModule::CreateFolderStructureFromWorkUnitPath(const std::string wwuFolderPath)
+void SortOriginalsModule::CreateFolderStructureFromWorkUnitPath(const std::string& wwuFolderPath)
 {
 	std::string modWwuPath = wwuFolderPath;
 	if (physicalFolderFlag)
@@ -220,7 +221,7 @@ void SortOriginalsModule::CreateFolderStructureFromWorkUnitPath(const std::strin
 	}
 }
 
-void SortOriginalsModule::CreateFolderStructureFomWwu(pugi::xml_node& parent, std::string currentOriginalsPath)
+void SortOriginalsModule::CreateFolderStructureFomWwu(const pugi::xml_node& parent, const std::string& currentOriginalsPath)
 {
 	for (pugi::xml_node children : parent)
 	{
@@ -443,7 +444,7 @@ void SortOriginalsModule::CreateFolderStructureFomWwu(pugi::xml_node& parent, st
 	}
 }
 
-bool SortOriginalsModule::DeleteEmptyFolders(std::string directory)
+bool SortOriginalsModule::DeleteEmptyFolders(const std::string& directory)
 {
 	bool deleteFlag = true;
 	for (auto& subfolder : std::filesystem::directory_iterator(directory))
@@ -478,7 +479,7 @@ void SortOriginalsModule::Scan()
 }
 
 //Getter
-const int&& SortOriginalsModule::GetOriginalsCount() 
+const int& SortOriginalsModule::GetOriginalsCount() 
 { 
 	return static_cast<int>(originalsDic.size()); 
 }
@@ -488,7 +489,7 @@ const std::string& SortOriginalsModule::GetOriginalPath()
 	return originalsPath; 
 }
 
-const std::vector<std::string> SortOriginalsModule::GetUnusedOriginals()
+const std::set<std::string>& SortOriginalsModule::GetUnusedOriginals()
 {
 	return unusedOriginalsPaths;
 }

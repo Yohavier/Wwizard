@@ -717,7 +717,7 @@ void GUI::ShowSortOriginalsModule()
     ImGui::SameLine();
     if (ImGui::Button("Delete unused Originals", ImVec2(200, 50)))
     {
-        sortOriginalsModule->CreateUnusedOriginalsList();
+        sortOriginalsModule->CollectUnusedOriginals();
         ImGui::OpenPopup("Unused wav in Originals Path");
     }
 
@@ -725,13 +725,13 @@ void GUI::ShowSortOriginalsModule()
     {
         if (ImGui::Button("Abort"))
         {
-            sortOriginalsModule->FinalizeDeleteUnusedOriginals(false);
+            sortOriginalsModule->DeleteUnusedOriginals(false);
             ImGui::CloseCurrentPopup();
         }
         ImGui::SameLine();
         if (ImGui::Button("Delete"))
         {
-            sortOriginalsModule->FinalizeDeleteUnusedOriginals(true);
+            sortOriginalsModule->DeleteUnusedOriginals(true);
             ImGui::CloseCurrentPopup();
         }
         ImGui::Separator();

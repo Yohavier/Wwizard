@@ -4,6 +4,7 @@
 #include <iostream>
 #include <filesystem>
 #include <map>
+#include <set>
 #include <fstream>
 #include <vector>
 #include <stdio.h>
@@ -15,30 +16,30 @@
 class SortOriginalsModule
 {
 public:
-	void LoadModule(std::string wwiseProjPath);
+	void LoadModule(const std::string& wwiseProjPath);
 
-	void CreateUnusedOriginalsList();
-	void FinalizeDeleteUnusedOriginals(bool wantDelete);
+	void CollectUnusedOriginals();
+	void DeleteUnusedOriginals(const bool wantDelete);
 	void SortOriginals();
 
-	const int&& GetOriginalsCount();
+	const int& GetOriginalsCount();
 	const std::string& GetOriginalPath();
-	const std::vector<std::string> GetUnusedOriginals();
+	const std::set<std::string>& GetUnusedOriginals();
 
 private:
-	void ScanOriginalsPath(std::string path);
-	void ScanWorkUnitXMLByPath(std::string wwuPath);
-	void ScanWorkUnitXMLByGuid(std::string guid);
-	void IterateXMLChildren(pugi::xml_node parent);
+	void ScanOriginalsPath(const std::string path);
+	void ScanWorkUnitXMLByPath(const std::string wwuPath);
+	void ScanWorkUnitXMLByGuid(const std::string& guid);
+	void IterateXMLChildren(const pugi::xml_node& parent);
 
-	void PreFetchAllWwuData(std::string directory);
-	void FetchSingleWwuData(std::string wwuPath);
+	void PreFetchAllWwuData(const std::string& directory);
+	void FetchSingleWwuData(const std::string& wwuPath);
 	void ScanWorkUnitOriginalsUse();
 
-	void CreateFolderStructureFromWorkUnitPath(const std::string wwuFolderPath);
-	void CreateFolderStructureFomWwu(pugi::xml_node& parent, std::string currentOriginalsPath);
+	void CreateFolderStructureFromWorkUnitPath(const std::string& wwuFolderPath);
+	void CreateFolderStructureFomWwu(const pugi::xml_node& parent, const std::string& currentOriginalsPath);
 
-	bool DeleteEmptyFolders(std::string directory);
+	bool DeleteEmptyFolders(const std::string& directory);
 
 	void ClearPreviousSortData();
 	void Scan();
@@ -65,12 +66,12 @@ private:
 	std::string actorMixerWwuPath;
 	std::string interactiveMuisicWwuPath;
 	std::string projectPath;
-	std::vector<std::string> unusedOriginalsPaths;
 
 	std::map<std::string, int> originalsDic;
 
-	std::string container[6] = { "WorkUnit", "Folder", "BlendContainer", "RandomSequenceContainer", "ActorMixer", "SwitchContainer" };
-
 	std::vector<WwuLookUpData> prefetchedWwuData;
+	std::set<std::string> unusedOriginalsPaths;
+
+	const std::string container[6] = { "WorkUnit", "Folder", "BlendContainer", "RandomSequenceContainer", "ActorMixer", "SwitchContainer" };
 };
 
