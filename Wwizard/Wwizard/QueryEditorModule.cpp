@@ -1,13 +1,15 @@
 #include "QueryEditorModule.h"
-#include <iostream>
 #include <fstream>
 #include <cstdlib>
+#include <iostream>
+#include <random>
+
 #include <rapidjson/filereadstream.h>
 #include <rapidjson/filewritestream.h>
 #include <rapidjson/writer.h>
 #include <rapidjson/document.h>
 #include "rapidjson/RapidJsonUtils.h"
-#include <random>
+
 
 QueryEditorModule::~QueryEditorModule()
 {
@@ -72,12 +74,12 @@ void QueryEditorModule::FetchWwiseFolderchildren(BaseQueryStructure& parentStruc
     }
 }
 
-void QueryEditorModule::AddToActiveQueryList(std::string guid)
+void QueryEditorModule::AddToActiveQueryList(const std::string& guid)
 {
-    activeQueryDictionary.insert({ guid, allQueries.find(guid)->second });
+    activeQueryDictionary.insert({ allQueries.find(guid)->second.guid, allQueries.find(guid)->second });
 }
 
-void QueryEditorModule::RemoveFromActiveQueryList(const std::string guid)
+void QueryEditorModule::RemoveFromActiveQueryList(const std::string& guid)
 {
     auto it = activeQueryDictionary.find(guid);
     if (it != activeQueryDictionary.end()) 
@@ -306,7 +308,7 @@ void QueryEditorModule::SaveCustomQueriesToJson()
     }
 }
 
-void QueryEditorModule::CreateNewQuery(std::string name, QueryType type, std::string arg)
+void QueryEditorModule::CreateNewQuery(const std::string name, const QueryType type, const std::string arg)
 {
     std::string guid = GenerateGuid();
     if (type == QueryType::WAAPIQUERY)
@@ -422,7 +424,7 @@ void QueryEditorModule::ResetQueryModule(const std::unique_ptr<WwizardWwiseClien
     }
 }
 
-void QueryEditorModule::SaveChangedQuery(std::string newName, std::string newArg, std::string guid)
+void QueryEditorModule::SaveChangedQuery(const std::string newName, const std::string newArg, const std::string guid)
 {
     auto it = allQueries.find(guid);
     if (it != allQueries.end())
@@ -445,27 +447,17 @@ void QueryEditorModule::SaveChangedQuery(std::string newName, std::string newArg
     }
 }
 
-void QueryEditorModule::DeleteQuery(std::string guid)
+void QueryEditorModule::DeleteQuery(const std::string& guid)
 {
-    allQueries.erase(guid);
     waqlQueries.erase(guid);
     waapiQueries.erase(guid);
     activeQueryDictionary.erase(guid);
+    allQueries.erase(guid);
 }
 
-const std::string QueryEditorModule::GetQueryTypeAsString(const QueryType& queryType)
+const std::string& QueryEditorModule::GetQueryTypeAsString(const QueryType& queryType)
 {
-    switch (queryType)
-    {
-        case QueryType::WAAPIQUERY:
-            return "Waapi";
-        case QueryType::WAQLQUERY:
-            return "Waql";
-        case QueryType::WWISEQUERY:
-            return "Wwise";
-        default:
-            return "";
-    }
+    return queryTypeAsString.find(queryType)->second;
 }
 
 const std::map<std::string, const BaseQueryStructure&>& QueryEditorModule::GetWaapiQueries()
