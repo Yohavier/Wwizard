@@ -87,7 +87,10 @@ bool NamingConventionModule::DetermineResult()
 
 void NamingConventionModule::AddIssueToList(const std::string& guid, const std::string& name, const Issue& issue)
 {
-	namingIssueResults.emplace(guid, NamingResultFile(guid, name, issue));
+	if (namingIssueResults.find(guid) == namingIssueResults.end())
+	{
+		namingIssueResults.emplace(guid, NamingResultFile(guid, name, issue));
+	}	
 }
 
 
@@ -200,7 +203,8 @@ void NamingConventionModule::IterateThroughWwu(const pugi::xml_node& wwuNode, co
 			else
 			{
 				std::string newNamePath = AddLastNamePathLayer(namePath, node, node.name());
-				if (static_cast<std::string>(node.attribute("Name").value()) != newNamePath.c_str() && namingIssueResults.find(newNamePath) == namingIssueResults.end())
+				CheckRightPrefix(node, wwuType);
+				if (static_cast<std::string>(node.attribute("Name").value()) != newNamePath.c_str())
 				{
 					AddIssueToList(static_cast<std::string>(node.attribute("ID").value()), static_cast<std::string>(node.attribute("Name").value()), Issue::HIERARCHY);
 				}
@@ -212,7 +216,8 @@ void NamingConventionModule::IterateThroughWwu(const pugi::xml_node& wwuNode, co
 		else if (whitelistedContainers.find(static_cast<std::string>(node.name())) != whitelistedContainers.end())
 		{
 			std::string newNamePath = AddLastNamePathLayer(namePath, node, static_cast<std::string>(node.name()));
-			if (static_cast<std::string>(node.attribute("Name").value()) != newNamePath.c_str() && namingIssueResults.find(newNamePath) == namingIssueResults.end())
+			CheckRightPrefix(node, wwuType);
+			if (static_cast<std::string>(node.attribute("Name").value()) != newNamePath.c_str())
 			{
 				AddIssueToList(static_cast<std::string>(node.attribute("ID").value()), static_cast<std::string>(node.attribute("Name").value()), Issue::HIERARCHY);
 			}
@@ -353,6 +358,28 @@ bool NamingConventionModule::CheckUppercaseRule(const pugi::xml_node& currentNod
 		return false;
 	}
 
+	return true;
+}
+
+bool NamingConventionModule::CheckRightPrefix(const pugi::xml_node& currentNode, const std::string& wwuType)
+{
+	std::string rightPrefix = wwuSettings[wwuType].prefixToApply;
+	std::string name = static_cast<std::string>(currentNode.attribute("Name").value());
+
+	auto separatorPlace = name.find(levelSeparator);
+	if (separatorPlace != std::string::npos)
+	{
+		if (name.substr(0, separatorPlace) != rightPrefix)
+		{
+			AddIssueToList(static_cast<std::string>(currentNode.attribute("ID").value()), static_cast<std::string>(currentNode.attribute("Name").value()), Issue::PREFIX);
+			return false;
+		}
+	}
+	else if (name != rightPrefix)
+	{
+		AddIssueToList(static_cast<std::string>(currentNode.attribute("ID").value()), static_cast<std::string>(currentNode.attribute("Name").value()), Issue::PREFIX);
+		return false;
+	}
 	return true;
 }
 

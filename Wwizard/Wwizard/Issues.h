@@ -4,5 +4,6 @@ enum class Issue
 	HIERARCHY,
 	SPACE,
 	UPPERCASE,
-	SEPARATOR
+	SEPARATOR,
+	PREFIX
 };

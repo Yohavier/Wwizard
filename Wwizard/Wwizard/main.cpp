@@ -11,6 +11,8 @@
 * multiselect
 * count music and sfx originals
 * Query save Data is sometimes deleted
+* CheckSeparator extract out out add last layer function
+* Physical folders currently dont get checked for naming
 */
 
 int main()

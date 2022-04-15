@@ -138,6 +138,7 @@ private:
 	bool IsCorrectSuffix(const std::string& currentName, const std::string& newNameLayer, const std::string& containerName);
 	void ApplyPrefix(std::string& namePath, const std::string& fullFolderName, const WwuSettings& newPrefix);
 	bool CheckUppercaseRule(const pugi::xml_node& currentNode, const bool& allowUppercase);
+	bool CheckRightPrefix(const pugi::xml_node& currentNode, const std::string& wwuType);
 
 	bool DetermineResult();
 	void ClearOldData();
@@ -160,7 +161,7 @@ private:
 
 	std::map<Issue, std::string> issueMessages = { {Issue::HIERARCHY, "Hierarchy doesnt match"},
 		{Issue::SEPARATOR, "Multiple Separators or suffix is wrong"}, {Issue::SPACE, "Space is not allowed"},
-		{Issue::UPPERCASE, "Uppercase is not allowed"} };
+		{Issue::UPPERCASE, "Uppercase is not allowed"}, {Issue::PREFIX, "Wrong Prefix"} };
 
 	std::set<std::string> whitelistedContainers = { "Folder", "Switch", "AudioDevice", "SwitchGroup",
 		"SoundBank", "Event", "DialogueEvent", "Bus", "AuxBus", "MusicSegment", "MusicTrack", "MusicSwitchContainer",
