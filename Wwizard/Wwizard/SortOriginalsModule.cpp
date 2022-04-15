@@ -1,6 +1,6 @@
 #include "SortOriginalsModule.h"
 
-void SortOriginalsModule::LoadModule(const std::string& wwiseProjPath)
+SortOriginalsModule::SortOriginalsModule(const std::string& wwiseProjPath)
 {
 	std::string relativeWwiseProjectPath = wwiseProjPath;
 	relativeWwiseProjectPath.erase(0, 1);

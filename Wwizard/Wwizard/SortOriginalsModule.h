@@ -16,7 +16,8 @@
 class SortOriginalsModule
 {
 public:
-	void LoadModule(const std::string& wwiseProjPath);
+	SortOriginalsModule() = delete;
+	SortOriginalsModule(const std::string& wwiseProjPath);
 
 	void CollectUnusedOriginals();
 	void DeleteUnusedOriginals(const bool wantDelete);

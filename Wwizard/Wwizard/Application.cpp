@@ -7,7 +7,7 @@ Application::Application()
     wwizardWwiseClient->Connect(settingsHandler);
 
     queryEditorModule.reset(new QueryEditorModule(wwizardWwiseClient));
-    sortOriginalsModule.reset(new SortOriginalsModule());
+    sortOriginalsModule.reset(new SortOriginalsModule(settingsHandler->GetWwisProjectPathRef()));
     namingConventionModule.reset(new NamingConventionModule(settingsHandler->GetWwisProjectPathRef()));
 
     myGUI.reset(new GUI(wwizardWwiseClient, settingsHandler, queryEditorModule, sortOriginalsModule, namingConventionModule));
