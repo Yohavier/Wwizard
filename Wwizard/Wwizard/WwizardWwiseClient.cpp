@@ -4,6 +4,7 @@
 #include <tchar.h>
 #include <vector>
 #include <string>
+#include <mutex>
 
 using namespace AK::WwiseAuthoringAPI;
 typedef std::basic_string<TCHAR> tstring;
@@ -16,11 +17,6 @@ void SampleAssertHook(const char* in_pszExpression, const char* in_pszFileName, 
 AkAssertHook g_pAssertHook = SampleAssertHook;
 
 #endif
-
-WwizardWwiseClient::WwizardWwiseClient() 
-{
-    std::cout << "Initialized Wwizard Wwise Client" << std::endl;
-}
 
 WwizardWwiseClient::~WwizardWwiseClient()
 {
@@ -198,3 +194,28 @@ void WwizardWwiseClient::OpenPropertyInWwise(const std::string& guid)
     wwiseClient.Call(ak::wwise::ui::commands::execute, openProperty, options, result, 500);
     wwiseClient.Call(ak::wwise::ui::commands::execute, openHierarchy, options, result, 500);
 }
+
+void WwizardWwiseClient::StartReconnectionThread()
+{
+    if (currentConnectionThread != nullptr)
+    {
+        return;
+    }
+
+    std::cout << "Start New Connection Threat" << std::endl;
+    wwiseClient.Disconnect();
+    std::thread t1(&WwizardWwiseClient::ReconnectionThread, this);
+    currentConnectionThread = &t1;
+    t1.detach();
+}
+
+void WwizardWwiseClient::ReconnectionThread()
+{
+    while (!wwiseClient.IsConnected())
+    {
+        std::cout << "run thread" << std::endl;
+        Connect(settings);
+    }
+    currentConnectionThread = nullptr;
+}
+

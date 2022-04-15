@@ -17,8 +17,6 @@ SortOriginalsModule::SortOriginalsModule(const std::string& wwiseProjPath)
 	originalsPath = relativeWwiseProjectPath + "Originals\\SFX";
 	actorMixerWwuPath = relativeWwiseProjectPath + "Actor-Mixer Hierarchy";
 	interactiveMuisicWwuPath = relativeWwiseProjectPath + "Interactive Music Hierarchy";
-
-	Scan();
 }
 
 void SortOriginalsModule::ClearPreviousSortData() 

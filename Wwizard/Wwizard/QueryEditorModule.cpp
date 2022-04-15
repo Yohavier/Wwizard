@@ -404,12 +404,14 @@ const std::string QueryEditorModule::GenerateGuid()
 
 void QueryEditorModule::ResetQueryModule(const std::unique_ptr<WwizardWwiseClient>& wwizardClient)
 {
+    queryResultFiles.clear();
+    activeQueryDictionary.clear();
     waapiQueries.clear();
     waqlQueries.clear();
     wwiseQueries.clear();
     allQueries.clear();
     selectedGuid = "";
-    queryResultFiles.clear();
+    
 
     if (wwizardClient->IsConnected())
     {

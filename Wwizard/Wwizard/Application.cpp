@@ -2,12 +2,9 @@
 
 Application::Application()
 {
-    wwizardWwiseClient.reset(new WwizardWwiseClient());
+    
     settingsHandler.reset(new SettingHandler());
-
-    //create loop thread if not connected, trying to reconnect and reopen wwise
-    wwizardWwiseClient->Connect(settingsHandler);
-
+    wwizardWwiseClient.reset(new WwizardWwiseClient(settingsHandler));
     queryEditorModule.reset(new QueryEditorModule(wwizardWwiseClient));
     sortOriginalsModule.reset(new SortOriginalsModule(settingsHandler->GetWwisProjectPathRef()));
     namingConventionModule.reset(new NamingConventionModule(settingsHandler->GetWwisProjectPathRef()));

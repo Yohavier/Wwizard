@@ -167,7 +167,7 @@ void GUI::CreateTaskBar(bool& isRunning)
             }
             if (ImGui::MenuItem("Reconnect", NULL))
             {
-                wwizarWwiseClient->Connect(settingHandler);
+                wwizarWwiseClient->StartReconnectionThread();
                 queryEditorModule->ResetQueryModule(wwizarWwiseClient);
             }
             if (ImGui::MenuItem("Settings", NULL))
@@ -201,6 +201,7 @@ void GUI::CreateTaskBar(bool& isRunning)
             if (ImGui::MenuItem("Query Editor", NULL))
             {
                 SetLayout(Layout::QUERYEDITOR);
+                queryEditorModule->ResetQueryModule(wwizarWwiseClient);
             }
 
             if (ImGui::MenuItem("Toolbox", NULL))
@@ -273,7 +274,7 @@ void GUI::RenderLayoutSettings()
         if (waapiIPSetting != settingHandler->GetWaapiIP() || waapiPortSetting != settingHandler->GetWaaapiPort())
         {
             settingHandler->SaveSettings(projectPathSetting, sdkPathSetting, waapiIPSetting, waapiPortSetting);
-            wwizarWwiseClient->Connect(settingHandler);
+            wwizarWwiseClient->StartReconnectionThread();
             queryEditorModule->ResetQueryModule(wwizarWwiseClient);
         }
         else
@@ -410,12 +411,12 @@ void GUI::ShowWwiseQueries(const BaseQueryStructure& queryObject)
         const bool is_selected = (queryEditorModule->GetCurrentSelectionGuid() == queryObject.guid && ImGui::IsWindowFocused());
 
         if (ImGui::Selectable(queryObject.name.c_str(), is_selected, ImGuiSelectableFlags_AllowDoubleClick))
-        { 
+        {
             if (ImGui::IsMouseDoubleClicked(0))
             {
                 queryEditorModule->AddToActiveQueryList(queryObject.guid);
                 queryEditorModule->RunActiveQueries();
-            }     
+            }
 
             queryEditorModule->SetQuerySelection(queryObject.guid);
         }
@@ -423,6 +424,7 @@ void GUI::ShowWwiseQueries(const BaseQueryStructure& queryObject)
         if (is_selected)
             ImGui::SetItemDefaultFocus();
     }
+    
     ImGui::PopID();
 }
 

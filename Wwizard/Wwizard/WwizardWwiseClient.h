@@ -5,19 +5,24 @@
 #include <iostream>
 #include <vector>
 #include "SettingHandler.h"
+#include <memory>
+#include <thread>
 
 using namespace AK::WwiseAuthoringAPI;
-
-
 
 class WwizardWwiseClient
 { 
 public:
-	WwizardWwiseClient();
+	WwizardWwiseClient() = delete;
+	WwizardWwiseClient(std::unique_ptr<SettingHandler>& settings)
+		: settings(settings)
+	{
+		StartReconnectionThread();
+	}
 
 	~WwizardWwiseClient();
-	 
-	bool Connect(const std::unique_ptr<SettingHandler>& settings);
+	
+	void StartReconnectionThread();
 
 	bool ForceOpenWwiseInstance(const std::unique_ptr<SettingHandler>& settings);
 
@@ -42,8 +47,12 @@ public:
 
 private:
 	void WalkChildren(const std::string& guid, const AkJson& opt, std::vector<AkJson>& outputList);
+	void ReconnectionThread();
+	bool Connect(const std::unique_ptr<SettingHandler>& settings);
 
 private:
 	Client wwiseClient;
+	std::unique_ptr<SettingHandler>& settings;
+	std::thread* currentConnectionThread = nullptr;
 };
 
