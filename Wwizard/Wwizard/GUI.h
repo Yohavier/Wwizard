@@ -34,7 +34,7 @@ class GUI
 public:
 	GUI(std::unique_ptr<WwizardWwiseClient>& wwizardWwiseClient, std::unique_ptr<SettingHandler>& settingHandler, std::unique_ptr<QueryEditorModule>&, std::unique_ptr<SortOriginalsModule>&, std::unique_ptr<NamingConventionModule>&);
 	~GUI();
-	void Render(bool* p_open);
+	void Render(bool& isRunning);
 
 private:
 	void RenderLayoutToolBox();
@@ -44,8 +44,8 @@ private:
 	void RenderLayoutSortOriginals();
 	void RenderLayoutNamingConvention();
 
-	void CreateTaskBar();
-	void SetLayout(Layout newLayout);
+	void CreateTaskBar(bool& isRunning);
+	void SetLayout(const Layout newLayout);
 
 	void ShowActiveQueries();
 	void ShowQueryResults();
@@ -63,15 +63,14 @@ private:
 
 	std::unique_ptr<WwizardWwiseClient>& wwizarWwiseClient;
 	std::unique_ptr<SettingHandler>& settingHandler;
-
 	std::unique_ptr<QueryEditorModule>& queryEditorModule;
 	std::unique_ptr<SortOriginalsModule>& sortOriginalsModule;
 	std::unique_ptr<NamingConventionModule>& namingConventionModule;
 
-	ImVec4 clear_color = ImVec4(0.45f, 0.55f, 0.60f, 1.00f);
 	HWND hwnd;
 	WNDCLASSEX wc;
 	ImGuiIO* io = nullptr;
+
 	typedef void(GUI::* func_ptr) (void);
 	std::map<Layout, func_ptr> layouts = { {Layout::TOOLBOX, &GUI::RenderLayoutToolBox},
 												{Layout::NAMINGCONVENTION, &GUI::RenderLayoutNamingConvention },
@@ -81,8 +80,9 @@ private:
 												{Layout::SORTORIGINALS, &GUI::RenderLayoutSortOriginals} 
 	};
 
+	const ImVec4 clear_color = ImVec4(0.45f, 0.55f, 0.60f, 1.00f);
 
-	std::map<int, ImColor> wwiseColors = { {0, ImColor(83, 83, 83)}, {1, ImColor(54, 62, 200)}, {2, ImColor(54, 62, 200)},
+	std::map<const int, const ImColor> wwiseColors = { {0, ImColor(83, 83, 83)}, {1, ImColor(54, 62, 200)}, {2, ImColor(54, 62, 200)},
 										  {3, ImColor(25, 85, 203)}, {4, ImColor(7, 104, 104)}, {5, ImColor(86, 115, 12)},
 										  {6, ImColor(120, 113, 16)}, {7,ImColor(121, 87, 21)}, {8, ImColor(120, 66, 12)},
 										  {9, ImColor(114, 56, 43)}, {10, ImColor(137, 35, 36)}, {11, ImColor(124, 38, 125)},

@@ -72,7 +72,7 @@ GUI::~GUI()
     ::UnregisterClass(wc.lpszClassName, wc.hInstance);
 }
 
-void GUI::Render(bool* p_open)
+void GUI::Render(bool& isRunning)
 {
     MSG msg;
     while (::PeekMessage(&msg, NULL, 0U, 0U, PM_REMOVE))
@@ -80,10 +80,8 @@ void GUI::Render(bool* p_open)
         ::TranslateMessage(&msg);
         ::DispatchMessage(&msg);
         if (msg.message == WM_QUIT)
-            *p_open = false;
+            isRunning = false;
     }
-    if (!p_open)
-        return;
     
     // Start the Dear ImGui frame
     ImGui_ImplDX10_NewFrame();
@@ -112,7 +110,7 @@ void GUI::Render(bool* p_open)
 
     if (!opt_padding)
         ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(0.0f, 0.0f));
-    ImGui::Begin("DockSpace Demo", p_open, window_flags);
+    ImGui::Begin("DockSpace Demo", (bool*)1, window_flags);
 
     if (!opt_padding)
         ImGui::PopStyleVar();
@@ -129,7 +127,7 @@ void GUI::Render(bool* p_open)
         ImGui::DockSpace(dockspace_id, ImVec2(0.0f, 0.0f), dockspace_flags);
     }
 
-    CreateTaskBar();
+    CreateTaskBar(isRunning);
         
     if (layouts.find(currentLayout) != layouts.end())
     {
@@ -157,7 +155,7 @@ void GUI::Render(bool* p_open)
     //g_pSwapChain->Present(0, 0); // Present without vsync
 }
 
-void GUI::CreateTaskBar()
+void GUI::CreateTaskBar(bool& isRunning)
 {
     if (ImGui::BeginMenuBar())
     {   
@@ -182,7 +180,10 @@ void GUI::CreateTaskBar()
             }
             ImGui::Separator();
 
-            ImGui::MenuItem("Close", NULL);
+            if (ImGui::MenuItem("Close", NULL))
+            {
+                isRunning = false;
+            }
             ImGui::EndMenu();
         }
         if (ImGui::BeginMenu("Module"))
@@ -236,7 +237,7 @@ void GUI::CreateTaskBar()
     }
 }
 
-void GUI::SetLayout(Layout newLayout)
+void GUI::SetLayout(const Layout newLayout)
 {
     currentLayout = newLayout;
 }
