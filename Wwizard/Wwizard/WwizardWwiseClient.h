@@ -16,7 +16,7 @@ public:
 	WwizardWwiseClient();
 
 	~WwizardWwiseClient();
-
+	 
 	bool Connect(const std::unique_ptr<SettingHandler>& settings);
 
 	bool ForceOpenWwiseInstance(const std::unique_ptr<SettingHandler>& settings);

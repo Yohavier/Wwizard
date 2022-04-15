@@ -1,7 +1,12 @@
 #include "WwizardWwiseClient.h"
 #include <windows.h>
+#include <atlstr.h>
+#include <tchar.h>
+#include <vector>
+#include <string>
 
 using namespace AK::WwiseAuthoringAPI;
+typedef std::basic_string<TCHAR> tstring;
 
 #if defined( AK_ENABLE_ASSERTS )
 
@@ -54,9 +59,28 @@ bool WwizardWwiseClient::Connect(const std::unique_ptr<SettingHandler>& settings
 
 bool WwizardWwiseClient::ForceOpenWwiseInstance(const std::unique_ptr<SettingHandler>& settings)
 {
-    system("taskkill /F /T /IM WwiseConsole.exe");
     std::string commandline = settings->GetSDKPath() + " waapi-server " + settings->GetWwisProjectPathRef() + " --allow-migration --wamp-port " + std::to_string(settings->waapiPort);
-    WinExec(commandline.c_str(), 0);
+    
+    std::vector<TCHAR> buffer(commandline.begin(), commandline.end());
+    buffer.push_back(_T('\0'));
+    TCHAR* p = &buffer[0];
+
+    STARTUPINFO si;
+    PROCESS_INFORMATION pi;
+
+    ZeroMemory(&si, sizeof(si));
+    si.cb = sizeof(si);
+    ZeroMemory(&pi, sizeof(pi));
+
+    if (!CreateProcess(NULL, p, NULL, NULL, FALSE, 0, NULL, NULL, &si, &pi))
+    {
+        printf("CreateProcess failed (%d).\n", GetLastError());
+        return false;
+    }
+
+    WaitForSingleObject(pi.hProcess, 2000);
+    CloseHandle(pi.hProcess);
+    CloseHandle(pi.hThread);
 
     if (wwiseClient.Connect(settings->waapiIP.c_str(), settings->waapiPort))
     {
