@@ -137,8 +137,6 @@ void NamingConventionModule::StartCheckingNamingConvention(const std::string& fo
 				AkJson obj;
 				std::string relativeFolderPath = "\\" + entry.path().u8string().substr(projectPath.size(), entry.path().u8string().size() - projectPath.size());
 				obj = wwizardClient->GetObjectFromPath(relativeFolderPath, options);
-				std::cout << obj["return"].GetArray()[0]["name"].GetVariant().GetString();
-
 				
 				std::string lastAddedNameLayer = AddLastNamePathLayer(constructedNamePath, entry.path().filename().u8string(), "Folder");
 

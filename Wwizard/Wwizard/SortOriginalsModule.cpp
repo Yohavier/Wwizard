@@ -168,10 +168,13 @@ void SortOriginalsModule::DeleteUnusedOriginals(const bool wantDelete)
 void SortOriginalsModule::SortOriginals()
 {
 	Scan();
-	std::filesystem::create_directory(originalsPath + "\\Multiuse");
+	if (GetOriginalsCount() > 0)
+	{
+		std::filesystem::create_directory(originalsPath + "\\Multiuse");
 
-	CreateFolderStructureFromWorkUnitPath(actorMixerWwuPath);
-	CreateFolderStructureFromWorkUnitPath(interactiveMuisicWwuPath);
+		CreateFolderStructureFromWorkUnitPath(actorMixerWwuPath);
+		CreateFolderStructureFromWorkUnitPath(interactiveMuisicWwuPath);
+	}
 	DeleteEmptyFolders(originalsPath);
 }
 
@@ -462,7 +465,10 @@ bool SortOriginalsModule::DeleteEmptyFolders(const std::string& directory)
 
 	if (deleteFlag)
 	{
-		std::filesystem::remove_all(directory);
+		if (directory != originalsPath)
+		{
+			std::filesystem::remove_all(directory);
+		}
 	}
 	return deleteFlag;
 }
