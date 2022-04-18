@@ -9,7 +9,9 @@
 #include "rapidjson/RapidJsonUtils.h"
 #include <algorithm>
 
-NamingConventionModule::NamingConventionModule(const std::string& wwiseProjPath)
+
+NamingConventionModule::NamingConventionModule(const std::string& wwiseProjPath, std::unique_ptr<WwizardWwiseClient>& wwizardClient)
+	:wwizardClient(wwizardClient)
 {
 	std::string relativeWwiseProjPath = wwiseProjPath;
 	relativeWwiseProjPath.erase(0, 1);
@@ -122,35 +124,58 @@ const std::string& NamingConventionModule::GetStringToReplace(const std::string&
 
 
 //Scan Naming Convention
-void NamingConventionModule::StartCheckingNamingConvention(const std::string& path, std::string namePath)
+void NamingConventionModule::StartCheckingNamingConvention(const std::string& folderPath, std::string constructedNamePath)
 {
-	for (const auto& entry : std::filesystem::directory_iterator(path))
+	for (const auto& entry : std::filesystem::directory_iterator(folderPath))
 	{
 		if (std::filesystem::is_directory(entry))
 		{
 			if (entry.path().filename().u8string() != ".cache" && entry.path().filename().u8string() != "GeneratedSoundBanks" && entry.path().filename().u8string() != "Originals" && entry.path().filename().u8string() != "Presets")
 			{
-				std::string newPath = namePath + levelSeparator + entry.path().filename().u8string();
-				StartCheckingNamingConvention(entry.path().u8string(), newPath);
+				AkJson options(AkJson::Map{
+				{ "return", AkJson::Array{ AkVariant("id"), AkVariant("name"), AkVariant("type"), AkVariant("path")}}});
+				AkJson obj;
+				std::string relativeFolderPath = "\\" + entry.path().u8string().substr(projectPath.size(), entry.path().u8string().size() - projectPath.size());
+				obj = wwizardClient->GetObjectFromPath(relativeFolderPath, options);
+				std::cout << obj["return"].GetArray()[0]["name"].GetVariant().GetString();
+
+				
+				std::string lastAddedNameLayer = AddLastNamePathLayer(constructedNamePath, entry.path().filename().u8string(), "Folder");
+
+				if (wwiseWorkFoldersToWwuType.find(relativeFolderPath.substr(1)) != wwiseWorkFoldersToWwuType.end())
+				{
+					if (whitelistedWwuTypes.find(wwiseWorkFoldersToWwuType[relativeFolderPath.substr(1)]) != whitelistedWwuTypes.end())
+					{
+						ApplyPrefix(constructedNamePath, wwuSettings[wwiseWorkFoldersToWwuType[relativeFolderPath.substr(1)]]);
+					}
+				}
+				else
+				{
+					if (!RunChecks(obj["return"].GetArray()[0]["name"].GetVariant().GetString(), obj["return"].GetArray()[0]["id"].GetVariant().GetString(), "folder", lastAddedNameLayer, constructedNamePath, "Folder"))
+					{
+						break;
+					}
+				}
+
+				StartCheckingNamingConvention(entry.path().u8string(), constructedNamePath);
 			}
 		}
 		else if (entry.path().extension() == ".wwu")
 		{
-			ScanWorkUnitXMLByPath(entry.path().u8string(), namePath);
+			ScanWorkUnitXMLByPath(entry.path().u8string(), constructedNamePath);
 		}
 	}
 }
 
-void NamingConventionModule::ApplyPrefix(std::string& namePath, const std::string& fullFolderName, const WwuSettings& newPrefix)
+void NamingConventionModule::ApplyPrefix(std::string& constructedNamePath, const WwuSettings& currentWwuSettings)
 {
-	size_t stringLoc = namePath.find(fullFolderName);
-	if (stringLoc < namePath.size())
+	if (currentWwuSettings.applyPrefix)
 	{
-		namePath.erase(stringLoc, stringLoc + fullFolderName.size() + 1);
-		if (newPrefix.applyPrefix)
-		{
-			namePath = newPrefix.prefixToApply + namePath;
-		}
+		constructedNamePath = currentWwuSettings.prefixToApply;
+	}
+	else
+	{
+		constructedNamePath = "";
 	}
 }
 
@@ -169,17 +194,13 @@ void NamingConventionModule::ScanWorkUnitXMLByPath(const std::string& wwuPath, s
 		{
 			if (wwuSettings[wwuType].applyNamingConventionCheck)
 			{
-				if (whitelistedWwuTypes.find(wwuType) != whitelistedWwuTypes.end())
-				{
-					ApplyPrefix(namePath, stringToReplace[wwuType], wwuSettings[wwuType]);
-				}
 				IterateThroughWwu(doc.child("WwiseDocument").child(wwuType.c_str()), namePath, wwuType);
 			}
 		}
 	}
 }
 
-void NamingConventionModule::IterateThroughWwu(const pugi::xml_node& wwuNode, const std::string& namePath, const std::string& wwuType)
+void NamingConventionModule::IterateThroughWwu(const pugi::xml_node& wwuNode, std::string namePath, const std::string& wwuType)
 {
 	for (auto& node : wwuNode)
 	{
@@ -202,29 +223,25 @@ void NamingConventionModule::IterateThroughWwu(const pugi::xml_node& wwuNode, co
 			}
 			else
 			{
-				std::string newNamePath = AddLastNamePathLayer(namePath, node, node.name());
-				CheckRightPrefix(node, wwuType);
-				if (static_cast<std::string>(node.attribute("Name").value()) != newNamePath.c_str())
+				std::string lastAddedLayer = AddLastNamePathLayer(namePath, static_cast<std::string>(node.attribute("Name").value()), static_cast<std::string>(node.name()));
+
+				if (!RunChecks(static_cast<std::string>(node.attribute("Name").value()), static_cast<std::string>(node.attribute("ID").value()), wwuType, lastAddedLayer, namePath, static_cast<std::string>(node.name())))
 				{
-					AddIssueToList(static_cast<std::string>(node.attribute("ID").value()), static_cast<std::string>(node.attribute("Name").value()), Issue::HIERARCHY);
+					break;
 				}
-				CheckNameForSpace(node, wwuSettings[wwuType].allowSpace);
-				CheckUppercaseRule(node, wwuSettings[wwuType].allowUpperCase);
-				IterateThroughWwu(node, newNamePath, wwuType);
+
+				IterateThroughWwu(node, namePath, wwuType);
 			}
 		}
 		else if (whitelistedContainers.find(static_cast<std::string>(node.name())) != whitelistedContainers.end())
 		{
-			std::string newNamePath = AddLastNamePathLayer(namePath, node, static_cast<std::string>(node.name()));
-			CheckRightPrefix(node, wwuType);
-			if (static_cast<std::string>(node.attribute("Name").value()) != newNamePath.c_str())
+			std::string lastAddedLayer = AddLastNamePathLayer(namePath, static_cast<std::string>(node.attribute("Name").value()), static_cast<std::string>(node.name()));
+			
+			if(!RunChecks(static_cast<std::string>(node.attribute("Name").value()), static_cast<std::string>(node.attribute("ID").value()), wwuType, lastAddedLayer, namePath, static_cast<std::string>(node.name())))
 			{
-				AddIssueToList(static_cast<std::string>(node.attribute("ID").value()), static_cast<std::string>(node.attribute("Name").value()), Issue::HIERARCHY);
+				break;
 			}
-
-			CheckNameForSpace(node, wwuSettings[wwuType].allowSpace);
-			CheckUppercaseRule(node, wwuSettings[wwuType].allowUpperCase);
-			IterateThroughWwu(node, newNamePath, wwuType);
+			IterateThroughWwu(node, namePath, wwuType);
 		}
 		else
 		{
@@ -233,50 +250,67 @@ void NamingConventionModule::IterateThroughWwu(const pugi::xml_node& wwuNode, co
 	}
 }
 
-std::string NamingConventionModule::AddLastNamePathLayer(const std::string& currentNamePath, const pugi::xml_node& newNode, const std::string& containerName)
+std::string NamingConventionModule::AddLastNamePathLayer(std::string& currentNamePath, const std::string& newName, const std::string& containerName)
 {
-	std::string newNodeName = static_cast<std::string>(newNode.attribute("Name").value());
+	std::string newNodeName = newName;
 	if (currentNamePath == "")
 	{
-		CheckForMultipleSeparatorsPerLayer(newNodeName, newNode, containerName);
+		currentNamePath = newNodeName;
 		return newNodeName;
 	}
 	else
 	{
-		if (newNodeName.find(levelSeparator) < newNodeName.size())
+		if (newNodeName.find(levelSeparator) != std::string::npos)
 		{
 			newNodeName.erase(0, currentNamePath.size() + 1);
 		}
-		std::string newName = currentNamePath + levelSeparator + newNodeName;
-		CheckForMultipleSeparatorsPerLayer(newNodeName, newNode, containerName);
+		currentNamePath += levelSeparator + newNodeName;
 
-		return newName;
+		return newNodeName;
 	}
 }
 
-void NamingConventionModule::CheckNameForSpace(const pugi::xml_node& currentNode, bool& allowSpace)
+
+bool NamingConventionModule::RunChecks(const std::string& nodeName, const std::string& nodeID, const std::string& wwuType, const std::string & lastAddedLayer, const std::string& reconstructedNamePath, const std::string& containerName)
 {
-	std::string currentName = static_cast<std::string>(currentNode.attribute("Name").value());
+	if (CheckRightPrefix(nodeName, nodeID, wwuType)
+		&& CheckNameForSpace(nodeName, nodeID, wwuSettings[wwuType].allowSpace)
+		&& CheckUppercaseRule(nodeName, nodeID, wwuSettings[wwuType].allowUpperCase)
+		&& CheckForMultipleSeparatorsPerLayer(nodeName, nodeID, lastAddedLayer, containerName)
+		&& CheckHierarchy(nodeName,reconstructedNamePath, nodeID))
+	{
+		return true;
+	}
+	return false;
+}
+
+bool NamingConventionModule::CheckNameForSpace(const std::string& nodeName, const std::string& nodeID, bool& allowSpace)
+{
+	std::string currentName = nodeName;
 	if (!allowSpace)
 	{
 		size_t loc = currentName.find(" ");
 		if (loc < currentName.size())
 		{
-			AddIssueToList(static_cast<std::string>(currentNode.attribute("ID").value()), static_cast<std::string>(currentNode.attribute("Name").value()), Issue::SPACE);
+			AddIssueToList(nodeID, nodeName, Issue::SPACE);
+			return false;
 		}
 	}
+	return true;
 }
 
-void NamingConventionModule::CheckForMultipleSeparatorsPerLayer(const std::string& newNameLayer, const pugi::xml_node& currentNode, const std::string& containerName)
+bool NamingConventionModule::CheckForMultipleSeparatorsPerLayer(const std::string& nodeName, const std::string& nodeID, const std::string& newNameLayer, const std::string& containerName)
 {
-	std::string currentName = static_cast<std::string>(currentNode.attribute("Name").value());
-	if (newNameLayer.find("_") < newNameLayer.size())
+	std::string currentName = nodeName;
+	if (newNameLayer.find("_") != std::string::npos)
 	{
 		if (!IsCorrectSuffix(currentName, newNameLayer.substr(newNameLayer.find("_") + 1), containerName))
 		{
-			AddIssueToList(static_cast<std::string>(currentNode.attribute("ID").value()), static_cast<std::string>(currentNode.attribute("Name").value()), Issue::SEPARATOR);
+			AddIssueToList(nodeID, nodeName, Issue::SEPARATOR);
+			return false;
 		}
 	}
+	return true;
 }
 
 bool NamingConventionModule::IsCorrectSuffix(const std::string& currentName, const std::string& newNameLayer, const std::string& containerName)
@@ -345,39 +379,54 @@ bool NamingConventionModule::IsCorrectSuffix(const std::string& currentName, con
 	return true;
 }
 
-bool NamingConventionModule::CheckUppercaseRule(const pugi::xml_node& currentNode, const bool& allowUpperCase)
+bool NamingConventionModule::CheckUppercaseRule(const std::string& nodeName, const std::string& nodeID, const bool& allowUpperCase)
 {
 	if (allowUpperCase)
 		return true;
 
-	std::string currentName = static_cast<std::string>(currentNode.attribute("Name").value());
+	std::string currentName = nodeName;
 	
 	if (std::any_of(currentName.begin(), currentName.end(), isupper))
 	{
-		AddIssueToList(static_cast<std::string>(currentNode.attribute("ID").value()), static_cast<std::string>(currentNode.attribute("Name").value()), Issue::UPPERCASE);
+		AddIssueToList(nodeID, nodeName, Issue::UPPERCASE);
 		return false;
 	}
 
 	return true;
 }
 
-bool NamingConventionModule::CheckRightPrefix(const pugi::xml_node& currentNode, const std::string& wwuType)
+bool NamingConventionModule::CheckRightPrefix(const std::string& nodeName, const std::string& nodeID, const std::string& wwuType)
 {
+	if (!wwuSettings[wwuType].applyPrefix)
+	{
+		return true;
+	}
+
 	std::string rightPrefix = wwuSettings[wwuType].prefixToApply;
-	std::string name = static_cast<std::string>(currentNode.attribute("Name").value());
+	std::string name = nodeName;
 
 	auto separatorPlace = name.find(levelSeparator);
 	if (separatorPlace != std::string::npos)
 	{
 		if (name.substr(0, separatorPlace) != rightPrefix)
 		{
-			AddIssueToList(static_cast<std::string>(currentNode.attribute("ID").value()), static_cast<std::string>(currentNode.attribute("Name").value()), Issue::PREFIX);
+			AddIssueToList(nodeID, nodeName, Issue::PREFIX);
 			return false;
 		}
 	}
 	else if (name != rightPrefix)
 	{
-		AddIssueToList(static_cast<std::string>(currentNode.attribute("ID").value()), static_cast<std::string>(currentNode.attribute("Name").value()), Issue::PREFIX);
+		AddIssueToList(nodeID, nodeName, Issue::PREFIX);
+		return false;
+	}
+	return true;
+}
+
+bool NamingConventionModule::CheckHierarchy(const std::string& currentName, const std::string& constructedName, const std::string& nameID)
+{
+	if (currentName != constructedName)
+	{
+		AddIssueToList(nameID, currentName, Issue::HIERARCHY);
 		return false;
 	}
 	return true;
@@ -497,4 +546,3 @@ void NamingConventionModule::LoadNamingConventionSettings()
 		}
 	}
 }
-

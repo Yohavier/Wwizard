@@ -43,7 +43,7 @@ struct BaseQueryStructure
 class QueryEditorModule
 {
 public:
-	QueryEditorModule(const std::unique_ptr<WwizardWwiseClient>& wwizardClient);
+	QueryEditorModule(std::unique_ptr<WwizardWwiseClient>& wwizardClient);
 	~QueryEditorModule();
 
 	void AddToActiveQueryList(const std::string& guid);
@@ -101,7 +101,7 @@ private:
 	std::map<std::string, QueryResultFile> queryResultFiles;
 	std::unique_ptr<BaseQueryStructure> wwiseQueryHierarchy;
 
-	const std::unique_ptr<WwizardWwiseClient>& wwizardClient;
+	std::unique_ptr<WwizardWwiseClient>& wwizardClient;
 	std::map<std::string, BaseQueryStructure&> activeQueryDictionary;
 	std::string selectedGuid = "";
 

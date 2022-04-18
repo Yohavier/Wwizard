@@ -16,7 +16,7 @@ QueryEditorModule::~QueryEditorModule()
     SaveCustomQueriesToJson();
 }
 
-QueryEditorModule::QueryEditorModule(const std::unique_ptr<WwizardWwiseClient>& wwizardClient)
+QueryEditorModule::QueryEditorModule(std::unique_ptr<WwizardWwiseClient>& wwizardClient)
     : wwizardClient(wwizardClient)
 {
     if (wwizardClient->IsConnected())
