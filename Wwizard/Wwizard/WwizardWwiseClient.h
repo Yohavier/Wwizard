@@ -45,6 +45,12 @@ public:
 
 	const AkJson GetChildrenFromGuid(const std::string guid, const AkJson option);
 
+	void GetCurrentSelectedObjectsInWwise(AkJson& result, const AkJson& option);
+
+	void DeleteObjectInWwise(const std::string& guid);
+
+	const AkJson GetPropertyFromGuid(const std::string& parentGuid);
+
 private:
 	void WalkChildren(const std::string& guid, const AkJson& opt, std::vector<AkJson>& outputList);
 	void ReconnectionThread();

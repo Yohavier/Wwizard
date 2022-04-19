@@ -133,6 +133,12 @@ const AkJson WwizardWwiseClient::GetChildrenFromGuid(const std::string guid, con
     return queryResult;
 }
 
+void WwizardWwiseClient::GetCurrentSelectedObjectsInWwise(AkJson& result, const AkJson& option)
+{
+    AkJson arg(AkJson::Map{ });
+    wwiseClient.Call(ak::wwise::ui::getSelectedObjects, arg, option, result, 500);
+}
+
 AkJson WwizardWwiseClient::GetObjectFromPath(const std::string path, AkJson option)
 {
     AkJson arg(AkJson::Map{
@@ -171,7 +177,7 @@ AkJson WwizardWwiseClient::RunCustomQuery(const AkJson arg)
 
     return queryResult;
 }
-//Not used atm
+
 void WwizardWwiseClient::GetProjectInfo()
 {
     AkJson queryResult;
@@ -219,3 +225,21 @@ void WwizardWwiseClient::ReconnectionThread()
     currentConnectionThread = nullptr;
 }
 
+void WwizardWwiseClient::DeleteObjectInWwise(const std::string& guid)
+{
+    AkJson empty(AkJson::Map{});
+    AkJson arg(AkJson::Map{ {"object", AkVariant(guid)} });
+    wwiseClient.Call(ak::wwise::core::object::delete_, arg, empty, empty, 500);
+}
+
+const AkJson WwizardWwiseClient::GetPropertyFromGuid(const std::string& parentGuid)
+{
+    AkJson options(AkJson::Map{ { "return", AkJson::Array{ AkVariant("Target")}} });
+    AkJson result;
+    AkJson arg(AkJson::Map{
+   {
+       {"from", AkJson::Map{{ "id", AkJson::Array{ AkVariant(parentGuid) }}}}
+   } });
+    wwiseClient.Call(ak::wwise::core::object::get, arg, options, result);
+    return result;
+}

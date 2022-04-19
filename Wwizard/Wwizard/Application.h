@@ -5,6 +5,7 @@
 #include "NamingConventionModule.h"
 #include "QueryEditorModule.h"
 #include "SortOriginalsModule.h"
+#include "ToolboxModule.h"
 
 #include <memory>
 
@@ -24,6 +25,7 @@ private:
 	std::unique_ptr<QueryEditorModule> queryEditorModule = nullptr;
 	std::unique_ptr<SortOriginalsModule> sortOriginalsModule = nullptr;
 	std::unique_ptr<NamingConventionModule> namingConventionModule = nullptr;
+	std::unique_ptr<ToolboxModule> toolboxModule = nullptr;
 
 	bool m_isRunning = true;
 };

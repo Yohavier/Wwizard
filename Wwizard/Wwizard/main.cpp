@@ -2,22 +2,18 @@
 #include <WinUser.h>
 
 /* 
-* Bugs & Technical Debt:
+* Bugs & Todos:
 * - Query save Data is sometimes deleted
-* - CheckSeparator extract out out add last layer function
-* - Physical folders currently dont get checked for naming
 * 
 * Toolbox Ideas
-* - delete invalid/empty events
 * - reset faders of selected objects
 * - Enable streaming for longer files 
-* - find large files
 * 
-* Add QueryEditor:
+* Add to QueryEditor:
 * - open and import wav file to reaper shortcut select file and ctrl+r
 * - multiselect
 * 
-* Add Sort Originals:
+* Add to Sort Originals:
 * - count music and sfx originals
 */
 

@@ -8,8 +8,8 @@ Application::Application()
     queryEditorModule.reset(new QueryEditorModule(wwizardWwiseClient));
     sortOriginalsModule.reset(new SortOriginalsModule(settingsHandler->GetWwisProjectPathRef()));
     namingConventionModule.reset(new NamingConventionModule(settingsHandler->GetWwisProjectPathRef(), wwizardWwiseClient));
-
-    myGUI.reset(new GUI(wwizardWwiseClient, settingsHandler, queryEditorModule, sortOriginalsModule, namingConventionModule));
+    toolboxModule.reset(new ToolboxModule(wwizardWwiseClient));
+    myGUI.reset(new GUI(wwizardWwiseClient, settingsHandler, queryEditorModule, sortOriginalsModule, namingConventionModule, toolboxModule));
 
     Loop();
 }

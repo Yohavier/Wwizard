@@ -163,6 +163,7 @@
     <ClCompile Include="QueryEditorModule.cpp" />
     <ClCompile Include="SettingHandler.cpp" />
     <ClCompile Include="SortOriginalsModule.cpp" />
+    <ClCompile Include="ToolboxModule.cpp" />
     <ClCompile Include="WwizardWwiseClient.cpp" />
   </ItemGroup>
   <ItemGroup>
@@ -183,6 +184,7 @@
     <ClInclude Include="ResultFile.h" />
     <ClInclude Include="SettingHandler.h" />
     <ClInclude Include="SortOriginalsModule.h" />
+    <ClInclude Include="ToolboxModule.h" />
     <ClInclude Include="WwizardWwiseClient.h" />
     <ClInclude Include="WwuLookUpData.h" />
   </ItemGroup>

@@ -84,6 +84,9 @@
     <ClCompile Include="NamingConventionModule.cpp">
       <Filter>Source Files\Modules</Filter>
     </ClCompile>
+    <ClCompile Include="ToolboxModule.cpp">
+      <Filter>Source Files\Modules</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\ThirdParty\backends\imgui_impl_dx10.h">
@@ -142,6 +145,9 @@
     </ClInclude>
     <ClInclude Include="Issues.h">
       <Filter>Header Files\Helper</Filter>
+    </ClInclude>
+    <ClInclude Include="ToolboxModule.h">
+      <Filter>Header Files\Modules</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

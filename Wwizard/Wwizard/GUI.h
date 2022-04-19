@@ -9,6 +9,7 @@
 #include "SettingHandler.h"
 #include "SortOriginalsModule.h"
 #include "NamingConventionModule.h"
+#include "ToolboxModule.h"
 
 #include "imgui.h"
 #include "imgui_internal.h"
@@ -32,12 +33,12 @@ enum class Layout
 class GUI
 {
 public:
-	GUI(std::unique_ptr<WwizardWwiseClient>& wwizardWwiseClient, std::unique_ptr<SettingHandler>& settingHandler, std::unique_ptr<QueryEditorModule>&, std::unique_ptr<SortOriginalsModule>&, std::unique_ptr<NamingConventionModule>&);
+	GUI(std::unique_ptr<WwizardWwiseClient>& wwizardWwiseClient, std::unique_ptr<SettingHandler>& settingHandler, std::unique_ptr<QueryEditorModule>& queryModule, std::unique_ptr<SortOriginalsModule>& sortModue , std::unique_ptr<NamingConventionModule>& namingConventionModule, std::unique_ptr<ToolboxModule>& toolboxModule);
 	~GUI();
 	void Render(bool& isRunning);
 
 private:
-	void RenderLayoutToolBox();
+	void RenderLayoutToolbox();
 	void RenderLayoutQueryEditor();
 	void RenderLayoutHome();
 	void RenderLayoutSettings();
@@ -66,13 +67,14 @@ private:
 	std::unique_ptr<QueryEditorModule>& queryEditorModule;
 	std::unique_ptr<SortOriginalsModule>& sortOriginalsModule;
 	std::unique_ptr<NamingConventionModule>& namingConventionModule;
+	std::unique_ptr<ToolboxModule>& toolboxModule;
 
 	HWND hwnd;
 	WNDCLASSEX wc;
 	ImGuiIO* io = nullptr;
 
 	typedef void(GUI::* func_ptr) (void);
-	std::map<Layout, func_ptr> layouts = { {Layout::TOOLBOX, &GUI::RenderLayoutToolBox},
+	std::map<Layout, func_ptr> layouts = { {Layout::TOOLBOX, &GUI::RenderLayoutToolbox},
 												{Layout::NAMINGCONVENTION, &GUI::RenderLayoutNamingConvention },
 												{Layout::HOME, &GUI::RenderLayoutHome},
 												{Layout::QUERYEDITOR, &GUI::RenderLayoutQueryEditor},

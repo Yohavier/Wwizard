@@ -15,13 +15,14 @@ void CreateRenderTarget();
 void CleanupRenderTarget();
 LRESULT WINAPI WndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam);
 
-GUI::GUI(std::unique_ptr<WwizardWwiseClient>& wwizardWwiseClient, std::unique_ptr<SettingHandler>& settingHandler, std::unique_ptr<QueryEditorModule>& queryEditorModule, std::unique_ptr<SortOriginalsModule>& sortOriginalsModule, std::unique_ptr<NamingConventionModule>& namingConventionModule)
+GUI::GUI(std::unique_ptr<WwizardWwiseClient>& wwizardWwiseClient, std::unique_ptr<SettingHandler>& settingHandler, std::unique_ptr<QueryEditorModule>& queryEditorModule, std::unique_ptr<SortOriginalsModule>& sortOriginalsModule, std::unique_ptr<NamingConventionModule>& namingConventionModule, std::unique_ptr<ToolboxModule>& toolboxModule)
     : currentLayout(Layout::HOME)
     , wwizarWwiseClient(wwizardWwiseClient)
     , settingHandler(settingHandler)
     , queryEditorModule(queryEditorModule)
     , sortOriginalsModule(sortOriginalsModule)
     , namingConventionModule(namingConventionModule)
+    , toolboxModule(toolboxModule)
 { 
     // Create application window
     //ImGui_ImplWin32_EnableDpiAwareness();
@@ -679,9 +680,6 @@ void GUI::ShowDetails()
         ImGui::Text(("Name : " + possibleSelectedFile->name).c_str());
         ImGui::Text(("Guid : " + possibleSelectedFile->guid).c_str());
     }
-
-    
-
     ImGui::PopStyleVar();
     ImGui::End();
 }
@@ -839,32 +837,38 @@ void GUI::RenderLayoutNamingConvention()
         }
         if (ImGui::BeginTabItem("Additional Settings"))
         {
-            ImGui::Separator();
+            ImGui::Separator();                
+            ImGui::BeginColumns("additional", 3);
             for (const auto& wwuType : namingConventionModule->GetWhiteListedWwuTypes())
             {
                 ImGui::Text(namingConventionModule->GetStringToReplace(wwuType).substr(1).c_str());
-                ImGui::SameLine();
+                ImGui::NextColumn();
                 ImGui::Checkbox(("## allowSpace" + namingConventionModule->GetStringToReplace(wwuType).substr(1)).c_str(), &(namingConventionModule->wwuSettings[wwuType].allowSpace));
                 ImGui::SameLine();
                 ImGui::Text("Allow Space");
-                ImGui::SameLine();
+                ImGui::NextColumn();
                 ImGui::Checkbox(("## allowUpperCase" + namingConventionModule->GetStringToReplace(wwuType).substr(1)).c_str(), &(namingConventionModule->wwuSettings[wwuType].allowUpperCase));
                 ImGui::SameLine();
                 ImGui::Text("Allow Upper Case");
+                ImGui::NextColumn();
             }
+            ImGui::EndColumns();
             ImGui::EndTabItem();
         }
         if (ImGui::BeginTabItem("Prefix Settings"))
         {
             ImGui::Text("This tab lets you add a prefix to each Physical Folder of Wwise (Type of Work Units).");
             ImGui::Separator();
+            ImGui::BeginColumns("prefix", 2);
             for (auto& wwuType : namingConventionModule->GetWhiteListedWwuTypes())
             {
                 ImGui::Checkbox(namingConventionModule->GetStringToReplace(wwuType).substr(1).c_str(), &(namingConventionModule->wwuSettings[wwuType].applyPrefix));
-                ImGui::SameLine();
+                ImGui::NextColumn();
                 std::string identificationName = "##" + namingConventionModule->GetStringToReplace(wwuType);
                 ImGui::InputText(identificationName.c_str(), &(namingConventionModule->wwuSettings[wwuType].prefixToApply));
+                ImGui::NextColumn();
             }
+            ImGui::EndColumns();
             ImGui::EndTabItem();
         }
         if (ImGui::BeginTabItem("Suffix Settings"))
@@ -875,6 +879,7 @@ void GUI::RenderLayoutNamingConvention()
             ImGui::Separator();
             for (auto& containerType : namingConventionModule->GetWhiteListedContainers())
             {
+                ImGui::PushItemWidth(200);
                 ImGui::Text(containerType.c_str());
                 std::string currentContainerID = "##" + containerType;
                
@@ -901,6 +906,7 @@ void GUI::RenderLayoutNamingConvention()
                 ImGui::SameLine();
                 ImGui::InputInt((currentContainerID + "MaxNumber").c_str(), &(namingConventionModule->containerSettings[containerType].maxNumberAllowed), ImGuiInputTextFlags_NoHorizontalScroll);
                 ImGui::Separator();
+                ImGui::PopItemWidth();
             }
             ImGui::EndTabItem();
         }
@@ -970,9 +976,43 @@ void GUI::SetDefaultStyle()
     colors[ImGuiCol_TitleBgCollapsed] = ImVec4{ 0.15f, 0.1505f, 0.151f, 1.0f };
 }
 
-void GUI::RenderLayoutToolBox()
+void GUI::RenderLayoutToolbox()
 {
+    if (!wwizarWwiseClient->IsConnected())
+        return;
+    ImGui::SetNextWindowSize(ImVec2(430, 450), ImGuiCond_FirstUseEver);
+    if (!ImGui::Begin("Toolbox"))
+    {
+        ImGui::End();
+        return;
+    }
+    if (ImGui::Button("Remove invalid events"))
+    {
+        toolboxModule->GatherEmptyEvents();
+    }
+    ImGui::SameLine();
+    ImGui::Checkbox("All Events", &toolboxModule->deleteEmptyEventsForAllEvents);
+    if (ImGui::IsItemHovered() && GImGui->HoveredIdTimer > 0.5f)
+        ImGui::SetTooltip("If checked all events will be checked.");
 
+    if (ImGui::Button("Reset Faders in Hierarchy"))
+    {
+
+    }
+
+    if (ImGui::Button("Assign Streaming after threshold"))
+    {
+
+    }
+    ImGui::SameLine();
+    ImGui::PushItemWidth(100);
+    ImGui::InputDouble("##threshold", &toolboxModule->streamingThreshold);
+    if (ImGui::IsItemHovered() && GImGui->HoveredIdTimer > 0.5f)
+        ImGui::SetTooltip("Files longer than the threshold are put to streaming");
+    ImGui::SameLine();
+    ImGui::Text("seconds");
+    ImGui::PopItemWidth();
+    ImGui::End();
 }
 
 //Helper Functions for Iam GUi
