@@ -22,7 +22,7 @@ private:
 
 	void IterateResetFaders(const std::string& guid, const AkJson& options);
 	bool CheckObjectType(const std::string& type);
-	void ResetFader(const std::string& guid);
+	void ResetFader(const std::string& guid, const std::string& type);
 
 public:
 	bool deleteEmptyEventsForAllEvents = false;
@@ -30,6 +30,6 @@ public:
 private:
 	std::unique_ptr<WwizardWwiseClient>& wwizardClient;
 
-	std::set<std::string> faderContainers = { "ActorMixer", "Sound", "BlendContainer", "SwitchContainer", "RandomSequenceContainer"};
+	std::set<std::string> faderContainers = { "ActorMixer", "Sound", "BlendContainer", "SwitchContainer", "RandomSequenceContainer", "AuxBus", "Bus", "MusicTrack", "MusicPlaylistContainer", "MusicSegment", "MusicSwitchContainer"};
 };
 
