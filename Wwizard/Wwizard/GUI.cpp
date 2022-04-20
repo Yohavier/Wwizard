@@ -999,19 +999,6 @@ void GUI::RenderLayoutToolbox()
     {
         toolboxModule->ResetFadersInHierarchy();
     }
-
-    if (ImGui::Button("Assign Streaming after threshold"))
-    {
-
-    }
-    ImGui::SameLine();
-    ImGui::PushItemWidth(100);
-    ImGui::InputDouble("##threshold", &toolboxModule->streamingThreshold);
-    if (ImGui::IsItemHovered() && GImGui->HoveredIdTimer > 0.5f)
-        ImGui::SetTooltip("Files longer than the threshold are put to streaming");
-    ImGui::SameLine();
-    ImGui::Text("seconds");
-    ImGui::PopItemWidth();
     ImGui::End();
 }
 

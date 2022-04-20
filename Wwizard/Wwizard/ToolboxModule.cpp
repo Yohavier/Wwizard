@@ -14,7 +14,7 @@ void ToolboxModule::GatherEmptyEvents()
 	if (deleteEmptyEventsForAllEvents)
 	{
 		result = wwizardClient->GetObjectFromPath("\\Events", options);
-		if (!result["return"].GetArray().empty())
+		if (!result["return"].IsEmpty())
 		{
 			for (const auto& results : result["return"].GetArray())
 			{
@@ -25,7 +25,7 @@ void ToolboxModule::GatherEmptyEvents()
 	else
 	{
 		wwizardClient->GetCurrentSelectedObjectsInWwise(result, options);
-		if (!result["objects"].GetArray().empty())
+		if (!result["objects"].IsEmpty())
 		{
 			if (result["objects"].GetArray()[0]["category"].GetVariant().GetString() == "Events")
 			{
@@ -93,7 +93,7 @@ void ToolboxModule::ResetFadersInHierarchy()
 	AkJson options(AkJson::Map{ { "return", AkJson::Array{ AkVariant("id"), AkVariant("path"), AkVariant("type"), AkVariant("category"), AkVariant("childrenCount")}} });
 
 	wwizardClient->GetCurrentSelectedObjectsInWwise(result, options);
-	if (!result["objects"].GetArray().empty())
+	if (!result["objects"].IsEmpty())
 	{
 		std::string category = result["objects"].GetArray()[0]["category"].GetVariant().GetString();
 		std::cout << category << std::endl;
@@ -150,8 +150,4 @@ void ToolboxModule::ResetFader(const std::string& path, const std::string& type)
 		{"value", AkVariant(0)}
 	} });
 	wwizardClient->SetProperty(arg);
-}
-
-void ToolboxModule::EnableStreamingAfterThreshold()
-{
 }

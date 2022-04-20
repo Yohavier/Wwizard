@@ -12,7 +12,6 @@ public:
 	void GatherEmptyEvents();
 
 	void ResetFadersInHierarchy();
-	void EnableStreamingAfterThreshold();
 
 private:
 	void DeleteEmptyEvent(const std::string& guid);

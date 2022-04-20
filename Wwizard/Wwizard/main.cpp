@@ -5,13 +5,14 @@
 * Bugs & Todos:
 * - Query save Data is sometimes deleted
 * 
-* Toolbox Ideas
-* - reset faders of selected objects
-* - Enable streaming for longer files 
-* 
 * Add to QueryEditor:
 * - open and import wav file to reaper shortcut select file and ctrl+r
 * - multiselect
+* 
+* Add to Toolbox:
+* - list of resetFaders
+* - ignore faders with comments
+* - list of delete events
 * 
 * Add to Sort Originals:
 * - count music and sfx originals
