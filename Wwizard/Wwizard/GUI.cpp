@@ -547,7 +547,25 @@ void GUI::ShowQueryResults()
 
 void GUI::RenderLayoutHome()
 {
-        
+    ImGui::SetNextWindowSize(ImVec2(430, 450), ImGuiCond_FirstUseEver);
+    if (!ImGui::Begin("Home"))
+    {
+        ImGui::End();
+        return;
+    }
+    ImGui::BeginColumns("homelayout", 2);
+    ImGui::Text("Notes");
+    ImGui::BulletText("Saving queries might not be safe and json file gets cleared sometimes.");
+
+    ImGui::NextColumn();
+    ImGui::Text("Todo");
+    ImGui::BulletText("Toolbox: list of resetFaders");
+    ImGui::BulletText("Toolbox: ignore faders with comments");
+    ImGui::BulletText("Toolbox: list of delete events");
+    ImGui::BulletText("SortOriginals: count music and sfx originals");
+    ImGui::BulletText("QueryEditor: multiselect");
+    ImGui::BulletText("QueryEditor: open and import wav file to reaper shortcut select file and ctrl+r");
+    ImGui::End();
 }
 
 void GUI::ShowQueryCreator()
@@ -869,7 +887,7 @@ void GUI::RenderLayoutNamingConvention()
                 ImGui::NextColumn();
             }
             ImGui::EndColumns();
-            ImGui::EndTabItem();
+            ImGui::EndTabItem(); 
         }
         if (ImGui::BeginTabItem("Suffix Settings"))
         {
@@ -877,8 +895,11 @@ void GUI::RenderLayoutNamingConvention()
             ImGui::Text("If you have multiple text suffixes you want to make possible, please separate them with a comma.");
             ImGui::Text("Max Layers lets you define how many layers the suffix has. 'tree_lp_01' has two suffix layers. You can only have one number suffixlayer.");
             ImGui::Separator();
+            ImGui::BeginColumns("suffix", 2);
+            int columnCounter = 0;
             for (auto& containerType : namingConventionModule->GetWhiteListedContainers())
             {
+                columnCounter++;
                 ImGui::PushItemWidth(200);
                 ImGui::Text(containerType.c_str());
                 std::string currentContainerID = "##" + containerType;
@@ -905,9 +926,16 @@ void GUI::RenderLayoutNamingConvention()
                 ImGui::Text("Max Number");
                 ImGui::SameLine();
                 ImGui::InputInt((currentContainerID + "MaxNumber").c_str(), &(namingConventionModule->containerSettings[containerType].maxNumberAllowed), ImGuiInputTextFlags_NoHorizontalScroll);
-                ImGui::Separator();
                 ImGui::PopItemWidth();
+                if (columnCounter == 2)
+                {
+                    ImGui::Separator();
+                    columnCounter = 0;
+                }
+                ImGui::NextColumn();
+            
             }
+            ImGui::EndColumns();
             ImGui::EndTabItem();
         }
         if (ImGui::BeginTabItem("Info"))

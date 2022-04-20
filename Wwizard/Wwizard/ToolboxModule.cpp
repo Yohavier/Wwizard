@@ -112,7 +112,6 @@ void ToolboxModule::ResetFadersInHierarchy()
 	}
 }
 
-
 void ToolboxModule::IterateResetFaders(const std::string& guid, const AkJson& options)
 {
 	AkJson result = wwizardClient->GetChildrenFromGuid(guid, options);
