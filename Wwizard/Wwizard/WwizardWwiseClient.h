@@ -51,6 +51,8 @@ public:
 
 	const AkJson GetPropertyFromGuid(const std::string& parentGuid);
 
+	void SetProperty(const AkJson& arg);
+
 private:
 	void WalkChildren(const std::string& guid, const AkJson& opt, std::vector<AkJson>& outputList);
 	void ReconnectionThread();

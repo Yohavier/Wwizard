@@ -89,6 +89,61 @@ void ToolboxModule::DeleteEmptyEvent(const std::string& guid)
 
 void ToolboxModule::ResetFadersInHierarchy()
 {
+	AkJson result;
+	AkJson options(AkJson::Map{ { "return", AkJson::Array{ AkVariant("id"), AkVariant("path"), AkVariant("type"), AkVariant("category"), AkVariant("childrenCount")}} });
+
+	wwizardClient->GetCurrentSelectedObjectsInWwise(result, options);
+	if (!result["objects"].GetArray().empty())
+	{
+		if (result["objects"].GetArray()[0]["category"].GetVariant().GetString() == "Actor-Mixer Hierarchy")
+		{
+			for (const auto& results : result["objects"].GetArray())
+			{
+				IterateResetFaders(results["id"].GetVariant().GetString(), options);
+
+				if (CheckObjectType(results["type"].GetVariant().GetString()))
+				{
+					ResetFader(results["id"].GetVariant().GetString());
+				}
+			}
+		}
+	}
+}
+
+
+void ToolboxModule::IterateResetFaders(const std::string& guid, const AkJson& options)
+{
+	AkJson result = wwizardClient->GetChildrenFromGuid(guid, options);
+	for (const auto& fader : result["return"].GetArray())
+	{
+		std::cout << fader["type"].GetVariant().GetString() << std::endl;
+
+		if (CheckObjectType(fader["type"].GetVariant().GetString()))
+		{
+			ResetFader(fader["path"].GetVariant().GetString());
+		}
+		IterateResetFaders(fader["id"].GetVariant().GetString(), options);
+	}
+}
+
+bool ToolboxModule::CheckObjectType(const std::string& type)
+{
+	if (faderContainers.find(type) != faderContainers.end())
+	{
+		return true;
+	}
+	return false;
+}
+
+void ToolboxModule::ResetFader(const std::string& path)
+{
+	AkJson arg(AkJson::Map{
+	{
+		{"object", AkVariant(path)},
+		{"property", AkVariant("Volume")},
+		{"value", AkVariant(0)}
+	} });
+	wwizardClient->SetProperty(arg);
 }
 
 void ToolboxModule::EnableStreamingAfterThreshold()

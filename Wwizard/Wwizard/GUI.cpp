@@ -997,7 +997,7 @@ void GUI::RenderLayoutToolbox()
 
     if (ImGui::Button("Reset Faders in Hierarchy"))
     {
-
+        toolboxModule->ResetFadersInHierarchy();
     }
 
     if (ImGui::Button("Assign Streaming after threshold"))

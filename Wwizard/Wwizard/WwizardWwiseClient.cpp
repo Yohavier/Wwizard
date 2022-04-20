@@ -237,9 +237,15 @@ const AkJson WwizardWwiseClient::GetPropertyFromGuid(const std::string& parentGu
     AkJson options(AkJson::Map{ { "return", AkJson::Array{ AkVariant("Target")}} });
     AkJson result;
     AkJson arg(AkJson::Map{
-   {
-       {"from", AkJson::Map{{ "id", AkJson::Array{ AkVariant(parentGuid) }}}}
-   } });
+       {
+           {"from", AkJson::Map{{ "id", AkJson::Array{ AkVariant(parentGuid) }}}}
+       } });
     wwiseClient.Call(ak::wwise::core::object::get, arg, options, result);
     return result;
+}
+
+void WwizardWwiseClient::SetProperty(const AkJson& arg)
+{
+    AkJson empty(AkJson::Map{});
+    wwiseClient.Call(ak::wwise::core::object::setProperty, arg, empty, empty, 500);
 }
