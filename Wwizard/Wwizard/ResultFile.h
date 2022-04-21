@@ -31,8 +31,10 @@ struct QueryResultFile : public BaseResultFile
 		: BaseResultFile(guid, name)
 		, type(type)
 		, color(color)
+		, path(path)
 	{}
 
 	std::string type;
+	std::string path;
 	int color;
 };

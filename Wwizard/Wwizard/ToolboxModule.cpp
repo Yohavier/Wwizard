@@ -8,8 +8,9 @@ ToolboxModule::ToolboxModule(std::unique_ptr<WwizardWwiseClient>& wwizardClient)
 
 void ToolboxModule::GatherEmptyEvents()
 {
+	eventQueryResultFiles.clear();
 	AkJson result; 
-	AkJson options(AkJson::Map{{ "return", AkJson::Array{ AkVariant("id"), AkVariant("name"), AkVariant("type"), AkVariant("category"), AkVariant("childrenCount")}} });
+	AkJson options(AkJson::Map{{ "return", AkJson::Array{ AkVariant("id"), AkVariant("name"), AkVariant("type"), AkVariant("category"), AkVariant("path"), AkVariant("color"), AkVariant("childrenCount")}} });
 	
 	if (deleteEmptyEventsForAllEvents)
 	{
@@ -51,7 +52,12 @@ void ToolboxModule::IterateGatherEmptyEvents(const std::string& guid, const AkJs
 		{
 			if (IsEventEmptyOrInvalid(evt["childrenCount"].GetVariant().GetUInt8(), evt["id"].GetVariant().GetString()))
 			{
-				DeleteEmptyEvent(evt["id"].GetVariant().GetString());
+				eventQueryResultFiles.insert({ evt["id"].GetVariant().GetString(), QueryResultFile(
+					evt["name"].GetVariant().GetString(),
+					evt["id"].GetVariant().GetString(),
+					evt["path"].GetVariant().GetString(),
+					evt["type"].GetVariant().GetString(),
+					evt["color"].GetVariant().GetUInt8()) });
 			}
 		}
 	}
@@ -82,15 +88,21 @@ bool ToolboxModule::AreAllActionsEmpty(const std::string& parentGuid)
 	return true;
 }
 
-void ToolboxModule::DeleteEmptyEvent(const std::string& guid)
+void ToolboxModule::DeleteEmptyEvent()
 {
-	wwizardClient->DeleteObjectInWwise(guid);
+	for (const auto& evt : eventQueryResultFiles)
+	{
+		wwizardClient->DeleteObjectInWwise(evt.second.guid);
+	}
+	eventQueryResultFiles.clear();
 }
 
-void ToolboxModule::ResetFadersInHierarchy()
+
+void ToolboxModule::GatherFadersInHierarchy()
 {
+	faderQueryResultFiles.clear();
 	AkJson result;
-	AkJson options(AkJson::Map{ { "return", AkJson::Array{ AkVariant("id"), AkVariant("path"), AkVariant("type"), AkVariant("category"), AkVariant("childrenCount")}} });
+	AkJson options(AkJson::Map{ { "return", AkJson::Array{ AkVariant("id"), AkVariant("path"), AkVariant("type"), AkVariant("name"), AkVariant("color"), AkVariant("category"), AkVariant("childrenCount")}} });
 
 	wwizardClient->GetCurrentSelectedObjectsInWwise(result, options);
 	if (!result["objects"].IsEmpty())
@@ -99,13 +111,17 @@ void ToolboxModule::ResetFadersInHierarchy()
 		std::cout << category << std::endl;
 		if (category == "Actor-Mixer Hierarchy" || category == "Master-Mixer Hierarchy" || category == "Interactive Music Hierarchy")
 		{
-			for (const auto& results : result["objects"].GetArray())
+			for (const auto& fader : result["objects"].GetArray())
 			{
-				IterateResetFaders(results["id"].GetVariant().GetString(), options);
+				IterateResetFaders(fader["id"].GetVariant().GetString(), options);
 
-				if (CheckObjectType(results["type"].GetVariant().GetString()))
+				if (CheckObjectType(fader["type"].GetVariant().GetString()))
 				{
-					ResetFader(results["id"].GetVariant().GetString(), results["type"].GetVariant().GetString());
+					faderQueryResultFiles.insert({fader["id"].GetVariant().GetString(), QueryResultFile(fader["name"].GetVariant().GetString(),
+					fader["id"].GetVariant().GetString(),
+					fader["path"].GetVariant().GetString(),
+					fader["type"].GetVariant().GetString(),
+					fader["color"].GetVariant().GetUInt8())});
 				}
 			}
 		}
@@ -121,7 +137,11 @@ void ToolboxModule::IterateResetFaders(const std::string& guid, const AkJson& op
 
 		if (CheckObjectType(fader["type"].GetVariant().GetString()))
 		{
-			ResetFader(fader["path"].GetVariant().GetString(), fader["type"].GetVariant().GetString());
+			faderQueryResultFiles.insert({ fader["id"].GetVariant().GetString(), QueryResultFile(fader["name"].GetVariant().GetString(),
+					fader["id"].GetVariant().GetString(),
+					fader["path"].GetVariant().GetString(),
+					fader["type"].GetVariant().GetString(),
+					fader["color"].GetVariant().GetUInt8()) });
 		}
 		IterateResetFaders(fader["id"].GetVariant().GetString(), options);
 	}
@@ -136,17 +156,21 @@ bool ToolboxModule::CheckObjectType(const std::string& type)
 	return false;
 }
 
-void ToolboxModule::ResetFader(const std::string& path, const std::string& type)
+void ToolboxModule::ResetFader()
 {
-	std::string property = "Volume";
-	if (type == "Bus" || type == "AuxBus")
-		property = "BusVolume";
-
-	AkJson arg(AkJson::Map{
+	for (const auto& fader : faderQueryResultFiles)
 	{
-		{"object", AkVariant(path)},
-		{"property", AkVariant(property)},
-		{"value", AkVariant(0)}
-	} });
-	wwizardClient->SetProperty(arg);
+		std::string property = "Volume";
+		if (fader.second.type == "Bus" || fader.second.type == "AuxBus")
+			property = "BusVolume";
+
+		AkJson arg(AkJson::Map{
+		{
+			{"object", AkVariant(fader.second.path)},
+			{"property", AkVariant(property)},
+			{"value", AkVariant(0)}
+		} });
+		wwizardClient->SetProperty(arg);
+	}
+	faderQueryResultFiles.clear();
 }

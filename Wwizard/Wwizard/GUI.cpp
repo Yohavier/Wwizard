@@ -311,7 +311,7 @@ void GUI::RenderLayoutQueryEditor()
 
 
     //Active Queries Field
-    ImGui::SetNextWindowSize(ImVec2(430, 450), ImGuiCond_FirstUseEver);
+     
     if (!ImGui::Begin("Active Queries", (bool*)1))
     {
         ImGui::End();
@@ -559,9 +559,9 @@ void GUI::RenderLayoutHome()
 
     ImGui::NextColumn();
     ImGui::Text("Todo");
-    ImGui::BulletText("Toolbox: list of resetFaders");
+    ImGui::BulletText("iterate waapi wrapper");
+    ImGui::BulletText("create ImGui wrapper");
     ImGui::BulletText("Toolbox: ignore faders with comments");
-    ImGui::BulletText("Toolbox: list of delete events");
     ImGui::BulletText("SortOriginals: count music and sfx originals");
     ImGui::BulletText("QueryEditor: multiselect");
     ImGui::BulletText("QueryEditor: open and import wav file to reaper shortcut select file and ctrl+r");
@@ -1008,25 +1008,72 @@ void GUI::RenderLayoutToolbox()
 {
     if (!wwizarWwiseClient->IsConnected())
         return;
+
     ImGui::SetNextWindowSize(ImVec2(430, 450), ImGuiCond_FirstUseEver);
     if (!ImGui::Begin("Toolbox"))
     {
         ImGui::End();
         return;
     }
-    if (ImGui::Button("Remove invalid events"))
-    {
-        toolboxModule->GatherEmptyEvents();
-    }
-    ImGui::SameLine();
-    ImGui::Checkbox("All Events", &toolboxModule->deleteEmptyEventsForAllEvents);
-    if (ImGui::IsItemHovered() && GImGui->HoveredIdTimer > 0.5f)
-        ImGui::SetTooltip("If checked all events will be checked.");
 
-    if (ImGui::Button("Reset Faders in Hierarchy"))
+    if (ImGui::CollapsingHeader("Invalid Events"))
     {
-        toolboxModule->ResetFadersInHierarchy();
+        ImGui::BeginColumns("events", 2);
+        ImGui::Text("Settings");
+
+        if (ImGui::Button("Gather invalid events"))
+        {
+            toolboxModule->GatherEmptyEvents();
+        }
+        ImGui::Checkbox("All Events", &toolboxModule->deleteEmptyEventsForAllEvents);
+        if (ImGui::IsItemHovered() && GImGui->HoveredIdTimer > 0.5f)
+            ImGui::SetTooltip("If checked all events will be checked.");
+
+        ImGui::NextColumn(); 
+        ImGui::Text("found invalid events");
+        if (ImGui::BeginTable("split", 1))
+        {
+            for (const auto& evt : toolboxModule->eventQueryResultFiles)
+            {
+                ImGui::TableNextColumn(); 
+                ImGui::Text(evt.second.name.c_str());
+            }
+            ImGui::EndTable();
+            if (ImGui::Button("Delete"))
+            {
+                toolboxModule->DeleteEmptyEvent();
+            }
+        }
+        ImGui::EndColumns();
     }
+
+    if (ImGui::CollapsingHeader("Reset Faders"))
+    {
+        ImGui::BeginColumns("faders", 2);
+        
+        if (ImGui::Button("Gather Faders in Hierarchy"))
+        {
+            toolboxModule->GatherFadersInHierarchy();
+        }
+        
+        ImGui::NextColumn();
+        ImGui::Text("resetable faders");
+        if (ImGui::BeginTable("split", 1))
+        {
+            for (const auto& fader : toolboxModule->faderQueryResultFiles)
+            {
+                ImGui::TableNextColumn();
+                ImGui::Text(fader.second.name.c_str());
+            }
+            ImGui::EndTable();
+            if (ImGui::Button("Reset"))
+            {
+                toolboxModule->ResetFader();
+            }
+        }
+        ImGui::EndColumns();
+    }
+
     ImGui::End();
 }
 
