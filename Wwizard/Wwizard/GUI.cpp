@@ -1033,7 +1033,7 @@ void GUI::RenderLayoutToolbox()
         ImGui::Text("found invalid events");
         if (ImGui::BeginTable("split", 1))
         {
-            for (const auto& evt : toolboxModule->eventQueryResultFiles)
+            for (const auto& evt : toolboxModule->GetEventResultFiles())
             {
                 ImGui::TableNextColumn(); 
                 ImGui::Text(evt.second.name.c_str());
@@ -1060,7 +1060,7 @@ void GUI::RenderLayoutToolbox()
         ImGui::Text("resetable faders");
         if (ImGui::BeginTable("split", 1))
         {
-            for (const auto& fader : toolboxModule->faderQueryResultFiles)
+            for (const auto& fader : toolboxModule->GetFaderResultFiles())
             {
                 ImGui::TableNextColumn();
                 ImGui::Text(fader.second.name.c_str());

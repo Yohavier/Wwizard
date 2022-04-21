@@ -102,13 +102,12 @@ void ToolboxModule::GatherFadersInHierarchy()
 {
 	faderQueryResultFiles.clear();
 	AkJson result;
-	AkJson options(AkJson::Map{ { "return", AkJson::Array{ AkVariant("id"), AkVariant("path"), AkVariant("type"), AkVariant("name"), AkVariant("color"), AkVariant("category"), AkVariant("childrenCount")}} });
+	AkJson options(AkJson::Map{ { "return", AkJson::Array{ AkVariant("id"), AkVariant("path"), AkVariant("type"), AkVariant("name"), AkVariant("color"), AkVariant("category"), AkVariant("childrenCount"), AkVariant("notes")}} });
 
 	wwizardClient->GetCurrentSelectedObjectsInWwise(result, options);
 	if (!result["objects"].IsEmpty())
 	{
 		std::string category = result["objects"].GetArray()[0]["category"].GetVariant().GetString();
-		std::cout << category << std::endl;
 		if (category == "Actor-Mixer Hierarchy" || category == "Master-Mixer Hierarchy" || category == "Interactive Music Hierarchy")
 		{
 			for (const auto& fader : result["objects"].GetArray())
@@ -117,11 +116,14 @@ void ToolboxModule::GatherFadersInHierarchy()
 
 				if (CheckObjectType(fader["type"].GetVariant().GetString()))
 				{
-					faderQueryResultFiles.insert({fader["id"].GetVariant().GetString(), QueryResultFile(fader["name"].GetVariant().GetString(),
-					fader["id"].GetVariant().GetString(),
-					fader["path"].GetVariant().GetString(),
-					fader["type"].GetVariant().GetString(),
-					fader["color"].GetVariant().GetUInt8())});
+					if (fader["notes"].GetVariant().GetString().find(ignoreFaderNote) == std::string::npos)
+					{
+						faderQueryResultFiles.insert({ fader["id"].GetVariant().GetString(), QueryResultFile(fader["name"].GetVariant().GetString(),
+						fader["id"].GetVariant().GetString(),
+						fader["path"].GetVariant().GetString(),
+						fader["type"].GetVariant().GetString(),
+						fader["color"].GetVariant().GetUInt8()) });
+					}
 				}
 			}
 		}
@@ -133,15 +135,16 @@ void ToolboxModule::IterateResetFaders(const std::string& guid, const AkJson& op
 	AkJson result = wwizardClient->GetChildrenFromGuid(guid, options);
 	for (const auto& fader : result["return"].GetArray())
 	{
-		std::cout << fader["type"].GetVariant().GetString() << std::endl;
-
 		if (CheckObjectType(fader["type"].GetVariant().GetString()))
 		{
-			faderQueryResultFiles.insert({ fader["id"].GetVariant().GetString(), QueryResultFile(fader["name"].GetVariant().GetString(),
-					fader["id"].GetVariant().GetString(),
-					fader["path"].GetVariant().GetString(),
-					fader["type"].GetVariant().GetString(),
-					fader["color"].GetVariant().GetUInt8()) });
+			if (fader["notes"].GetVariant().GetString().find(ignoreFaderNote) == std::string::npos)
+			{
+				faderQueryResultFiles.insert({ fader["id"].GetVariant().GetString(), QueryResultFile(fader["name"].GetVariant().GetString(),
+						fader["id"].GetVariant().GetString(),
+						fader["path"].GetVariant().GetString(),
+						fader["type"].GetVariant().GetString(),
+						fader["color"].GetVariant().GetUInt8()) });
+			}
 		}
 		IterateResetFaders(fader["id"].GetVariant().GetString(), options);
 	}
@@ -173,4 +176,14 @@ void ToolboxModule::ResetFader()
 		wwizardClient->SetProperty(arg);
 	}
 	faderQueryResultFiles.clear();
+}
+
+const std::map<std::string, QueryResultFile>& ToolboxModule::GetEventResultFiles()
+{
+	return eventQueryResultFiles;
+}
+
+const std::map<std::string, QueryResultFile>& ToolboxModule::GetFaderResultFiles()
+{
+	return faderQueryResultFiles;
 }
