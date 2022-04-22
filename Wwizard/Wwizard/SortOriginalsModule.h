@@ -22,16 +22,20 @@ public:
 	void CollectUnusedOriginals();
 	void DeleteUnusedOriginals(const bool wantDelete);
 	void SortOriginals();
+	void Scan();
 
 	const int& GetOriginalsCount();
 	const std::string& GetOriginalPath();
 	const std::set<std::string>& GetUnusedOriginals();
+	const int& GetMusicCount();
+	const int& GetSFXCount();
+
 
 private:
 	void ScanOriginalsPath(const std::string path);
-	void ScanWorkUnitXMLByPath(const std::string wwuPath);
-	void ScanWorkUnitXMLByGuid(const std::string& guid);
-	void IterateXMLChildren(const pugi::xml_node& parent);
+	void ScanWorkUnitXMLByPath(const std::string wwuPath, const bool& isMusic);
+	void ScanWorkUnitXMLByGuid(const std::string& guid, const bool& isMusic);
+	void IterateXMLChildren(const pugi::xml_node& parent, const bool& isMusic);
 
 	void PreFetchAllWwuData(const std::string& directory);
 	void FetchSingleWwuData(const std::string& wwuPath);
@@ -43,7 +47,7 @@ private:
 	bool DeleteEmptyFolders(const std::string& directory);
 
 	void ClearPreviousSortData();
-	void Scan();
+
 
 public:
 	bool workUnitFlag;
@@ -69,6 +73,8 @@ private:
 	std::string projectPath;
 
 	std::map<std::string, int> originalsDic;
+	std::map<std::string, int> musicDic;
+	std::map<std::string, int> sfxDic;
 
 	std::vector<WwuLookUpData> prefetchedWwuData;
 	std::set<std::string> unusedOriginalsPaths;

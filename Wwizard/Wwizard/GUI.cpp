@@ -561,8 +561,8 @@ void GUI::RenderLayoutHome()
     ImGui::Text("Todo");
     ImGui::BulletText("iterate waapi wrapper");
     ImGui::BulletText("create ImGui wrapper");
-    ImGui::BulletText("Toolbox: ignore faders with comments");
-    ImGui::BulletText("SortOriginals: count music and sfx originals");
+    ImGui::BulletText("Move Sort Originals into own Thread");
+    ImGui::BulletText("Move Naming Convention into own Thread");
     ImGui::BulletText("QueryEditor: multiselect");
     ImGui::BulletText("QueryEditor: open and import wav file to reaper shortcut select file and ctrl+r");
     ImGui::End();
@@ -716,9 +716,22 @@ void GUI::RenderLayoutSortOriginals()
     ImGui::Text("Originals Count: ");
     ImGui::SameLine();
     ImGui::Text(std::to_string(sortOriginalsModule->GetOriginalsCount()).c_str());
+    ImGui::Text("SFX Count: ");
+    ImGui::SameLine();
+    ImGui::Text(std::to_string(sortOriginalsModule->GetSFXCount()).c_str());
+    ImGui::Text("music Count: ");
+    ImGui::SameLine();
+    ImGui::Text(std::to_string(sortOriginalsModule->GetMusicCount()).c_str());
+
     ImGui::Text("OriginalsPath: ");
     ImGui::SameLine();
     ImGui::Text(sortOriginalsModule->GetOriginalPath().c_str());
+
+    if (ImGui::Button("Scan", ImVec2(75, 25)))
+    {
+        sortOriginalsModule->Scan();
+    }
+
     ImGui::Separator();
     ImGui::Separator();
     if (ImGui::Button("Sort Originals", ImVec2(200, 50)))
@@ -1073,7 +1086,6 @@ void GUI::RenderLayoutToolbox()
         }
         ImGui::EndColumns();
     }
-
     ImGui::End();
 }
 

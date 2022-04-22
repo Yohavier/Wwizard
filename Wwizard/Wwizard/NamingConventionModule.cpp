@@ -71,7 +71,7 @@ void NamingConventionModule::FetchSingleWwuData(const std::string& path)
 		return;
 
 	pugi::xml_node data = doc.child("WwiseDocument").first_child().child("WorkUnit");
-	WwuLookUpData newWwuData = WwuLookUpData(data.attribute("Name").value(), data.attribute("ID").value(), data.attribute("PersistMode").value(), path);
+	WwuLookUpData newWwuData = WwuLookUpData(data.attribute("Name").value(), data.attribute("ID").value(), data.attribute("PersistMode").value(), path, false);
 	prefetchedWwuData.emplace_back(newWwuData);
 }
 

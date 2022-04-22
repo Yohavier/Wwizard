@@ -23,6 +23,8 @@ void SortOriginalsModule::ClearPreviousSortData()
 {
 	originalsDic.clear();
 	prefetchedWwuData.clear();
+	musicDic.clear();
+	sfxDic.clear();
 }
 //Originals 
 void SortOriginalsModule::ScanOriginalsPath(const std::string path)
@@ -74,7 +76,12 @@ void SortOriginalsModule::FetchSingleWwuData(const std::string& path)
 
 	pugi::xml_node data = doc.child("WwiseDocument").first_child().child("WorkUnit");
 		
-	WwuLookUpData newWwuData = WwuLookUpData(data.attribute("Name").value(), data.attribute("ID").value(), data.attribute("PersistMode").value(), path);
+	bool isMusic = false;
+	if (static_cast<std::string>(doc.child("WwiseDocument").first_child().name()) == "InteractiveMusic")
+	{
+		isMusic = true;
+	}
+	WwuLookUpData newWwuData = WwuLookUpData(data.attribute("Name").value(), data.attribute("ID").value(), data.attribute("PersistMode").value(), path, isMusic);
 	prefetchedWwuData.emplace_back(newWwuData);
 }
 
@@ -84,44 +91,52 @@ void SortOriginalsModule::ScanWorkUnitOriginalsUse()
 	{
 		if (data.wwuType == "Standalone")
 		{
-			ScanWorkUnitXMLByPath(data.path);
+			ScanWorkUnitXMLByPath(data.path, data.isMusic);
 		}
 	}
 }
 
-void SortOriginalsModule::ScanWorkUnitXMLByPath(const std::string wwuPath)
+void SortOriginalsModule::ScanWorkUnitXMLByPath(const std::string wwuPath, const bool& isMusic)
 {
 	pugi::xml_document doc;
 	pugi::xml_parse_result result = doc.load_file(wwuPath.c_str());
 	if (!result)
 		return;
 
-	IterateXMLChildren(doc.child("WwiseDocument"));
+	IterateXMLChildren(doc.child("WwiseDocument"), isMusic);
 }
 
-void SortOriginalsModule::IterateXMLChildren(const pugi::xml_node& parent)
+void SortOriginalsModule::IterateXMLChildren(const pugi::xml_node& parent, const bool& isMusic)
 {
 	for (pugi::xml_node children : parent)
 	{
 		if (static_cast<std::string>(children.name()) == "AudioFile")
 		{
 			auto nodeValue = children.text().as_string();
-			originalsDic[originalsPath + "\\" + nodeValue] += 1;
+			int currentValue = originalsDic[originalsPath + "\\" + nodeValue] += 1;
+			if (isMusic)
+			{
+				musicDic.emplace(originalsPath + "\\" + nodeValue, currentValue);
+			}
+			else
+			{
+				sfxDic.emplace(originalsPath + "\\" + nodeValue, currentValue);
+			}
 		}
 		else if (static_cast<std::string>(children.name()) == "WorkUnit")
 		{
 			if (static_cast<std::string>(children.attribute("PersistMode").value()) == "Reference")
-				ScanWorkUnitXMLByGuid(children.attribute("ID").as_string());
-			IterateXMLChildren(children);
+				ScanWorkUnitXMLByGuid(children.attribute("ID").as_string(), isMusic);
+			IterateXMLChildren(children, isMusic);
 		}
 		else
 		{
-			IterateXMLChildren(children);
+			IterateXMLChildren(children, isMusic);
 		}
 	}
 }
 
-void SortOriginalsModule::ScanWorkUnitXMLByGuid(const std::string& guid)
+void SortOriginalsModule::ScanWorkUnitXMLByGuid(const std::string& guid, const bool& isMusic)
 {
 	for (auto& data : prefetchedWwuData)
 	{
@@ -132,7 +147,7 @@ void SortOriginalsModule::ScanWorkUnitXMLByGuid(const std::string& guid)
 			if (!result)
 				return;
 
-			IterateXMLChildren(doc.child("WwiseDocument"));
+			IterateXMLChildren(doc.child("WwiseDocument"), isMusic);
 		}
 	}	
 }
@@ -496,4 +511,14 @@ const std::string& SortOriginalsModule::GetOriginalPath()
 const std::set<std::string>& SortOriginalsModule::GetUnusedOriginals()
 {
 	return unusedOriginalsPaths;
+}
+
+const int& SortOriginalsModule::GetMusicCount()
+{
+	return musicDic.size();
+}
+
+const int& SortOriginalsModule::GetSFXCount()
+{
+	return sfxDic.size();
 }
