@@ -27,7 +27,8 @@ enum class Layout
 	NAMINGCONVENTION,
 	SORTORIGINALS,
 	SETTINGS,
-	TOOLBOX
+	TOOLBOX,
+	COLORCODING
 };
 
 class GUI
@@ -44,6 +45,7 @@ private:
 	void RenderLayoutSettings();
 	void RenderLayoutSortOriginals();
 	void RenderLayoutNamingConvention();
+	void RenderColorCodingModule();
 
 	void CreateTaskBar(bool& isRunning);
 	void SetLayout(const Layout newLayout);
@@ -79,7 +81,8 @@ private:
 												{Layout::HOME, &GUI::RenderLayoutHome},
 												{Layout::QUERYEDITOR, &GUI::RenderLayoutQueryEditor},
 												{Layout::SETTINGS, &GUI::RenderLayoutSettings},
-												{Layout::SORTORIGINALS, &GUI::RenderLayoutSortOriginals} 
+												{Layout::SORTORIGINALS, &GUI::RenderLayoutSortOriginals},
+												{Layout::COLORCODING, &GUI::RenderColorCodingModule}
 	};
 
 	const ImVec4 clear_color = ImVec4(0.45f, 0.55f, 0.60f, 1.00f);

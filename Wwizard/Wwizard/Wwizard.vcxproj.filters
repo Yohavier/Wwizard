@@ -87,6 +87,9 @@
     <ClCompile Include="ToolboxModule.cpp">
       <Filter>Source Files\Modules</Filter>
     </ClCompile>
+    <ClCompile Include="ColorCodingModule.cpp">
+      <Filter>Source Files\Modules</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\ThirdParty\backends\imgui_impl_dx10.h">
@@ -147,6 +150,9 @@
       <Filter>Header Files\Helper</Filter>
     </ClInclude>
     <ClInclude Include="ToolboxModule.h">
+      <Filter>Header Files\Modules</Filter>
+    </ClInclude>
+    <ClInclude Include="ColorCodingModule.h">
       <Filter>Header Files\Modules</Filter>
     </ClInclude>
   </ItemGroup>

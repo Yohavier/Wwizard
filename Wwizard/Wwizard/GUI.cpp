@@ -189,26 +189,33 @@ void GUI::CreateTaskBar(bool& isRunning)
         }
         if (ImGui::BeginMenu("Module"))
         {
-            if (ImGui::MenuItem("Naming Convention", NULL))
+            bool enabled = wwizarWwiseClient->IsConnected();
+            if (ImGui::MenuItem("Naming Convention", NULL, false, enabled))
             {
                 SetLayout(Layout::NAMINGCONVENTION);
             }
-    
-            if (ImGui::MenuItem("Sort Originals", NULL))
+
+            if (ImGui::MenuItem("Sort Originals", NULL, false, enabled))
             {
                 SetLayout(Layout::SORTORIGINALS);
             }
 
-            if (ImGui::MenuItem("Query Editor", NULL))
+            if (ImGui::MenuItem("Query Editor", NULL, false, enabled))
             {
                 SetLayout(Layout::QUERYEDITOR);
                 queryEditorModule->ResetQueryModule(wwizarWwiseClient);
             }
 
-            if (ImGui::MenuItem("Toolbox", NULL))
+            if (ImGui::MenuItem("Color Coding", NULL, false, enabled))
+            {
+                SetLayout(Layout::COLORCODING);
+            }
+
+            if (ImGui::MenuItem("Toolbox", NULL, false, enabled))
             {
                 SetLayout(Layout::TOOLBOX);
             }
+            
             ImGui::EndMenu();
         }
         if (currentLayout == Layout::QUERYEDITOR)
@@ -563,8 +570,11 @@ void GUI::RenderLayoutHome()
     ImGui::BulletText("create ImGui wrapper");
     ImGui::BulletText("Move Sort Originals into own Thread");
     ImGui::BulletText("Move Naming Convention into own Thread");
-    ImGui::BulletText("QueryEditor: multiselect");
     ImGui::BulletText("QueryEditor: open and import wav file to reaper shortcut select file and ctrl+r");
+    ImGui::BulletText("Remove Unreferenced Audio Events");
+    ImGui::BulletText("Remove unused Game syncs");
+    ImGui::BulletText("Analyse audio spectrum of whole project");
+    ImGui::BulletText("auto Color coding");
     ImGui::End();
 }
 
@@ -700,6 +710,11 @@ void GUI::ShowDetails()
     }
     ImGui::PopStyleVar();
     ImGui::End();
+}
+
+void GUI::RenderColorCodingModule()
+{
+
 }
 
 //Sort Originals
