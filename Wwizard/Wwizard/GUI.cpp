@@ -721,7 +721,7 @@ void GUI::RenderColorCodingModule()
         ImGui::End();
         return;
     }
-
+    ImGui::Text("Single always stronger than hierarchy");
     if (ImGui::Button("Add  Setting"))
     {
         colorCodingModule->AddColorSettings("", 0);
@@ -776,6 +776,53 @@ void GUI::RenderColorCodingModule()
         ImGui::PopID();
         id++;
         ImGui::Separator();
+    }
+
+    ImGui::Text("Colors that should never change");
+    if (ImGui::BeginPopupModal("ColorSelector"))
+    {
+        ImGui::BeginColumns("Color Pop Up", 7);
+        int column = 0;
+        for (const auto& color : wwiseColors)
+        {
+            if (ImGui::ColorButton(std::to_string(color.first).c_str(), color.second, 0, ImVec2(50, 50)))
+            {
+                colorCodingModule->blockedColors.insert(color.first);
+                ImGui::CloseCurrentPopup();
+            }
+            column++;
+            if (column == 4)
+            {
+                ImGui::NextColumn();
+                column = 0;
+            }
+        }
+        ImGui::EndColumns();
+
+        ImGui::Dummy(ImVec2(0.0f, 20.0f));
+        ImGui::SetCursorPosX(ImGui::GetCursorPosX() + ImGui::GetWindowSize().x * 0.25f);
+        if (ImGui::Button("Close", ImVec2(ImGui::GetWindowSize().x * 0.5f, 0.0f)))
+        {
+            ImGui::CloseCurrentPopup();
+        }
+        ImGui::EndPopup();
+    }
+
+    if (ImGui::Button("+"))
+    {
+        ImGui::OpenPopup("ColorSelector");
+    }
+    int idd = 0;
+    for (const auto& blockedColor : colorCodingModule->GetBlockedColors())
+    {
+        ImGui::PushID(idd);
+        ImGui::SameLine();
+        if (ImGui::ColorButton("blocked Color", ConvertWwiseColorToRGB(blockedColor)))
+        {
+            colorCodingModule->blockedColors.erase(blockedColor);
+        }
+        ImGui::PopID();
+        idd++;
     }
 
     if (ImGui::Button("Apply color coding to Wwise"))

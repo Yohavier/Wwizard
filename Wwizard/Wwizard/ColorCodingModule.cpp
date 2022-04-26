@@ -11,7 +11,7 @@ void ColorCodingModule::FindNamesInWwise()
 	colorHierarchy.clear();
 	for (const auto& colorSetting : colorSettings)
 	{
-		AkJson option(AkJson::Map{ { "return", AkJson::Array{ AkVariant("path"), AkVariant("name"), AkVariant("type"), AkVariant("id")}}});
+		AkJson option(AkJson::Map{ { "return", AkJson::Array{ AkVariant("path"), AkVariant("name"), AkVariant("type"), AkVariant("id"), AkVariant("color")}}});
 		AkJson result = wwizardClient->GetObjectsByPartName(colorSetting.second.name, option);
 
 		for (const auto& colorObject : result["return"].GetArray())
@@ -27,18 +27,17 @@ void ColorCodingModule::FindNamesInWwise()
 					{
 						if (colorObject["type"].GetVariant().GetString() != "AudioFileSource")
 						{
-							CollectColorHierarchy(colorObject["id"].GetVariant().GetString(), "", colorSetting.second.settingMode, colorSetting.second.colorCode, colorObject["path"].GetVariant().GetString());
+							CollectColorHierarchy(colorObject["id"].GetVariant().GetString(), "", colorSetting.second.settingMode, colorSetting.second.colorCode, colorObject["path"].GetVariant().GetString(), colorObject["color"].GetVariant().GetInt8());
 						}
 					}
 				}
 			}
 		}
 	}
-
 	ApplyColors();
 }
 
-void ColorCodingModule::CollectColorHierarchy(std::string currentID, std::string parentID, int mode, int applyableColorID, std::string path)
+void ColorCodingModule::CollectColorHierarchy(std::string currentID, std::string parentID, int mode, int applyableColorID, std::string path, int actualColor)
 {
 	AkJson option(AkJson::Map{ { "return", AkJson::Array{ AkVariant("path"), AkVariant("name"), AkVariant("type"), AkVariant("id"), AkVariant("color")}} });
 	AkJson result = wwizardClient->GetChildrenFromGuid(currentID, option);
@@ -62,7 +61,6 @@ void ColorCodingModule::CollectColorHierarchy(std::string currentID, std::string
 
 		if (newMode == SettingMode::SingleHard)
 		{
-
 			colorHierarchy.at(currentID).mode = (int)SettingMode::SingleHard;
 			colorHierarchy.at(currentID).applyableColorID = applyableColorID;
 		}
@@ -93,17 +91,25 @@ void ColorCodingModule::CollectColorHierarchy(std::string currentID, std::string
 		colorHierarchy.emplace(currentID, ColorResult(currentID, parentID, childIDs, mode, applyableColorID, path));
 	}
 
+	for (const auto& col : blockedColors)
+	{
+		if (col == actualColor)
+		{
+			colorHierarchy.at(currentID).applyableColorID = actualColor;
+		}
+	}
+
 	for  (const auto& child : result["return"].GetArray())
 	{
 		if (child["type"].GetVariant().GetString() != "Action" && child["type"].GetVariant().GetString() != "AudioFileSource")
 		{
 			if (newMode == SettingMode::HierarchyHard || newMode == SettingMode::HierarchySoft)
 			{
-				CollectColorHierarchy(child["id"].GetVariant().GetString(), currentID, mode, applyableColorID, child["path"].GetVariant().GetString());
+				CollectColorHierarchy(child["id"].GetVariant().GetString(), currentID, mode, applyableColorID, child["path"].GetVariant().GetString(), child["color"].GetVariant().GetInt8());
 			}
 			else
 			{
-				CollectColorHierarchy(child["id"].GetVariant().GetString(), currentID, -1, child["color"].GetVariant().GetInt8(), child["path"].GetVariant().GetString());
+				CollectColorHierarchy(child["id"].GetVariant().GetString(), currentID, -1, child["color"].GetVariant().GetInt8(), child["path"].GetVariant().GetString(), child["color"].GetVariant().GetInt8());
 			}
 		}
 	}

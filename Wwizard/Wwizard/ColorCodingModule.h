@@ -3,6 +3,7 @@
 #include <string>
 #include "WwizardWwiseClient.h"
 #include <memory>
+#include <set>
 
 struct ColorSettings
 {
@@ -56,11 +57,19 @@ public:
 
 	void FindNamesInWwise();
 	void AddColorSettings(std::string name, int colorCode);
-	void CollectColorHierarchy(std::string currentID, std::string parentID, int mode, int applyableColorID, std::string path);
+	std::set<int> GetBlockedColors()
+	{
+		return blockedColors;
+	}
+
+private:
+	void CollectColorHierarchy(std::string currentID, std::string parentID, int mode, int applyableColorID, std::string path, int actualColor);
 	void ApplyColors();
 
+public:
 	std::map<int, ColorSettings> colorSettings;
-	//Single always stronger than hierarchy
+	std::set<int> blockedColors;
+
 	const char* items[4] = { "Single - soft", "Single - hard", "Hierarchy - soft", "Hierarchy - hard"};
 
 private:
