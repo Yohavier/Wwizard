@@ -15,7 +15,7 @@ void CreateRenderTarget();
 void CleanupRenderTarget();
 LRESULT WINAPI WndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam);
 
-GUI::GUI(std::unique_ptr<WwizardWwiseClient>& wwizardWwiseClient, std::unique_ptr<SettingHandler>& settingHandler, std::unique_ptr<QueryEditorModule>& queryEditorModule, std::unique_ptr<SortOriginalsModule>& sortOriginalsModule, std::unique_ptr<NamingConventionModule>& namingConventionModule, std::unique_ptr<ToolboxModule>& toolboxModule)
+GUI::GUI(std::unique_ptr<WwizardWwiseClient>& wwizardWwiseClient, std::unique_ptr<SettingHandler>& settingHandler, std::unique_ptr<QueryEditorModule>& queryEditorModule, std::unique_ptr<SortOriginalsModule>& sortOriginalsModule, std::unique_ptr<NamingConventionModule>& namingConventionModule, std::unique_ptr<ToolboxModule>& toolboxModule, std::unique_ptr<ColorCodingModule>& colorCodingModule)
     : currentLayout(Layout::HOME)
     , wwizarWwiseClient(wwizardWwiseClient)
     , settingHandler(settingHandler)
@@ -23,6 +23,7 @@ GUI::GUI(std::unique_ptr<WwizardWwiseClient>& wwizardWwiseClient, std::unique_pt
     , sortOriginalsModule(sortOriginalsModule)
     , namingConventionModule(namingConventionModule)
     , toolboxModule(toolboxModule)
+    , colorCodingModule(colorCodingModule)
 { 
     // Create application window
     //ImGui_ImplWin32_EnableDpiAwareness();
@@ -714,7 +715,74 @@ void GUI::ShowDetails()
 
 void GUI::RenderColorCodingModule()
 {
+    ImGui::SetNextWindowSize(ImVec2(1000, 1000), ImGuiCond_FirstUseEver);
+    if (!ImGui::Begin("Color Coding", (bool*)1))
+    {
+        ImGui::End();
+        return;
+    }
 
+    if (ImGui::Button("Add  Setting"))
+    {
+        colorCodingModule->AddColorSettings("", 0);
+    }
+
+    int id = 0;
+    for (auto& colorSetting : colorCodingModule->colorSettings)
+    {
+        ImGui::PushID(id);
+        ImGui::Text("Keywords: ");
+        ImGui::SameLine();
+        ImGui::InputText("##Keywords: ", &(colorSetting.second.name));
+
+        if (ImGui::BeginPopupModal("ColorPicker"))
+        {
+            ImGui::BeginColumns("Color Pop Up", 7);
+            int column = 0;
+            for (const auto& color : wwiseColors)
+            {
+                if (ImGui::ColorButton(std::to_string(color.first).c_str(), color.second, 0, ImVec2(50, 50)))
+                {
+                    colorSetting.second.colorCode = color.first;
+                    ImGui::CloseCurrentPopup();
+                }
+                column++;
+                if (column == 4)
+                {
+                    ImGui::NextColumn();
+                    column = 0;
+                }
+            }
+            ImGui::EndColumns();
+            
+            ImGui::Dummy(ImVec2(0.0f, 20.0f));
+            ImGui::SetCursorPosX(ImGui::GetCursorPosX() + ImGui::GetWindowSize().x * 0.25f);
+            if (ImGui::Button("Close", ImVec2(ImGui::GetWindowSize().x * 0.5f, 0.0f)))
+            {
+                ImGui::CloseCurrentPopup();
+            }
+            ImGui::EndPopup();
+        }
+        
+        ImGui::Text("Color ");
+        ImGui::SameLine();
+        if (ImGui::ColorButton("Select Color", ConvertWwiseColorToRGB(colorSetting.second.colorCode)))
+        {
+            ImGui::OpenPopup("ColorPicker");
+        }
+        ImGui::Text("Mode: ");
+        ImGui::SameLine();
+        ImGui::Combo("##mode", &colorSetting.second.settingMode, colorCodingModule->items, 4);
+        ImGui::PopID();
+        id++;
+        ImGui::Separator();
+    }
+
+    if (ImGui::Button("Apply color coding to Wwise"))
+    {
+        colorCodingModule->FindNamesInWwise();
+    }
+    ImGui::End();
 }
 
 //Sort Originals

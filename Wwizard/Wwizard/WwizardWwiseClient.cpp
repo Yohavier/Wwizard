@@ -249,3 +249,15 @@ void WwizardWwiseClient::SetProperty(const AkJson& arg)
     AkJson empty(AkJson::Map{});
     wwiseClient.Call(ak::wwise::core::object::setProperty, arg, empty, empty, 500);
 }
+
+const AkJson WwizardWwiseClient::GetObjectsByPartName(const std::string& name, const AkJson& option)
+{
+    AkJson result;
+    AkJson arg(AkJson::Map{
+           {
+               {"waql", AkVariant("where name :\"" + name + "\"")}
+           } });
+
+    wwiseClient.Call(ak::wwise::core::object::get, arg, option, result);
+    return result;
+}

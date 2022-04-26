@@ -52,6 +52,8 @@ public:
 	const AkJson GetPropertyFromGuid(const std::string& parentGuid);
 
 	void SetProperty(const AkJson& arg);
+	
+	const AkJson GetObjectsByPartName(const std::string& name, const AkJson& option);
 
 private:
 	void WalkChildren(const std::string& guid, const AkJson& opt, std::vector<AkJson>& outputList);

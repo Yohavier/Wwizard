@@ -10,6 +10,7 @@
 #include "SortOriginalsModule.h"
 #include "NamingConventionModule.h"
 #include "ToolboxModule.h"
+#include "ColorCodingModule.h"
 
 #include "imgui.h"
 #include "imgui_internal.h"
@@ -18,7 +19,6 @@
 #include <d3d10_1.h>
 #include <d3d10.h>
 #include "imgui_stdlib.h"
-
 
 enum class Layout
 {
@@ -34,7 +34,7 @@ enum class Layout
 class GUI
 {
 public:
-	GUI(std::unique_ptr<WwizardWwiseClient>& wwizardWwiseClient, std::unique_ptr<SettingHandler>& settingHandler, std::unique_ptr<QueryEditorModule>& queryModule, std::unique_ptr<SortOriginalsModule>& sortModue , std::unique_ptr<NamingConventionModule>& namingConventionModule, std::unique_ptr<ToolboxModule>& toolboxModule);
+	GUI(std::unique_ptr<WwizardWwiseClient>& wwizardWwiseClient, std::unique_ptr<SettingHandler>& settingHandler, std::unique_ptr<QueryEditorModule>& queryModule, std::unique_ptr<SortOriginalsModule>& sortModue , std::unique_ptr<NamingConventionModule>& namingConventionModule, std::unique_ptr<ToolboxModule>& toolboxModule, std::unique_ptr<ColorCodingModule>& colorCodingModule);
 	~GUI();
 	void Render(bool& isRunning);
 
@@ -70,6 +70,7 @@ private:
 	std::unique_ptr<SortOriginalsModule>& sortOriginalsModule;
 	std::unique_ptr<NamingConventionModule>& namingConventionModule;
 	std::unique_ptr<ToolboxModule>& toolboxModule;
+	std::unique_ptr<ColorCodingModule>& colorCodingModule;
 
 	HWND hwnd;
 	WNDCLASSEX wc;
