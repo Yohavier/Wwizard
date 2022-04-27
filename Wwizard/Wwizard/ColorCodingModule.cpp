@@ -3,7 +3,7 @@
 ColorCodingModule::ColorCodingModule(std::unique_ptr<WwizardWwiseClient>& wwizardClient)
 	: wwizardClient(wwizardClient)
 {
-
+	LoadColorSettings();
 }
 
 void ColorCodingModule::FindNamesInWwise()
@@ -11,13 +11,18 @@ void ColorCodingModule::FindNamesInWwise()
 	colorHierarchy.clear();
 	for (const auto& colorSetting : colorSettings)
 	{
-		AkJson option(AkJson::Map{ { "return", AkJson::Array{ AkVariant("path"), AkVariant("name"), AkVariant("type"), AkVariant("id"), AkVariant("color")}}});
+		AkJson option(AkJson::Map{ { "return", AkJson::Array{ AkVariant("path"), AkVariant("name"), AkVariant("type"), AkVariant("id"), AkVariant("color"), AkVariant("classId")}}});
 		AkJson result = wwizardClient->GetObjectsByPartName(colorSetting.second.name, option);
+
+		if (colorSetting.second.name == "")
+		{
+			continue;
+		}
 
 		for (const auto& colorObject : result["return"].GetArray())
 		{
 			std::string colName = colorObject["name"].GetVariant().GetString();
-			int keywordStart = colName.find(colorSetting.second.name);
+			int keywordStart = static_cast<int>(colName.find(colorSetting.second.name));
 
 			if (keywordStart != -1)
 			{
@@ -25,7 +30,7 @@ void ColorCodingModule::FindNamesInWwise()
 				{
 					if (colName.size() == keywordStart + colorSetting.second.name.size() || colName[keywordStart + colorSetting.second.name.size()] == '_')
 					{
-						if (colorObject["type"].GetVariant().GetString() != "AudioFileSource")
+						if (CheckIfHasColorProperty(colorObject["classId"].GetVariant().GetUInt32()))
 						{
 							CollectColorHierarchy(colorObject["id"].GetVariant().GetString(), "", colorSetting.second.settingMode, colorSetting.second.colorCode, colorObject["path"].GetVariant().GetString(), colorObject["color"].GetVariant().GetInt8());
 						}
@@ -35,6 +40,14 @@ void ColorCodingModule::FindNamesInWwise()
 		}
 	}
 	ApplyColors();
+}
+
+void ColorCodingModule::DeleteColorSetting(ColorSetting setting)
+{
+	if (colorSettings.find(setting.settingID) != colorSettings.end())
+	{
+		colorSettings.erase(setting.settingID);
+	}
 }
 
 void ColorCodingModule::CollectColorHierarchy(std::string currentID, std::string parentID, int mode, int applyableColorID, std::string path, int actualColor)
@@ -172,6 +185,110 @@ void ColorCodingModule::ApplyColors()
 
 void ColorCodingModule::AddColorSettings(std::string name, int colorCode)
 {
-	colorSettings.emplace(colorSettings.size() + 1, ColorSettings(name, colorCode, colorSettings.size() + 1));
+	std::string newGUID = GenerateGuid();
+	colorSettings.emplace(newGUID, ColorSetting(name, newGUID, colorCode));
 }
 
+bool ColorCodingModule::CheckIfHasColorProperty(int classID)
+{
+	AkJson result = wwizardClient->GetObjectPropertyList(classID);
+
+	for (const auto& res : result["return"].GetArray())
+	{
+		if(res.GetVariant().GetString() == "Color")
+		{
+			return true;
+		}
+	}
+	return false;
+}
+
+void ColorCodingModule::SaveColorSettings()
+{
+	rapidjson::Document d;
+	d.SetObject();
+
+	rapidjson::Value rapidColorSettings;
+	rapidColorSettings.SetArray();
+
+	for (const auto& setting : colorSettings)
+	{
+		rapidjson::Value rapidSetting(rapidjson::kObjectType);
+		{
+			rapidjson::Value name;
+			name = rapidjson::StringRef(setting.second.name.c_str());
+			rapidSetting.AddMember("name", name, d.GetAllocator());
+
+			rapidjson::Value colorCode;
+			colorCode = setting.second.colorCode;
+			rapidSetting.AddMember("colorCode", colorCode, d.GetAllocator());
+
+			rapidjson::Value id;
+			id = rapidjson::StringRef(setting.second.settingID.c_str());
+			rapidSetting.AddMember("settingID", id, d.GetAllocator());
+
+			rapidjson::Value settingMode;
+			settingMode = setting.second.settingMode;
+			rapidSetting.AddMember("settingMode", settingMode, d.GetAllocator());
+		}
+		rapidColorSettings.PushBack(rapidSetting, d.GetAllocator());
+	}
+	d.AddMember("ColorSettings", rapidColorSettings, d.GetAllocator());
+	
+	rapidjson::Value rapidBlockedColors;
+	rapidBlockedColors.SetObject();
+	rapidjson::Value rapidBlockedList(rapidjson::kArrayType);
+
+	for (const auto& excludeColor : blockedColors)
+	{
+		rapidBlockedList.PushBack(excludeColor, d.GetAllocator());
+	}
+
+	rapidBlockedColors.AddMember("colorID", rapidBlockedList, d.GetAllocator());
+	d.AddMember("BlockedColors", rapidBlockedColors, d.GetAllocator());
+	
+	auto path = static_cast<std::string>(SOLUTION_DIR) + "SavedData/ColorSettings.json";
+	FILE* fp = fopen(path.c_str(), "wb");
+	if (fp != 0)
+	{
+		char* writeBuffer = new char[65536];
+		rapidjson::FileWriteStream os(fp, writeBuffer, sizeof(writeBuffer));
+
+		rapidjson::Writer<rapidjson::FileWriteStream> writer(os);
+		d.Accept(writer);
+
+		fclose(fp);
+	}
+}
+
+void ColorCodingModule::LoadColorSettings()
+{
+	auto path = static_cast<std::string>(SOLUTION_DIR) + "SavedData/ColorSettings.json";
+	FILE* fp = fopen(path.c_str(), "rb");
+	
+	if (fp != 0)
+	{
+		char* readBuffer = new char[65536];
+		rapidjson::FileReadStream is(fp, readBuffer, sizeof(readBuffer));
+
+		rapidjson::Document d;
+		d.ParseStream(is);
+		fclose(fp);
+
+		for (int i = 0; i < static_cast<int>(d["ColorSettings"].Size()); i++)
+		{
+			ColorSetting newColorSetting = ColorSetting(d["ColorSettings"][i]["name"].GetString(), d["ColorSettings"][i]["colorCode"].GetInt(), d["ColorSettings"][i]["settingID"].GetString(), d["ColorSettings"][i]["settingMode"].GetInt());
+			colorSettings.emplace(d["ColorSettings"][i]["settingID"].GetString(), newColorSetting);
+		}
+
+		for (int i = 0; i < static_cast<int>(d["BlockedColors"]["colorID"].Size()); i++)
+		{
+			blockedColors.emplace(d["BlockedColors"]["colorID"][i].GetInt());
+		}
+	}
+}
+
+const std::string ColorCodingModule::GenerateGuid()
+{
+	return std::to_string(((long long)rand() << 32) | rand());
+}

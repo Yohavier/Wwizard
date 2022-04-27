@@ -34,7 +34,7 @@ public:
 	
 	AkJson RunCustomQuery(const AkJson arg);
 
-	void GetProjectInfo();
+	const AkJson GetProjectInfo();
 
 	bool IsConnected()
 	{
@@ -54,6 +54,8 @@ public:
 	void SetProperty(const AkJson& arg);
 	
 	const AkJson GetObjectsByPartName(const std::string& name, const AkJson& option);
+
+	const AkJson GetObjectPropertyList(const int& classID);
 
 private:
 	void WalkChildren(const std::string& guid, const AkJson& opt, std::vector<AkJson>& outputList);

@@ -10,10 +10,11 @@ public:
 	ToolboxModule() = delete;
 	ToolboxModule(std::unique_ptr<WwizardWwiseClient>& wwizardClient);
 	void GatherEmptyEvents();
-
 	void GatherFadersInHierarchy(); 
+
 	void DeleteEmptyEvent();
 	void ResetFader();
+
 
 	const std::map<std::string, QueryResultFile>& GetEventResultFiles();
 	const std::map<std::string, QueryResultFile>& GetFaderResultFiles();

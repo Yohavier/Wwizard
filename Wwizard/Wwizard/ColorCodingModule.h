@@ -5,18 +5,25 @@
 #include <memory>
 #include <set>
 
-struct ColorSettings
+struct ColorSetting
 {
-	ColorSettings() = delete;
-	ColorSettings(std::string name, int colorCode, int id)
+	ColorSetting() = delete;
+	ColorSetting(std::string name, std::string settingID, int colorCode)
 		: name(name)
 		, colorCode(colorCode)
-		, id(id)
+		, settingID(settingID)
+	{}
+
+	ColorSetting(std::string name, int colorCode, std::string settingID, int settingMode)
+		: name(name)
+		, colorCode(colorCode)
+		, settingID(settingID)
+		, settingMode(settingMode)
 	{}
 
 	std::string name = "";
 	int colorCode = -1;
-	int id;
+	std::string settingID;
 	int settingMode = 0;
 };
 
@@ -54,20 +61,31 @@ class ColorCodingModule
 public:
 	ColorCodingModule() = delete;
 	ColorCodingModule(std::unique_ptr<WwizardWwiseClient>& wwizardClient);
+	~ColorCodingModule()
+	{
+		SaveColorSettings();
+	}
 
 	void FindNamesInWwise();
 	void AddColorSettings(std::string name, int colorCode);
+
+	bool CheckIfHasColorProperty(int classID);
+
 	std::set<int> GetBlockedColors()
 	{
 		return blockedColors;
 	}
+	void DeleteColorSetting(ColorSetting setting);
 
 private:
 	void CollectColorHierarchy(std::string currentID, std::string parentID, int mode, int applyableColorID, std::string path, int actualColor);
 	void ApplyColors();
+	void LoadColorSettings();
+	void SaveColorSettings();
+	const std::string GenerateGuid();
 
 public:
-	std::map<int, ColorSettings> colorSettings;
+	std::map<std::string, ColorSetting> colorSettings;
 	std::set<int> blockedColors;
 
 	const char* items[4] = { "Single - soft", "Single - hard", "Hierarchy - soft", "Hierarchy - hard"};

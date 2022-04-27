@@ -526,7 +526,7 @@ void GUI::ShowQueryResults()
 
     for (auto& object : queryEditorModule->GetQueryResultFiles())
     {
-        auto col = ConvertWwiseColorToRGB(object.second.color);
+        const ImColor& col = ConvertWwiseColorToRGB(object.second.color);
 
         ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(col.Value.x, col.Value.y, col.Value.z, 1));
         ImGui::Text("|=|");
@@ -561,21 +561,25 @@ void GUI::RenderLayoutHome()
         ImGui::End();
         return;
     }
-    ImGui::BeginColumns("homelayout", 2);
-    ImGui::Text("Notes");
-    ImGui::BulletText("Saving queries might not be safe and json file gets cleared sometimes.");
-
-    ImGui::NextColumn();
-    ImGui::Text("Todo");
-    ImGui::BulletText("iterate waapi wrapper");
-    ImGui::BulletText("create ImGui wrapper");
+    ImGui::Text("Roadmap");
+    ImGui::Separator();
+    ImGui::BulletText("QueryEditor: open and import wav file to reaper shortcut select file and ctrl+r");
     ImGui::BulletText("Move Sort Originals into own Thread");
     ImGui::BulletText("Move Naming Convention into own Thread");
-    ImGui::BulletText("QueryEditor: open and import wav file to reaper shortcut select file and ctrl+r");
-    ImGui::BulletText("Remove Unreferenced Audio Events");
+    ImGui::BulletText("iterate waapi wrapper");
+    ImGui::BulletText("create ImGui wrapper");
+    ImGui::BulletText("General Cleanup");
+    ImGui::BulletText("Work on the Readme file");
+
+    ImGui::Separator();
+    ImGui::Text("---- Release Version 1.0 ----");
+    ImGui::Separator();
+
+    ImGui::BulletText("After Current Goal");
+    ImGui::BulletText("Remove Unreferenced Sounds");
     ImGui::BulletText("Remove unused Game syncs");
     ImGui::BulletText("Analyse audio spectrum of whole project");
-    ImGui::BulletText("auto Color coding");
+
     ImGui::End();
 }
 
@@ -773,6 +777,12 @@ void GUI::RenderColorCodingModule()
         ImGui::Text("Mode: ");
         ImGui::SameLine();
         ImGui::Combo("##mode", &colorSetting.second.settingMode, colorCodingModule->items, 4);
+        if (ImGui::Button("Delete Colorsetting"))
+        {
+            colorCodingModule->DeleteColorSetting(colorSetting.second);
+            ImGui::PopID();
+            break;
+        }
         ImGui::PopID();
         id++;
         ImGui::Separator();

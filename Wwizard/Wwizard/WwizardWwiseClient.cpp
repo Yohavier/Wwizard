@@ -178,7 +178,7 @@ AkJson WwizardWwiseClient::RunCustomQuery(const AkJson arg)
     return queryResult;
 }
 
-void WwizardWwiseClient::GetProjectInfo()
+const AkJson WwizardWwiseClient::GetProjectInfo()
 {
     AkJson queryResult;
     AkJson arg(AkJson::Map{});
@@ -186,7 +186,7 @@ void WwizardWwiseClient::GetProjectInfo()
 
     wwiseClient.Call(ak::wwise::core::getInfo, arg, opt, queryResult, 500);
 
-    const auto objects = queryResult["directories"];
+    return queryResult;
 }
 
 void WwizardWwiseClient::OpenPropertyInWwise(const std::string& guid)
@@ -259,5 +259,18 @@ const AkJson WwizardWwiseClient::GetObjectsByPartName(const std::string& name, c
            } });
 
     wwiseClient.Call(ak::wwise::core::object::get, arg, option, result);
+    return result;
+}
+
+const AkJson WwizardWwiseClient::GetObjectPropertyList(const int& classID)
+{
+    AkJson result;
+    AkJson empty(AkJson::Map{});
+    AkJson arg(AkJson::Map{
+           {
+               {"classId", AkVariant(classID)}
+           } });
+
+    wwiseClient.Call(ak::wwise::core::object::getPropertyAndReferenceNames, arg, empty, result);
     return result;
 }
