@@ -12,6 +12,7 @@
 #include <algorithm>
 #include <regex>
 #include "WwuLookUpData.h"
+#include <thread>
 
 class SortOriginalsModule
 {
@@ -21,8 +22,6 @@ public:
 
 	void CollectUnusedOriginals();
 	void DeleteUnusedOriginals(const bool wantDelete);
-	void SortOriginals();
-	void Scan();
 
 	const int& GetOriginalsCount();
 	const std::string& GetOriginalPath();
@@ -30,6 +29,8 @@ public:
 	const int& GetMusicCount();
 	const int& GetSFXCount();
 
+	void StartSortOriginalsThread();
+	void Scan();
 
 private:
 	void ScanOriginalsPath(const std::string path);
@@ -48,6 +49,7 @@ private:
 
 	void ClearPreviousSortData();
 
+	void SortOriginals();
 
 public:
 	bool workUnitFlag;
@@ -80,5 +82,8 @@ private:
 	std::set<std::string> unusedOriginalsPaths;
 
 	const std::string container[6] = { "WorkUnit", "Folder", "BlendContainer", "RandomSequenceContainer", "ActorMixer", "SwitchContainer" };
+
+	std::thread* currentSortingThread = nullptr;
+	std::thread* currentScanThread = nullptr;
 };
 

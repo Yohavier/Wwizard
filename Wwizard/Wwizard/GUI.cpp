@@ -563,8 +563,7 @@ void GUI::RenderLayoutHome()
     }
     ImGui::Text("Roadmap");
     ImGui::Separator();
-    ImGui::BulletText("QueryEditor: open and import wav file to reaper shortcut select file and ctrl+r");
-    ImGui::BulletText("Move Sort Originals into own Thread");
+
     ImGui::BulletText("Move Naming Convention into own Thread");
     ImGui::BulletText("iterate waapi wrapper");
     ImGui::BulletText("create ImGui wrapper");
@@ -575,7 +574,7 @@ void GUI::RenderLayoutHome()
     ImGui::Text("---- Release Version 1.0 ----");
     ImGui::Separator();
 
-    ImGui::BulletText("After Current Goal");
+    ImGui::BulletText("QueryEditor: open and import wav file to reaper shortcut select file and ctrl+r");
     ImGui::BulletText("Remove Unreferenced Sounds");
     ImGui::BulletText("Remove unused Game syncs");
     ImGui::BulletText("Analyse audio spectrum of whole project");
@@ -876,7 +875,7 @@ void GUI::RenderLayoutSortOriginals()
     ImGui::Separator();
     if (ImGui::Button("Sort Originals", ImVec2(200, 50)))
     {
-        sortOriginalsModule->SortOriginals();
+        sortOriginalsModule->StartSortOriginalsThread();
     }
     ImGui::SameLine();
     if (ImGui::Button("Delete unused Originals", ImVec2(200, 50)))

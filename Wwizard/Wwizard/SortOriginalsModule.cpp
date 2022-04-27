@@ -191,6 +191,7 @@ void SortOriginalsModule::SortOriginals()
 		CreateFolderStructureFromWorkUnitPath(interactiveMuisicWwuPath);
 	}
 	DeleteEmptyFolders(originalsPath);
+	currentSortingThread = nullptr;
 }
 
 
@@ -515,10 +516,23 @@ const std::set<std::string>& SortOriginalsModule::GetUnusedOriginals()
 
 const int& SortOriginalsModule::GetMusicCount()
 {
-	return musicDic.size();
+	return static_cast<int>(musicDic.size());
 }
 
 const int& SortOriginalsModule::GetSFXCount()
 {
-	return sfxDic.size();
+	return static_cast<int>(sfxDic.size());
+}
+
+void SortOriginalsModule::StartSortOriginalsThread()
+{
+	if (currentSortingThread != nullptr)
+	{
+		return;
+	}
+
+	std::cout << "Start Sorting Thread" << std::endl;
+	std::thread sortThread(&SortOriginalsModule::SortOriginals, this);
+	currentSortingThread = &sortThread;
+	sortThread.detach();
 }
