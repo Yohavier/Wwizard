@@ -564,7 +564,6 @@ void GUI::RenderLayoutHome()
     ImGui::Text("Roadmap");
     ImGui::Separator();
 
-    ImGui::BulletText("Move Naming Convention into own Thread");
     ImGui::BulletText("iterate waapi wrapper");
     ImGui::BulletText("create ImGui wrapper");
     ImGui::BulletText("General Cleanup");
@@ -965,7 +964,7 @@ void GUI::RenderLayoutNamingConvention()
         {
             if (ImGui::Button("Check Naming"))
             {
-                namingConventionModule->CheckNamingConvention();
+                namingConventionModule->StartCheckNamingConventionThread();
             }
             if (ImGui::BeginTable("Naming Issues", 2, ImGuiTableFlags_BordersOuter | ImGuiTableFlags_Resizable))
             {

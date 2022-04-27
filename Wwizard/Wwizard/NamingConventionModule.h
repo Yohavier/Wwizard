@@ -7,6 +7,7 @@
 #include <map>
 #include "Issues.h"
 #include "ResultFile.h"
+#include <thread>
 #include "WwizardWwiseClient.h"
 
 struct WwuSettings
@@ -117,7 +118,8 @@ public:
 	NamingConventionModule(const std::string& wwiseProjPath, std::unique_ptr<WwizardWwiseClient>& wwizardClient);
 	~NamingConventionModule();
 
-	bool CheckNamingConvention();
+	
+	void StartCheckNamingConventionThread();
 
 	const std::string& GetErrorMessageFromIssue(const Issue& issue);
 	const std::map<std::string, NamingResultFile>& GetNamingIssues();
@@ -126,6 +128,8 @@ public:
 	const std::string& GetStringToReplace(const std::string& wwuType);
 
 private:
+	void CheckNamingConvention();
+
 	void PreFetchAllWwuData(const std::string& directory);
 	void FetchSingleWwuData(const std::string& path);
 	void ScanWorkUnitXMLByPath(const std::string& wwuPath, std::string& namePath);
@@ -146,7 +150,6 @@ private:
 	void ClearOldData();
 	void AddIssueToList(const std::string& guid, const std::string& name, const Issue& issue);
 
-
 	void SaveNamingConventionSettings();
 	void LoadNamingConventionSettings();
 
@@ -162,6 +165,8 @@ private:
 
 	std::string projectPath;
 	std::vector<WwuLookUpData> prefetchedWwuData;
+
+	std::thread* currentNamingConventionThread = nullptr;
 
 	std::map<Issue, std::string> issueMessages = { {Issue::HIERARCHY, "Hierarchy doesnt match"},
 		{Issue::SEPARATOR, "Multiple Separators or suffix is wrong"}, {Issue::SPACE, "Space is not allowed"},

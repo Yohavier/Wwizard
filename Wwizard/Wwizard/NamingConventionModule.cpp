@@ -33,7 +33,7 @@ NamingConventionModule::~NamingConventionModule()
 	SaveNamingConventionSettings();
 }
 
-bool NamingConventionModule::CheckNamingConvention()
+void NamingConventionModule::CheckNamingConvention()
 {
 	ClearOldData();
 
@@ -41,7 +41,7 @@ bool NamingConventionModule::CheckNamingConvention()
 
 	StartCheckingNamingConvention(projectPath, "");
 
-	return DetermineResult();
+	currentNamingConventionThread = nullptr;
 }
 
 //Prefetch
@@ -95,6 +95,19 @@ void NamingConventionModule::AddIssueToList(const std::string& guid, const std::
 	}	
 }
 
+
+void NamingConventionModule::StartCheckNamingConventionThread()
+{
+	if (currentNamingConventionThread != nullptr)
+	{
+		return;
+	}
+
+	std::cout << "Start Naming Convention Thread" << std::endl;
+	std::thread namingConventionThread(&NamingConventionModule::CheckNamingConvention, this);
+	currentNamingConventionThread = &namingConventionThread;
+	namingConventionThread.detach();
+}
 
 //Getter
 const std::string& NamingConventionModule::GetErrorMessageFromIssue(const Issue& issue)
@@ -223,23 +236,20 @@ void NamingConventionModule::IterateThroughWwu(const pugi::xml_node& wwuNode, st
 			{
 				std::string lastAddedLayer = AddLastNamePathLayer(namePath, static_cast<std::string>(node.attribute("Name").value()), static_cast<std::string>(node.name()));
 
-				if (!RunChecks(static_cast<std::string>(node.attribute("Name").value()), static_cast<std::string>(node.attribute("ID").value()), wwuType, lastAddedLayer, namePath, static_cast<std::string>(node.name())))
+				if (RunChecks(static_cast<std::string>(node.attribute("Name").value()), static_cast<std::string>(node.attribute("ID").value()), wwuType, lastAddedLayer, namePath, static_cast<std::string>(node.name())))
 				{
-					break;
-				}
-
-				IterateThroughWwu(node, namePath, wwuType);
+					IterateThroughWwu(node, namePath, wwuType);
+				}	
 			}
 		}
 		else if (whitelistedContainers.find(static_cast<std::string>(node.name())) != whitelistedContainers.end())
 		{
 			std::string lastAddedLayer = AddLastNamePathLayer(namePath, static_cast<std::string>(node.attribute("Name").value()), static_cast<std::string>(node.name()));
 			
-			if(!RunChecks(static_cast<std::string>(node.attribute("Name").value()), static_cast<std::string>(node.attribute("ID").value()), wwuType, lastAddedLayer, namePath, static_cast<std::string>(node.name())))
+			if(RunChecks(static_cast<std::string>(node.attribute("Name").value()), static_cast<std::string>(node.attribute("ID").value()), wwuType, lastAddedLayer, namePath, static_cast<std::string>(node.name())))
 			{
-				break;
+				IterateThroughWwu(node, namePath, wwuType);
 			}
-			IterateThroughWwu(node, namePath, wwuType);
 		}
 		else
 		{
