@@ -564,8 +564,6 @@ void GUI::RenderLayoutHome()
     ImGui::Text("Roadmap");
     ImGui::Separator();
 
-    ImGui::BulletText("iterate waapi wrapper");
-    ImGui::BulletText("create ImGui wrapper");
     ImGui::BulletText("Polish UI with warning pop ups, tooltips and style");
     ImGui::BulletText("General Cleanup");
     ImGui::BulletText("make save and load safe");

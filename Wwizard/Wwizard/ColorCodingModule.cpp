@@ -274,16 +274,28 @@ void ColorCodingModule::LoadColorSettings()
 		rapidjson::Document d;
 		d.ParseStream(is);
 		fclose(fp);
-
-		for (int i = 0; i < static_cast<int>(d["ColorSettings"].Size()); i++)
+		
+		if (d.HasMember("ColorSettings"))
 		{
-			ColorSetting newColorSetting = ColorSetting(d["ColorSettings"][i]["name"].GetString(), d["ColorSettings"][i]["colorCode"].GetInt(), d["ColorSettings"][i]["settingID"].GetString(), d["ColorSettings"][i]["settingMode"].GetInt());
-			colorSettings.emplace(d["ColorSettings"][i]["settingID"].GetString(), newColorSetting);
+			for (int i = 0; i < static_cast<int>(d["ColorSettings"].Size()); i++)
+			{
+				if (d["ColorSettings"][i].HasMember("name") && d["ColorSettings"][i].HasMember("colorCode") && d["ColorSettings"][i].HasMember("settingID") && d["ColorSettings"][i].HasMember("settingMode"))
+				{
+					ColorSetting newColorSetting = ColorSetting(d["ColorSettings"][i]["name"].GetString(), d["ColorSettings"][i]["colorCode"].GetInt(), d["ColorSettings"][i]["settingID"].GetString(), d["ColorSettings"][i]["settingMode"].GetInt());
+					colorSettings.emplace(d["ColorSettings"][i]["settingID"].GetString(), newColorSetting);
+				}		
+			}
 		}
 
-		for (int i = 0; i < static_cast<int>(d["BlockedColors"]["colorID"].Size()); i++)
+		if (d.HasMember("BlockedColors"))
 		{
-			blockedColors.emplace(d["BlockedColors"]["colorID"][i].GetInt());
+			if (d["BlockedColors"].HasMember("colorID"))
+			{
+				for (int i = 0; i < static_cast<int>(d["BlockedColors"]["colorID"].Size()); i++)
+				{
+					blockedColors.emplace(d["BlockedColors"]["colorID"][i].GetInt());
+				}
+			}
 		}
 	}
 }

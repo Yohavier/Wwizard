@@ -539,18 +539,37 @@ void NamingConventionModule::LoadNamingConventionSettings()
 
 		for (const auto& wwu : whitelistedWwuTypes)
 		{
-			wwuSettings.emplace(d["WwuSettings"][wwu.c_str()]["name"].GetString(), WwuSettings(d["WwuSettings"][wwu.c_str()]["prefixToApply"].GetString(),
-																							   d["WwuSettings"][wwu.c_str()]["applyPrefix"].GetBool(),
-																							   d["WwuSettings"][wwu.c_str()]["apply"].GetBool(),
-																							   d["WwuSettings"][wwu.c_str()]["allowSpace"].GetBool()));
+			if (d.HasMember("WwuSettings"))
+			{
+				if (d["WwuSettings"].HasMember(wwu.c_str()))
+				{
+					if (d["WwuSettings"][wwu.c_str()].HasMember("name") && d["WwuSettings"][wwu.c_str()].HasMember("prefixToApply") && d["WwuSettings"][wwu.c_str()].HasMember("applyPrefix") && d["WwuSettings"][wwu.c_str()].HasMember("apply") && d["WwuSettings"][wwu.c_str()].HasMember("allowSpace"))
+					{
+						wwuSettings.emplace(d["WwuSettings"][wwu.c_str()]["name"].GetString(), WwuSettings(d["WwuSettings"][wwu.c_str()]["prefixToApply"].GetString(),
+							d["WwuSettings"][wwu.c_str()]["applyPrefix"].GetBool(),
+							d["WwuSettings"][wwu.c_str()]["apply"].GetBool(),
+							d["WwuSettings"][wwu.c_str()]["allowSpace"].GetBool()));
+					}
+				}
+
+			}
 		}
 		for (const auto& container : whitelistedContainers)
 		{
-			containerSettings.emplace(container.c_str(), ContainerSettings(d["ContainerSettings"][container.c_str()]["allowNumberSuffix"].GetBool(),
-																		   d["ContainerSettings"][container.c_str()]["allowStringSuffix"].GetBool(),
-																		   d["ContainerSettings"][container.c_str()]["suffixLayers"].GetInt(),
-																		   d["ContainerSettings"][container.c_str()]["maxNumberAllowed"].GetInt(),
-																		   d["ContainerSettings"][container.c_str()]["stringSuffixes"].GetString()));
+			if (d.HasMember("ContainerSettings"))
+			{
+				if (d["ContainerSettings"].HasMember(container.c_str()))
+				{
+					if (d["ContainerSettings"][container.c_str()].HasMember("allowNumberSuffix") && d["ContainerSettings"][container.c_str()].HasMember("allowStringSuffix") && d["ContainerSettings"][container.c_str()].HasMember("suffixLayers") && d["ContainerSettings"][container.c_str()].HasMember("maxNumberAllowed") && d["ContainerSettings"][container.c_str()].HasMember("stringSuffixes"))
+					{
+						containerSettings.emplace(container.c_str(), ContainerSettings(d["ContainerSettings"][container.c_str()]["allowNumberSuffix"].GetBool(),
+							d["ContainerSettings"][container.c_str()]["allowStringSuffix"].GetBool(),
+							d["ContainerSettings"][container.c_str()]["suffixLayers"].GetInt(),
+							d["ContainerSettings"][container.c_str()]["maxNumberAllowed"].GetInt(),
+							d["ContainerSettings"][container.c_str()]["stringSuffixes"].GetString()));
+					}
+				}
+			}
 		}
 	}
 }

@@ -183,21 +183,26 @@ void QueryEditorModule::LoadWaqlQueriesFromJson()
         rapidjson::Document d;
         d.ParseStream(is);
         fclose(fp);
-
-        for (int i = 0; i < static_cast<int>(d["WaqlQueries"].Size()); i++)
+        if (d.HasMember("WaqlQueries"))
         {
-            AkJson test;
-            test.FromRapidJson(d["WaqlQueries"][i]["arg"], test);
-
-            BaseQueryStructure newQuery = BaseQueryStructure(d["WaqlQueries"][i]["name"].GetString(), d["WaqlQueries"][i]["guid"].GetString(), d["WaqlQueries"][i]["path"].GetString(), QueryType::WAQLQUERY, test);
-            AddQueryToAllQueriesMap(newQuery);
-
-            auto it = allQueries.find(d["WaqlQueries"][i]["guid"].GetString());
-            if (it != allQueries.end())
+            for (int i = 0; i < static_cast<int>(d["WaqlQueries"].Size()); i++)
             {
-                waqlQueries.insert({ it->second.guid, it->second });
+                if (d["WaqlQueries"][i].HasMember("arg") && d["WaqlQueries"][i].HasMember("name") && d["WaqlQueries"][i].HasMember("guid") && d["WaqlQueries"][i].HasMember("path"))
+                {
+                    AkJson test;
+                    test.FromRapidJson(d["WaqlQueries"][i]["arg"], test);
+
+                    BaseQueryStructure newQuery = BaseQueryStructure(d["WaqlQueries"][i]["name"].GetString(), d["WaqlQueries"][i]["guid"].GetString(), d["WaqlQueries"][i]["path"].GetString(), QueryType::WAQLQUERY, test);
+                    AddQueryToAllQueriesMap(newQuery);
+
+                    auto it = allQueries.find(d["WaqlQueries"][i]["guid"].GetString());
+                    if (it != allQueries.end())
+                    {
+                        waqlQueries.insert({ it->second.guid, it->second });
+                    }
+                }
             }
-        }
+        }    
     }
 }
 
@@ -214,20 +219,24 @@ void QueryEditorModule::LoadWaapiQueriesFromJson()
         d.ParseStream(is);
         fclose(fp);
 
-        assert(d["WaapiQueries"].IsArray());
-
-        for (int i = 0; i < static_cast<int>(d["WaapiQueries"].Size()); i++)
+        if (d.HasMember("WaapiQueries"))
         {
-            AkJson test;
-            test.FromRapidJson(d["WaapiQueries"][i]["arg"], test);
-
-            BaseQueryStructure newQuery = BaseQueryStructure(d["WaapiQueries"][i]["name"].GetString(), d["WaapiQueries"][i]["guid"].GetString(), d["WaapiQueries"][i]["path"].GetString(), QueryType::WAAPIQUERY, test);
-            AddQueryToAllQueriesMap(newQuery);
-
-            auto it = allQueries.find(d["WaapiQueries"][i]["guid"].GetString());
-            if (it != allQueries.end())
+            if (d["WaapiQueries"].HasMember("name") && d["WaapiQueries"].HasMember("guid") && d["WaapiQueries"].HasMember("path") && d["WaapiQueries"].HasMember("arg"))
             {
-                waapiQueries.insert({ it->second.guid, it->second });
+                for (int i = 0; i < static_cast<int>(d["WaapiQueries"].Size()); i++)
+                {
+                    AkJson test;
+                    test.FromRapidJson(d["WaapiQueries"][i]["arg"], test);
+
+                    BaseQueryStructure newQuery = BaseQueryStructure(d["WaapiQueries"][i]["name"].GetString(), d["WaapiQueries"][i]["guid"].GetString(), d["WaapiQueries"][i]["path"].GetString(), QueryType::WAAPIQUERY, test);
+                    AddQueryToAllQueriesMap(newQuery);
+
+                    auto it = allQueries.find(d["WaapiQueries"][i]["guid"].GetString());
+                    if (it != allQueries.end())
+                    {
+                        waapiQueries.insert({ it->second.guid, it->second });
+                    }
+                }
             }
         }
     }

@@ -23,15 +23,13 @@ void SettingHandler::LoadSettings()
         settingDoc.ParseStream(is);
         fclose(fp);
 
-        assert(settingDoc["wwiseProjectPath"].IsString());
-        assert(settingDoc["sdkPath"].IsString());
-        assert(settingDoc["waapiIP"].IsString());
-        assert(settingDoc["waapiPort"].IsInt());
-
-        this->wwiseProjectPath = settingDoc["wwiseProjectPath"].GetString();
-        this->sdkPath = settingDoc["sdkPath"].GetString();
-        this->waapiIP = settingDoc["waapiIP"].GetString();
-        this->waapiPort = settingDoc["waapiPort"].GetInt();
+        if (settingDoc.HasMember("wwiseProjectPath") && settingDoc.HasMember("sdkPath") && settingDoc.HasMember("waapiIP") && settingDoc.HasMember("waapiPort"))
+        {
+            this->wwiseProjectPath = settingDoc["wwiseProjectPath"].GetString();
+            this->sdkPath = settingDoc["sdkPath"].GetString();
+            this->waapiIP = settingDoc["waapiIP"].GetString();
+            this->waapiPort = settingDoc["waapiPort"].GetInt();
+        }
     }   
 }
 
