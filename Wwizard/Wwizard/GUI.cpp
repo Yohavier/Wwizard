@@ -566,13 +566,16 @@ void GUI::RenderLayoutHome()
 
     ImGui::BulletText("iterate waapi wrapper");
     ImGui::BulletText("create ImGui wrapper");
+    ImGui::BulletText("Polish UI with warning pop ups, tooltips and style");
     ImGui::BulletText("General Cleanup");
+    ImGui::BulletText("make save and load safe");
     ImGui::BulletText("Work on the Readme file");
 
     ImGui::Separator();
     ImGui::Text("---- Release Version 1.0 ----");
     ImGui::Separator();
 
+    ImGui::BulletText("Sort Originals P4 integration");
     ImGui::BulletText("QueryEditor: open and import wav file to reaper shortcut select file and ctrl+r");
     ImGui::BulletText("Remove Unreferenced Sounds");
     ImGui::BulletText("Remove unused Game syncs");

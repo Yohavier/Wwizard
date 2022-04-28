@@ -19,7 +19,6 @@ public:
 	{
 		StartReconnectionThread();
 	}
-
 	~WwizardWwiseClient();
 	
 	void StartReconnectionThread();
@@ -28,11 +27,11 @@ public:
 
 	void WalkProjectPath(const AkJson& arg, const AkJson& opt, std::vector<AkJson>& outputList);
 
-	AkJson GetObjectFromPath(const std::string path, AkJson option);
+	const AkJson GetObjectFromPath(const std::string path, AkJson option);
 
-	AkJson RunQueryFromGuuid(const std::string guuid);
+	const AkJson RunQueryFromGuuid(const std::string guuid);
 	
-	AkJson RunCustomQuery(const AkJson arg);
+	const AkJson RunCustomQuery(const AkJson arg);
 
 	const AkJson GetProjectInfo();
 
@@ -45,7 +44,7 @@ public:
 
 	const AkJson GetChildrenFromGuid(const std::string guid, const AkJson option);
 
-	void GetCurrentSelectedObjectsInWwise(AkJson& result, const AkJson& option);
+	const AkJson GetCurrentSelectedObjectsInWwise(const AkJson& option);
 
 	void DeleteObjectInWwise(const std::string& guid);
 

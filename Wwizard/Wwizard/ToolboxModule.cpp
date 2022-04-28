@@ -25,7 +25,7 @@ void ToolboxModule::GatherEmptyEvents()
 	}
 	else
 	{
-		wwizardClient->GetCurrentSelectedObjectsInWwise(result, options);
+		result = wwizardClient->GetCurrentSelectedObjectsInWwise(options);
 		if (!result["objects"].IsEmpty())
 		{
 			if (result["objects"].GetArray()[0]["category"].GetVariant().GetString() == "Events")
@@ -104,7 +104,7 @@ void ToolboxModule::GatherFadersInHierarchy()
 	AkJson result;
 	AkJson options(AkJson::Map{ { "return", AkJson::Array{ AkVariant("id"), AkVariant("path"), AkVariant("type"), AkVariant("name"), AkVariant("color"), AkVariant("category"), AkVariant("childrenCount"), AkVariant("notes")}} });
 
-	wwizardClient->GetCurrentSelectedObjectsInWwise(result, options);
+	result = wwizardClient->GetCurrentSelectedObjectsInWwise(options);
 	if (!result["objects"].IsEmpty())
 	{
 		std::string category = result["objects"].GetArray()[0]["category"].GetVariant().GetString();
