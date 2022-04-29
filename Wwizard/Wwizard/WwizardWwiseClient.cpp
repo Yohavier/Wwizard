@@ -86,42 +86,6 @@ bool WwizardWwiseClient::ForceOpenWwiseInstance(const std::unique_ptr<SettingHan
         return false;
 }
 
-void WwizardWwiseClient::WalkProjectPath(const AkJson& waapiArg, const std::vector<std::string>& optionList, std::vector<AkJson>& outputList)
-{
- 	AkJson waapiResult;
-    AkJson waapiOption = ConvertVectorToAkJsonOption(optionList);
-	wwiseClient.Call(ak::wwise::core::object::get, waapiArg, waapiOption, waapiResult, 500);
-
-    const auto& objects = waapiResult["return"].GetArray();
-    for (const auto& object : objects)
-    {
-        outputList.push_back(object);
-        WalkChildren(object["id"].GetVariant().GetString().c_str(), optionList, outputList);
-    }
-}
-
-void WwizardWwiseClient::WalkChildren(const std::string& guid, const std::vector<std::string>& optionList, std::vector<AkJson>& outputList)
-{
-    AkJson waapiArg(AkJson::Map{
-            {
-                {"from", AkJson::Map{{ "id", AkJson::Array{ AkVariant(guid) }}}},
-                {"transform", AkJson::Array{ AkJson::Map {{"select", AkJson::Array{ AkVariant("children")}}}}}
-            }});
-
-    AkJson waapiOption = ConvertVectorToAkJsonOption(optionList);
-
-    AkJson waapiResult;
-
-    wwiseClient.Call(ak::wwise::core::object::get, waapiArg, waapiOption, waapiResult, 500);
-
-    const auto& objects = waapiResult["return"].GetArray();
-    for (const auto& object : objects)
-    {
-        outputList.push_back(object);
-        WalkChildren(object["id"].GetVariant().GetString().c_str(), optionList, outputList);
-    }
-}
-
 const AkJson WwizardWwiseClient::GetChildrenFromGuid(const std::string& guid, const std::vector<std::string>& optionList)
 {
     AkJson waapiArg(AkJson::Map{

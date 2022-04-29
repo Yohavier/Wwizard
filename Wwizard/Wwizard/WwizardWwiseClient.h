@@ -19,13 +19,10 @@ public:
 	{
 		StartReconnectionThread();
 	}
+
 	~WwizardWwiseClient();
 	
 	void StartReconnectionThread();
-
-	bool ForceOpenWwiseInstance(const std::unique_ptr<SettingHandler>& settings);
-
-	void WalkProjectPath(const AkJson& arg, const std::vector<std::string>& optionList, std::vector<AkJson>& outputList);
 
 	const AkJson GetObjectFromPath(const std::string& path, std::vector<std::string>& returnValues);
 
@@ -69,10 +66,13 @@ public:
 	const AkJson GetObjectPropertyList(const int& classID);
 
 private:
-	void WalkChildren(const std::string& guid, const std::vector<std::string>& optionList, std::vector<AkJson>& outputList);
 	void ReconnectionThread();
+
 	bool Connect(const std::unique_ptr<SettingHandler>& settings);
+
 	const AkJson ConvertVectorToAkJsonOption(const std::vector<std::string>& optionList);
+
+	bool ForceOpenWwiseInstance(const std::unique_ptr<SettingHandler>& settings);
 
 private:
 	Client wwiseClient;
