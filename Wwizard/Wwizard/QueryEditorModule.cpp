@@ -4,6 +4,9 @@
 #include <iostream>
 #include <random>
 
+#include <chrono>
+
+
 #include <rapidjson/filereadstream.h>
 #include <rapidjson/filewritestream.h>
 #include <rapidjson/writer.h>
@@ -316,7 +319,10 @@ void QueryEditorModule::SaveCustomQueriesToJson()
 
 void QueryEditorModule::CreateNewQuery(const std::string name, const QueryType type, const std::string arg)
 {
-    std::string guid = GenerateGuid();
+    unsigned long long now = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now().time_since_epoch()).count();
+
+    std::string guid = std::to_string(now);
+    
     if (type == QueryType::WAAPIQUERY)
     {
         rapidjson::Document a;
