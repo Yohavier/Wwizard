@@ -86,87 +86,97 @@ bool WwizardWwiseClient::ForceOpenWwiseInstance(const std::unique_ptr<SettingHan
         return false;
 }
 
-void WwizardWwiseClient::WalkProjectPath(const AkJson& arg, const AkJson& opt, std::vector<AkJson>& outputList)
+void WwizardWwiseClient::WalkProjectPath(const AkJson& waapiArg, const std::vector<std::string>& optionList, std::vector<AkJson>& outputList)
 {
- 	AkJson queryResult;
-	wwiseClient.Call(ak::wwise::core::object::get, arg, opt, queryResult, 500);
+ 	AkJson waapiResult;
+    AkJson waapiOption = ConvertVectorToAkJsonOption(optionList);
+	wwiseClient.Call(ak::wwise::core::object::get, waapiArg, waapiOption, waapiResult, 500);
 
-    const auto& objects = queryResult["return"].GetArray();
+    const auto& objects = waapiResult["return"].GetArray();
     for (const auto& object : objects)
     {
         outputList.push_back(object);
-        WalkChildren(object["id"].GetVariant().GetString().c_str(), opt, outputList);
+        WalkChildren(object["id"].GetVariant().GetString().c_str(), optionList, outputList);
     }
 }
 
-void WwizardWwiseClient::WalkChildren(const std::string& guid, const AkJson& opt, std::vector<AkJson>& outputList)
+void WwizardWwiseClient::WalkChildren(const std::string& guid, const std::vector<std::string>& optionList, std::vector<AkJson>& outputList)
 {
-    AkJson queryResult;
-
-    AkJson arg(AkJson::Map{
+    AkJson waapiArg(AkJson::Map{
             {
                 {"from", AkJson::Map{{ "id", AkJson::Array{ AkVariant(guid) }}}},
                 {"transform", AkJson::Array{ AkJson::Map {{"select", AkJson::Array{ AkVariant("children")}}}}}
             }});
 
-    wwiseClient.Call(ak::wwise::core::object::get, arg, opt, queryResult, 500);
+    AkJson waapiOption = ConvertVectorToAkJsonOption(optionList);
 
-    const auto& objects = queryResult["return"].GetArray();
+    AkJson waapiResult;
+
+    wwiseClient.Call(ak::wwise::core::object::get, waapiArg, waapiOption, waapiResult, 500);
+
+    const auto& objects = waapiResult["return"].GetArray();
     for (const auto& object : objects)
     {
         outputList.push_back(object);
-        WalkChildren(object["id"].GetVariant().GetString().c_str(), opt, outputList);
+        WalkChildren(object["id"].GetVariant().GetString().c_str(), optionList, outputList);
     }
 }
 
-const AkJson WwizardWwiseClient::GetChildrenFromGuid(const std::string guid, const AkJson option)
+const AkJson WwizardWwiseClient::GetChildrenFromGuid(const std::string& guid, const std::vector<std::string>& optionList)
 {
-    AkJson arg(AkJson::Map{
+    AkJson waapiArg(AkJson::Map{
     {
         {"from", AkJson::Map{{ "id", AkJson::Array{ AkVariant(guid) }}}},
         {"transform", AkJson::Array{ AkJson::Map {{"select", AkJson::Array{ AkVariant("children")}}}}}
     } });
-    AkJson queryResult;
 
-    wwiseClient.Call(ak::wwise::core::object::get, arg, option, queryResult, 500);
+    AkJson waapiOption = ConvertVectorToAkJsonOption(optionList);
 
-    return queryResult;
+    AkJson waapiResult;
+
+    wwiseClient.Call(ak::wwise::core::object::get, waapiArg, waapiOption, waapiResult, 500);
+
+    return waapiResult;
 }
 
-const AkJson WwizardWwiseClient::GetCurrentSelectedObjectsInWwise(const AkJson& option)
+const AkJson WwizardWwiseClient::GetSelectedObjectsInWwise(const std::vector<std::string>& optionList)
 {
-    AkJson result;
-    AkJson arg(AkJson::Map{ });
-    wwiseClient.Call(ak::wwise::ui::getSelectedObjects, arg, option, result, 500);
-    return result;
+    AkJson waapiArg(AkJson::Map{ });
+    AkJson waapiOption = ConvertVectorToAkJsonOption(optionList);
+    AkJson waapiResult;
+
+    wwiseClient.Call(ak::wwise::ui::getSelectedObjects, waapiArg, waapiOption, waapiResult, 500);
+    return waapiResult;
 }
 
-const AkJson WwizardWwiseClient::GetObjectFromPath(const std::string path, AkJson option)
+const AkJson WwizardWwiseClient::GetObjectFromPath(const std::string& path, std::vector<std::string>& optionList)
 {
-    AkJson arg(AkJson::Map{
+    AkJson waapiArg(AkJson::Map{
         { "from", AkJson::Map{
             { "path", AkJson::Array{ AkVariant(path) } } } }
         });
 
-    AkJson queryResult;
+    AkJson waapiOption = ConvertVectorToAkJsonOption(optionList);
+    AkJson waapiResult;
 
-    wwiseClient.Call(ak::wwise::core::object::get, arg, option, queryResult, 500);
+    wwiseClient.Call(ak::wwise::core::object::get, waapiArg, waapiOption, waapiResult, 500);
 
-    return queryResult;
+    return waapiResult;
 }
 
-const AkJson WwizardWwiseClient::RunQueryFromGuuid(const std::string guid)
+const AkJson WwizardWwiseClient::RunQueryFromGuuid(const std::string& guid)
 {
-    AkJson arg(AkJson::Map{
+    AkJson waapiArg(AkJson::Map{
        { "from", AkJson::Map{{ "query", AkJson::Array{AkVariant(guid)}}}}});
 
-    AkJson options(AkJson::Map{
+    AkJson waapiOption(AkJson::Map{
     { "return", AkJson::Array{ AkVariant("id"), AkVariant("name"), AkVariant("type"), AkVariant("path"), AkVariant("color")}}});
 
-    AkJson queryResult;
-    wwiseClient.Call(ak::wwise::core::object::get, arg, options, queryResult, 500);
+    AkJson waapiResult;
 
-    return queryResult;
+    wwiseClient.Call(ak::wwise::core::object::get, waapiArg, waapiOption, waapiResult, 500);
+
+    return waapiResult;
 }
 
 const AkJson WwizardWwiseClient::RunCustomQuery(const AkJson arg)
@@ -182,25 +192,25 @@ const AkJson WwizardWwiseClient::RunCustomQuery(const AkJson arg)
 
 const AkJson WwizardWwiseClient::GetProjectInfo()
 {
-    AkJson queryResult;
-    AkJson arg(AkJson::Map{});
-    AkJson opt(AkJson::Map{});
+    AkJson waapiArg(AkJson::Map{});
+    AkJson waapiOption(AkJson::Map{});
+    AkJson waapiResult;
 
-    wwiseClient.Call(ak::wwise::core::getInfo, arg, opt, queryResult, 500);
+    wwiseClient.Call(ak::wwise::core::getInfo, waapiArg, waapiOption, waapiResult, 500);
 
-    return queryResult;
+    return waapiResult;
 }
 
-void WwizardWwiseClient::OpenPropertyInWwise(const std::string& guid)
+void WwizardWwiseClient::FocusObjectInWwise(const std::string& guid)
 {
-    AkJson openHierarchy(AkJson::Map{ {{"command", AkVariant("FindInProjectExplorerSyncGroup1")}, {"objects", AkJson::Array{AkVariant(guid)}}} });
-    AkJson openProperty(AkJson::Map{ {{"command", AkVariant("Inspect")}, {"objects", AkJson::Array{AkVariant(guid)}}} });
+    AkJson waapiHierarchyArg(AkJson::Map{ {{"command", AkVariant("FindInProjectExplorerSyncGroup1")}, {"objects", AkJson::Array{AkVariant(guid)}}} });
+    AkJson waapiPropertyArg(AkJson::Map{ {{"command", AkVariant("Inspect")}, {"objects", AkJson::Array{AkVariant(guid)}}} });
 
-    AkJson options(AkJson::Map{ });
-    AkJson result;
+    AkJson waapiOption(AkJson::Map{ });
+    AkJson waapiResult;
 
-    wwiseClient.Call(ak::wwise::ui::commands::execute, openProperty, options, result, 500);
-    wwiseClient.Call(ak::wwise::ui::commands::execute, openHierarchy, options, result, 500);
+    wwiseClient.Call(ak::wwise::ui::commands::execute, waapiPropertyArg, waapiOption, waapiResult, 500);
+    wwiseClient.Call(ak::wwise::ui::commands::execute, waapiHierarchyArg, waapiOption, waapiResult, 500);
 }
 
 void WwizardWwiseClient::StartReconnectionThread()
@@ -229,50 +239,62 @@ void WwizardWwiseClient::ReconnectionThread()
 
 void WwizardWwiseClient::DeleteObjectInWwise(const std::string& guid)
 {
+    AkJson waapiArg(AkJson::Map{ {"object", AkVariant(guid)} });
     AkJson empty(AkJson::Map{});
-    AkJson arg(AkJson::Map{ {"object", AkVariant(guid)} });
-    wwiseClient.Call(ak::wwise::core::object::delete_, arg, empty, empty, 500);
+
+    wwiseClient.Call(ak::wwise::core::object::delete_, waapiArg, empty, empty, 500);
 }
 
 const AkJson WwizardWwiseClient::GetPropertyFromGuid(const std::string& parentGuid)
 {
-    AkJson options(AkJson::Map{ { "return", AkJson::Array{ AkVariant("Target")}} });
-    AkJson result;
-    AkJson arg(AkJson::Map{
-       {
-           {"from", AkJson::Map{{ "id", AkJson::Array{ AkVariant(parentGuid) }}}}
-       } });
-    wwiseClient.Call(ak::wwise::core::object::get, arg, options, result);
-    return result;
+    AkJson waapiArg(AkJson::Map{
+    {
+        {"from", AkJson::Map{{ "id", AkJson::Array{ AkVariant(parentGuid) }}}}
+    } });
+    AkJson waapiOption(AkJson::Map{ { "return", AkJson::Array{ AkVariant("Target")}} });
+    AkJson waapiResult;
+
+    wwiseClient.Call(ak::wwise::core::object::get, waapiArg, waapiOption, waapiResult);
+    return waapiResult;
 }
 
-void WwizardWwiseClient::SetProperty(const AkJson& arg)
+const AkJson WwizardWwiseClient::GetObjectsByPartName(const std::string& name, const std::vector<std::string> & optionList)
 {
-    AkJson empty(AkJson::Map{});
-    wwiseClient.Call(ak::wwise::core::object::setProperty, arg, empty, empty, 500);
-}
+    AkJson waapiArg(AkJson::Map{
+    {
+        {"waql", AkVariant("where name :\"" + name + "\"")}
+    } });
 
-const AkJson WwizardWwiseClient::GetObjectsByPartName(const std::string& name, const AkJson& option)
-{
-    AkJson result;
-    AkJson arg(AkJson::Map{
-           {
-               {"waql", AkVariant("where name :\"" + name + "\"")}
-           } });
+    AkJson waapiOption = ConvertVectorToAkJsonOption(optionList);
 
-    wwiseClient.Call(ak::wwise::core::object::get, arg, option, result);
-    return result;
+    AkJson waapiResult;
+
+    wwiseClient.Call(ak::wwise::core::object::get, waapiArg, waapiOption, waapiResult);
+    return waapiResult;
 }
 
 const AkJson WwizardWwiseClient::GetObjectPropertyList(const int& classID)
 {
-    AkJson result;
-    AkJson empty(AkJson::Map{});
-    AkJson arg(AkJson::Map{
-           {
-               {"classId", AkVariant(classID)}
-           } });
+    AkJson waapiArg(AkJson::Map{
+    {
+        {"classId", AkVariant(classID)}
+    } });
 
-    wwiseClient.Call(ak::wwise::core::object::getPropertyAndReferenceNames, arg, empty, result);
-    return result;
+    AkJson waapiResult;
+    AkJson waapiOption(AkJson::Map{});
+
+    wwiseClient.Call(ak::wwise::core::object::getPropertyAndReferenceNames, waapiArg, waapiOption, waapiResult);
+    return waapiResult;
+}
+
+const AkJson WwizardWwiseClient::ConvertVectorToAkJsonOption(const std::vector<std::string>& optionList)
+{
+    AkJson waapiOption(AkJson::Map{ { "return", AkJson::Array{ }} });
+
+    for (const auto& option : optionList)
+    {
+        waapiOption["return"].GetArray().emplace_back(AkVariant(option));
+    }
+
+    return waapiOption;
 }

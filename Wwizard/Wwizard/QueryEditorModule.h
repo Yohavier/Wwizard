@@ -84,7 +84,7 @@ public:
 private:
 	const std::string GenerateGuid();
 	void FetchWwiseQueries();
-	void FetchWwiseFolderchildren(BaseQueryStructure& parentStructureFolder, const AkJson options);
+	void FetchWwiseFolderchildren(BaseQueryStructure& parentStructureFolder, const std::vector<std::string>& optionList);
 	const BaseQueryStructure* const GetCurrentSelectionQuery();
 	const QueryResultFile* const GetCurrentSelectionFile();
 	void LoadWaapiQueriesFromJson();

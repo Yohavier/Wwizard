@@ -11,8 +11,8 @@ void ColorCodingModule::FindNamesInWwise()
 	colorHierarchy.clear();
 	for (const auto& colorSetting : colorSettings)
 	{
-		AkJson option(AkJson::Map{ { "return", AkJson::Array{ AkVariant("path"), AkVariant("name"), AkVariant("type"), AkVariant("id"), AkVariant("color"), AkVariant("classId")}}});
-		AkJson result = wwizardClient->GetObjectsByPartName(colorSetting.second.name, option);
+		std::vector<std::string> optionList = { "path", "name", "type", "id", "color", "classId" };
+		AkJson result = wwizardClient->GetObjectsByPartName(colorSetting.second.name, optionList);
 
 		if (colorSetting.second.name == "")
 		{
@@ -52,8 +52,9 @@ void ColorCodingModule::DeleteColorSetting(ColorSetting setting)
 
 void ColorCodingModule::CollectColorHierarchy(std::string currentID, std::string parentID, int mode, int applyableColorID, std::string path, int actualColor)
 {
-	AkJson option(AkJson::Map{ { "return", AkJson::Array{ AkVariant("path"), AkVariant("name"), AkVariant("type"), AkVariant("id"), AkVariant("color")}} });
-	AkJson result = wwizardClient->GetChildrenFromGuid(currentID, option);
+	std::vector<std::string> optionList = { "path", "color", "name", "type", "id" };
+
+	AkJson result = wwizardClient->GetChildrenFromGuid(currentID, optionList);
 	
 	std::vector<std::string> childIDs;
 
@@ -136,49 +137,19 @@ void ColorCodingModule::ApplyColors()
 		{
 			if (colorObject.second.parentID != "" && colorHierarchy.at(colorObject.second.parentID).mode != 0 && colorHierarchy.at(colorObject.second.parentID).mode != 1)
 			{
-				AkJson argEnable(AkJson::Map{
-				{
-					{"object", AkVariant(colorObject.second.path)},
-					{"property", AkVariant("OverrideColor")},
-					{"value", AkVariant(false)}
-				} });
-				wwizardClient->SetProperty(argEnable);
+				wwizardClient->SetProperty<bool>(colorObject.second.path, "OverrideColor", false);
 			}
 			else
 			{
-				AkJson argEnable(AkJson::Map{
-				{
-					{"object", AkVariant(colorObject.second.path)},
-					{"property", AkVariant("OverrideColor")},
-					{"value", AkVariant(true)}
-				} });
-				wwizardClient->SetProperty(argEnable);
+				wwizardClient->SetProperty<bool>(colorObject.second.path, "OverrideColor", true);
 
-				AkJson argSetColor(AkJson::Map{
-				{
-					{"object", AkVariant(colorObject.second.path)},
-					{"property", AkVariant("Color")},
-					{"value", AkVariant(colorObject.second.applyableColorID)}
-				} });
-				wwizardClient->SetProperty(argSetColor);
+				wwizardClient->SetProperty<int>(colorObject.second.path, "Color", colorObject.second.applyableColorID);
 			}
 		}
 		else
 		{
-			AkJson argEnable(AkJson::Map{
-				{
-					{"object", AkVariant(colorObject.second.path)},
-					{"property", AkVariant("OverrideColor")},
-					{"value", AkVariant(true)}
-				} });
-			wwizardClient->SetProperty(argEnable);
-			AkJson argSetColor(AkJson::Map{
-			{
-				{"object", AkVariant(colorObject.second.path)},
-				{"property", AkVariant("Color")},
-				{"value", AkVariant(colorObject.second.applyableColorID)}
-			} });
-			wwizardClient->SetProperty(argSetColor);
+			wwizardClient->SetProperty<int>(colorObject.second.path, "OverrideColor", true);
+			wwizardClient->SetProperty<int>(colorObject.second.path, "Color", colorObject.second.applyableColorID);
 		}
 	}
 }

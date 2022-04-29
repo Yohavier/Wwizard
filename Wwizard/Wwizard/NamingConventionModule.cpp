@@ -145,11 +145,9 @@ void NamingConventionModule::StartCheckingNamingConvention(const std::string& fo
 		{
 			if (entry.path().filename().u8string() != ".cache" && entry.path().filename().u8string() != "GeneratedSoundBanks" && entry.path().filename().u8string() != "Originals" && entry.path().filename().u8string() != "Presets")
 			{
-				AkJson options(AkJson::Map{
-				{ "return", AkJson::Array{ AkVariant("id"), AkVariant("name"), AkVariant("type"), AkVariant("path")}}});
-				AkJson obj;
+				std::vector<std::string> optionList = { "id", "name", "type", "path" };
 				std::string relativeFolderPath = "\\" + entry.path().u8string().substr(projectPath.size(), entry.path().u8string().size() - projectPath.size());
-				obj = wwizardClient->GetObjectFromPath(relativeFolderPath, options);
+				AkJson obj = wwizardClient->GetObjectFromPath(relativeFolderPath, optionList);
 				
 				std::string lastAddedNameLayer = AddLastNamePathLayer(constructedNamePath, entry.path().filename().u8string(), "Folder");
 

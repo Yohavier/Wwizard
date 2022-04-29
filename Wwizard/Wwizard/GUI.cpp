@@ -544,7 +544,7 @@ void GUI::ShowQueryResults()
 
             if (ImGui::IsMouseDoubleClicked(0))
             {
-                wwizarWwiseClient->OpenPropertyInWwise(object.second.guid);
+                wwizarWwiseClient->FocusObjectInWwise(object.second.guid);
             }  
         }   
 
@@ -566,7 +566,6 @@ void GUI::RenderLayoutHome()
 
     ImGui::BulletText("Polish UI with warning pop ups, tooltips and style");
     ImGui::BulletText("General Cleanup");
-    ImGui::BulletText("make save and load safe");
     ImGui::BulletText("Work on the Readme file");
 
     ImGui::Separator();
@@ -671,7 +670,7 @@ void GUI::ShowDetails()
             ImGui::SameLine();
             if (ImGui::Button("Inspect Wwise Query"))
             {
-                wwizarWwiseClient->OpenPropertyInWwise(possibleSelectedQuery->guid);
+                wwizarWwiseClient->FocusObjectInWwise(possibleSelectedQuery->guid);
             }
         }
         if (ImGui::BeginPopup("QueryEditing"))
@@ -983,7 +982,7 @@ void GUI::RenderLayoutNamingConvention()
                     {
                         if (ImGui::IsMouseDoubleClicked(0))
                         {
-                            wwizarWwiseClient->OpenPropertyInWwise(issue.second.guid);
+                            wwizarWwiseClient->FocusObjectInWwise(issue.second.guid);
                         }
                     }
             

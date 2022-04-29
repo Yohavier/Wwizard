@@ -30,23 +30,20 @@ QueryEditorModule::QueryEditorModule(std::unique_ptr<WwizardWwiseClient>& wwizar
 
 void QueryEditorModule::FetchWwiseQueries()
 {
-    AkJson options(AkJson::Map{
-    { "return", AkJson::Array{ AkVariant("id"), AkVariant("name"), AkVariant("type"), AkVariant("path")}} });
-
-    AkJson parentObject;
-    parentObject = wwizardClient->GetObjectFromPath("\\Queries", options);
+    std::vector<std::string> optionList = { "id", "name", "type", "path" };
+    AkJson parentObject = wwizardClient->GetObjectFromPath("\\Queries", optionList);
     BaseQueryStructure parentStructureFolder = BaseQueryStructure(parentObject["return"].GetArray()[0]["name"].GetVariant().GetString(), parentObject["return"].GetArray()[0]["id"].GetVariant().GetString(), parentObject["return"].GetArray()[0]["path"].GetVariant().GetString(), QueryType::FOLDER);
 
     wwiseQueryHierarchy->guid = parentStructureFolder.guid;
     wwiseQueryHierarchy->name = parentStructureFolder.name;
     wwiseQueryHierarchy->path = parentStructureFolder.path;
 
-    FetchWwiseFolderchildren(*wwiseQueryHierarchy, options);
+    FetchWwiseFolderchildren(*wwiseQueryHierarchy, optionList);
 }
 
-void QueryEditorModule::FetchWwiseFolderchildren(BaseQueryStructure& parentStructureFolder, const AkJson options)
+void QueryEditorModule::FetchWwiseFolderchildren(BaseQueryStructure& parentStructureFolder, const std::vector<std::string>& optionList)
 {
-    AkJson queryResult = wwizardClient->GetChildrenFromGuid(parentStructureFolder.guid, options);
+    AkJson queryResult = wwizardClient->GetChildrenFromGuid(parentStructureFolder.guid, optionList);
 
     for (const auto& object : queryResult["return"].GetArray())
     {
@@ -69,7 +66,7 @@ void QueryEditorModule::FetchWwiseFolderchildren(BaseQueryStructure& parentStruc
         {
             BaseQueryStructure newFolder = BaseQueryStructure(object["name"].GetVariant().GetString(), object["id"].GetVariant().GetString(), object["path"].GetVariant().GetString(), QueryType::FOLDER);
             parentStructureFolder.subHierarchy.emplace_back(newFolder);
-            FetchWwiseFolderchildren(parentStructureFolder.subHierarchy.back(), options);
+            FetchWwiseFolderchildren(parentStructureFolder.subHierarchy.back(), optionList);
         }
     }
 }
@@ -221,23 +218,26 @@ void QueryEditorModule::LoadWaapiQueriesFromJson()
 
         if (d.HasMember("WaapiQueries"))
         {
-            if (d["WaapiQueries"].HasMember("name") && d["WaapiQueries"].HasMember("guid") && d["WaapiQueries"].HasMember("path") && d["WaapiQueries"].HasMember("arg"))
+            if (!d["WaapiQueries"].Empty())
             {
-                for (int i = 0; i < static_cast<int>(d["WaapiQueries"].Size()); i++)
+                if (d["WaapiQueries"].HasMember("name") && d["WaapiQueries"].HasMember("guid") && d["WaapiQueries"].HasMember("path") && d["WaapiQueries"].HasMember("arg"))
                 {
-                    AkJson test;
-                    test.FromRapidJson(d["WaapiQueries"][i]["arg"], test);
-
-                    BaseQueryStructure newQuery = BaseQueryStructure(d["WaapiQueries"][i]["name"].GetString(), d["WaapiQueries"][i]["guid"].GetString(), d["WaapiQueries"][i]["path"].GetString(), QueryType::WAAPIQUERY, test);
-                    AddQueryToAllQueriesMap(newQuery);
-
-                    auto it = allQueries.find(d["WaapiQueries"][i]["guid"].GetString());
-                    if (it != allQueries.end())
+                    for (int i = 0; i < static_cast<int>(d["WaapiQueries"].Size()); i++)
                     {
-                        waapiQueries.insert({ it->second.guid, it->second });
+                        AkJson test;
+                        test.FromRapidJson(d["WaapiQueries"][i]["arg"], test);
+
+                        BaseQueryStructure newQuery = BaseQueryStructure(d["WaapiQueries"][i]["name"].GetString(), d["WaapiQueries"][i]["guid"].GetString(), d["WaapiQueries"][i]["path"].GetString(), QueryType::WAAPIQUERY, test);
+                        AddQueryToAllQueriesMap(newQuery);
+
+                        auto it = allQueries.find(d["WaapiQueries"][i]["guid"].GetString());
+                        if (it != allQueries.end())
+                        {
+                            waapiQueries.insert({ it->second.guid, it->second });
+                        }
                     }
                 }
-            }
+            }  
         }
     }
 }

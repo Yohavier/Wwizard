@@ -9,44 +9,44 @@ ToolboxModule::ToolboxModule(std::unique_ptr<WwizardWwiseClient>& wwizardClient)
 void ToolboxModule::GatherEmptyEvents()
 {
 	eventQueryResultFiles.clear();
-	AkJson result; 
-	AkJson options(AkJson::Map{{ "return", AkJson::Array{ AkVariant("id"), AkVariant("name"), AkVariant("type"), AkVariant("category"), AkVariant("path"), AkVariant("color"), AkVariant("childrenCount")}} });
-	
+	AkJson waapiResult; 
+	std::vector<std::string> optionList = { "id", "name", "category", "path", "color", "childrenCount", "type" };
+
 	if (deleteEmptyEventsForAllEvents)
 	{
-		result = wwizardClient->GetObjectFromPath("\\Events", options);
+		AkJson result = wwizardClient->GetObjectFromPath("\\Events", optionList);
 		if (!result["return"].IsEmpty())
 		{
 			for (const auto& results : result["return"].GetArray())
 			{
-				IterateGatherEmptyEvents(results["id"].GetVariant().GetString(), options);
+				IterateGatherEmptyEvents(results["id"].GetVariant().GetString(), optionList);
 			}
 		}
 	}
 	else
 	{
-		result = wwizardClient->GetCurrentSelectedObjectsInWwise(options);
-		if (!result["objects"].IsEmpty())
+		waapiResult = wwizardClient->GetSelectedObjectsInWwise(optionList);
+		if (!waapiResult["objects"].IsEmpty())
 		{
-			if (result["objects"].GetArray()[0]["category"].GetVariant().GetString() == "Events")
+			if (waapiResult["objects"].GetArray()[0]["category"].GetVariant().GetString() == "Events")
 			{
-				for (const auto& results : result["objects"].GetArray())
+				for (const auto& results : waapiResult["objects"].GetArray())
 				{
-					IterateGatherEmptyEvents(results["id"].GetVariant().GetString(), options);
+					IterateGatherEmptyEvents(results["id"].GetVariant().GetString(), optionList);
 				}
 			}
 		}
 	}
 }
 
-void ToolboxModule::IterateGatherEmptyEvents(const std::string& guid, const AkJson& options)
+void ToolboxModule::IterateGatherEmptyEvents(const std::string& guid, const std::vector<std::string>& optionList)
 {
-	AkJson result = wwizardClient->GetChildrenFromGuid(guid, options);
+	AkJson result = wwizardClient->GetChildrenFromGuid(guid, optionList);
 	for (const auto& evt : result["return"].GetArray())
 	{
 		if (evt["type"].GetVariant().GetString() != "Event")
 		{
-			IterateGatherEmptyEvents(evt["id"].GetVariant().GetString(), options);
+			IterateGatherEmptyEvents(evt["id"].GetVariant().GetString(), optionList);
 		}
 		else
 		{
@@ -70,8 +70,8 @@ bool ToolboxModule::IsEventEmptyOrInvalid(const int& count, const std::string& g
 
 bool ToolboxModule::AreAllActionsEmpty(const std::string& parentGuid)
 {
-	AkJson options(AkJson::Map{{ "return", AkJson::Array{ AkVariant("id")}}});
-	AkJson result = wwizardClient->GetChildrenFromGuid(parentGuid, options);
+	std::vector < std::string> optionList = { "id" };
+	AkJson result = wwizardClient->GetChildrenFromGuid(parentGuid, optionList);
 	
 	for (const auto& evt : result["return"].GetArray())
 	{
@@ -101,10 +101,10 @@ void ToolboxModule::DeleteEmptyEvent()
 void ToolboxModule::GatherFadersInHierarchy()
 {
 	faderQueryResultFiles.clear();
-	AkJson result;
-	AkJson options(AkJson::Map{ { "return", AkJson::Array{ AkVariant("id"), AkVariant("path"), AkVariant("type"), AkVariant("name"), AkVariant("color"), AkVariant("category"), AkVariant("childrenCount"), AkVariant("notes")}} });
 
-	result = wwizardClient->GetCurrentSelectedObjectsInWwise(options);
+	std::vector<std::string> optionList = { "id", "path", "type", "name", "color", "category", "childrenCount", "notes"};
+	AkJson result = wwizardClient->GetSelectedObjectsInWwise(optionList);
+
 	if (!result["objects"].IsEmpty())
 	{
 		std::string category = result["objects"].GetArray()[0]["category"].GetVariant().GetString();
@@ -112,7 +112,7 @@ void ToolboxModule::GatherFadersInHierarchy()
 		{
 			for (const auto& fader : result["objects"].GetArray())
 			{
-				IterateResetFaders(fader["id"].GetVariant().GetString(), options);
+				IterateResetFaders(fader["id"].GetVariant().GetString(), optionList);
 
 				if (CheckObjectType(fader["type"].GetVariant().GetString()))
 				{
@@ -130,9 +130,9 @@ void ToolboxModule::GatherFadersInHierarchy()
 	}
 }
 
-void ToolboxModule::IterateResetFaders(const std::string& guid, const AkJson& options)
+void ToolboxModule::IterateResetFaders(const std::string& guid, const std::vector<std::string>& optionList)
 {
-	AkJson result = wwizardClient->GetChildrenFromGuid(guid, options);
+	AkJson result = wwizardClient->GetChildrenFromGuid(guid, optionList);
 	for (const auto& fader : result["return"].GetArray())
 	{
 		if (CheckObjectType(fader["type"].GetVariant().GetString()))
@@ -146,7 +146,7 @@ void ToolboxModule::IterateResetFaders(const std::string& guid, const AkJson& op
 						fader["color"].GetVariant().GetUInt8()) });
 			}
 		}
-		IterateResetFaders(fader["id"].GetVariant().GetString(), options);
+		IterateResetFaders(fader["id"].GetVariant().GetString(), optionList);
 	}
 }
 
@@ -167,13 +167,7 @@ void ToolboxModule::ResetFader()
 		if (fader.second.type == "Bus" || fader.second.type == "AuxBus")
 			property = "BusVolume";
 
-		AkJson arg(AkJson::Map{
-		{
-			{"object", AkVariant(fader.second.path)},
-			{"property", AkVariant(property)},
-			{"value", AkVariant(0)}
-		} });
-		wwizardClient->SetProperty(arg);
+		wwizardClient->SetProperty<int>(fader.second.path, property, 0);
 	}
 	faderQueryResultFiles.clear();
 }
