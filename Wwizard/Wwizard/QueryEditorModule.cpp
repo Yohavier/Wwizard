@@ -218,26 +218,23 @@ void QueryEditorModule::LoadWaapiQueriesFromJson()
 
         if (d.HasMember("WaapiQueries"))
         {
-            if (!d["WaapiQueries"].Empty())
+            for (int i = 0; i < static_cast<int>(d["WaapiQueries"].Size()); i++)
             {
-                if (d["WaapiQueries"].HasMember("name") && d["WaapiQueries"].HasMember("guid") && d["WaapiQueries"].HasMember("path") && d["WaapiQueries"].HasMember("arg"))
+                if (d["WaapiQueries"][i].HasMember("name") && d["WaapiQueries"][i].HasMember("guid") && d["WaapiQueries"][i].HasMember("path") && d["WaapiQueries"][i].HasMember("arg"))
                 {
-                    for (int i = 0; i < static_cast<int>(d["WaapiQueries"].Size()); i++)
+                    AkJson test;
+                    test.FromRapidJson(d["WaapiQueries"][i]["arg"], test);
+
+                    BaseQueryStructure newQuery = BaseQueryStructure(d["WaapiQueries"][i]["name"].GetString(), d["WaapiQueries"][i]["guid"].GetString(), d["WaapiQueries"][i]["path"].GetString(), QueryType::WAAPIQUERY, test);
+                    AddQueryToAllQueriesMap(newQuery);
+
+                    auto it = allQueries.find(d["WaapiQueries"][i]["guid"].GetString());
+                    if (it != allQueries.end())
                     {
-                        AkJson test;
-                        test.FromRapidJson(d["WaapiQueries"][i]["arg"], test);
-
-                        BaseQueryStructure newQuery = BaseQueryStructure(d["WaapiQueries"][i]["name"].GetString(), d["WaapiQueries"][i]["guid"].GetString(), d["WaapiQueries"][i]["path"].GetString(), QueryType::WAAPIQUERY, test);
-                        AddQueryToAllQueriesMap(newQuery);
-
-                        auto it = allQueries.find(d["WaapiQueries"][i]["guid"].GetString());
-                        if (it != allQueries.end())
-                        {
-                            waapiQueries.insert({ it->second.guid, it->second });
-                        }
+                        waapiQueries.insert({ it->second.guid, it->second });
                     }
                 }
-            }  
+            }                   
         }
     }
 }
