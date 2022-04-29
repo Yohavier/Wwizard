@@ -219,17 +219,6 @@ void GUI::CreateTaskBar(bool& isRunning)
             
             ImGui::EndMenu();
         }
-        if (currentLayout == Layout::QUERYEDITOR)
-        {
-            if (wwizarWwiseClient->IsConnected())
-            {
-                if (ImGui::BeginMenu("Add Query"))
-                {
-                    ShowQueryCreator();
-                    ImGui::EndMenu();
-                }
-            }       
-        }
 
         if (wwizarWwiseClient->IsConnected())
         {
@@ -315,6 +304,19 @@ void GUI::RenderLayoutQueryEditor()
         ShowWaqlQueries();
         ImGui::EndTable();
     }
+
+    if (ImGui::BeginPopupModal("Query Creator"))
+    {
+        ShowQueryCreator();
+        ImGui::EndPopup();
+    }
+
+    if (ImGui::Button("Create new query"))
+    {
+        ImGui::OpenPopup("Query Creator");
+    }
+
+
     ImGui::End();
 
 
@@ -333,7 +335,6 @@ void GUI::RenderLayoutQueryEditor()
     }
     ImGui::PopStyleVar();
     ImGui::End();
-
 
     //Details window
     ShowDetails();
@@ -616,17 +617,25 @@ void GUI::ShowQueryCreator()
     }
     if (ImGui::Button("Submit Query", ImVec2(-FLT_MIN, 0.0f)))
     {
-
         if (waapi)
+        {
             queryEditorModule->CreateNewQuery(nameText, QueryType::WAAPIQUERY, argText);
+            ImGui::CloseCurrentPopup();
+        }    
         else if (waql)
+        {
             queryEditorModule->CreateNewQuery(nameText, QueryType::WAQLQUERY, argText);
+            ImGui::CloseCurrentPopup();
+        }           
         else
         {
             ImGui::OpenPopup("Options");
         }
-            
-    }    
+    }   
+    if (ImGui::Button("Close"))
+    {
+        ImGui::CloseCurrentPopup();
+    }
 }
     
 void GUI::ShowDetails()
