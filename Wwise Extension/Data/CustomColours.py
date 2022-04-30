@@ -1,8 +1,0 @@
-white = (255, 255, 255)
-lightGrey = (200, 200, 200)
-greyedOut = (135, 135, 135)
-grey = (70, 70, 70)
-darkGrey = (43, 43, 43)
-blackGreyedOut = (54, 40, 48)
-black = (0, 0, 0)
-yellow = (219, 152, 80)
