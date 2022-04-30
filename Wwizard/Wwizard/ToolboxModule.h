@@ -30,6 +30,7 @@ private:
 
 public:
 	bool deleteEmptyEventsForAllEvents = false;
+	std::string ignoreFaderNote = "@FIgnore";
 
 private:
 	std::map<std::string, QueryResultFile> eventQueryResultFiles;
@@ -37,7 +38,5 @@ private:
 	std::unique_ptr<WwizardWwiseClient>& wwizardClient;
 
 	std::set<std::string> faderContainers = { "ActorMixer", "Sound", "BlendContainer", "SwitchContainer", "RandomSequenceContainer", "AuxBus", "Bus", "MusicTrack", "MusicPlaylistContainer", "MusicSegment", "MusicSwitchContainer"};
-	
-	std::string ignoreFaderNote = "@FIgnore";
 };
 
