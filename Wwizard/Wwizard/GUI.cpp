@@ -1238,8 +1238,6 @@ void GUI::RenderLayoutToolbox()
         ImGui::Dummy(ImVec2(0, 10));
     }
 
-
-
     if (ImGui::CollapsingHeader("Reset Faders"))
     {
         ImGui::BeginColumns("Faders", 2);
