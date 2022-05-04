@@ -27,7 +27,7 @@ struct ColorSetting
 	int settingMode = 0;
 };
 
-enum class SettingMode
+enum class ColorSettingMode
 {
 	SingleSoft, 
 	SingleHard, 
@@ -39,21 +39,19 @@ struct ColorResult
 {
 public:
 	ColorResult() = delete;
-	ColorResult(std::string id, std::string parentID, std::vector<std::string> childIDs, int mode, int applyableColorID, std::string path)
-		:id(id)
+	ColorResult(std::string objectID, std::string parentID, int colorSettingMode, int applyableColorID, std::string objectPath)
+		:objectID(objectID)
 		, parentID(parentID)
-		, childIDs(childIDs)
-		, mode (mode)
+		, colorSettingMode (colorSettingMode)
 		, applyableColorID(applyableColorID)
-		, path(path)
+		, objectPath(objectPath)
 	{}
 
-	std::string id;
+	std::string objectID;
 	std::string parentID;
-	std::vector<std::string> childIDs;
-	int mode = 0;
+	int colorSettingMode = 0;
 	int applyableColorID = 0;
-	std::string path;
+	std::string objectPath;
 };
 
 class ColorCodingModule
@@ -61,34 +59,31 @@ class ColorCodingModule
 public:
 	ColorCodingModule() = delete;
 	ColorCodingModule(std::unique_ptr<WwizardWwiseClient>& wwizardClient);
-	~ColorCodingModule()
-	{
-		SaveColorSettings();
-	}
 
-	void FindNamesInWwise();
-	void AddColorSettings(std::string name, int colorCode);
+	~ColorCodingModule();
 
-	bool CheckIfHasColorProperty(int classID);
+	void BeginColorCodingProcess();
 
-	std::set<int> GetBlockedColors()
-	{
-		return blockedColors;
-	}
+	std::set<int> GetBlockedColors();
+
+	void CreateColorSetting(std::string name, int colorCode);
 	void DeleteColorSetting(ColorSetting setting);
 
 private:
-	void CollectColorHierarchy(std::string currentID, std::string parentID, int mode, int applyableColorID, std::string path, int actualColor);
-	void ApplyColors();
+	void FindObjectsAffectedByColorSettings();
+	void CollectObjectsInColorHierarchy(std::string currentID, std::string parentID, int mode, int applyableColorID, std::string path, int actualColor);
+	void ApplyColorSettings();
 	void LoadColorSettings();
 	void SaveColorSettings();
 	const std::string GenerateGuid();
+	void ClearPreviousData();
+	bool CheckIfWwiseObjectHasColorProperty(int classID);
 
 public:
 	std::map<std::string, ColorSetting> colorSettings;
 	std::set<int> blockedColors;
 
-	const char* items[4] = { "Single - soft", "Single - hard", "Hierarchy - soft", "Hierarchy - hard"};
+	const char* colorSettingModes[4] = { "Single - soft", "Single - hard", "Hierarchy - soft", "Hierarchy - hard"};
 
 private:
 	std::unique_ptr<WwizardWwiseClient>& wwizardClient;

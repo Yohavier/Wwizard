@@ -39,7 +39,7 @@ struct BaseQueryStructure
 		, arg(arg)
 	{}
 };
- 
+
 class QueryEditorModule
 {
 public:
@@ -105,9 +105,8 @@ private:
 	std::map<std::string, BaseQueryStructure&> activeQueryDictionary;
 	std::string selectedGuid = "";
 
-	const std::map<const QueryType, const std::string> queryTypeAsString = { {QueryType::WAAPIQUERY, "Waapi"}, 
-																			 {QueryType::WAQLQUERY, "Waql"}, 
-																			 {QueryType::WWISEQUERY, "Wwise"} };
+	const std::map<const QueryType, const std::string> queryTypeAsString = { {QueryType::WAAPIQUERY, "Waapi"},
+																				{QueryType::WAQLQUERY, "Waql"},
+																				{QueryType::WWISEQUERY, "Wwise"} };
 };
-
 

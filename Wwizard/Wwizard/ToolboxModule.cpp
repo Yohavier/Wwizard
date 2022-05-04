@@ -6,7 +6,7 @@ ToolboxModule::ToolboxModule(std::unique_ptr<WwizardWwiseClient>& wwizardClient)
 
 }
 
-void ToolboxModule::GatherEmptyEvents()
+void ToolboxModule::GetEmptyEvents()
 {
 	eventQueryResultFiles.clear();
 	AkJson waapiResult; 
@@ -19,7 +19,7 @@ void ToolboxModule::GatherEmptyEvents()
 		{
 			for (const auto& results : result["return"].GetArray())
 			{
-				IterateGatherEmptyEvents(results["id"].GetVariant().GetString(), optionList);
+				GetEmptyEventsInHierarchy(results["id"].GetVariant().GetString(), optionList);
 			}
 		}
 	}
@@ -32,21 +32,21 @@ void ToolboxModule::GatherEmptyEvents()
 			{
 				for (const auto& results : waapiResult["objects"].GetArray())
 				{
-					IterateGatherEmptyEvents(results["id"].GetVariant().GetString(), optionList);
+					GetEmptyEventsInHierarchy(results["id"].GetVariant().GetString(), optionList);
 				}
 			}
 		}
 	}
 }
 
-void ToolboxModule::IterateGatherEmptyEvents(const std::string& guid, const std::vector<std::string>& optionList)
+void ToolboxModule::GetEmptyEventsInHierarchy(const std::string& guid, const std::vector<std::string>& optionList)
 {
 	AkJson result = wwizardClient->GetChildrenFromGuid(guid, optionList);
 	for (const auto& evt : result["return"].GetArray())
 	{
 		if (evt["type"].GetVariant().GetString() != "Event")
 		{
-			IterateGatherEmptyEvents(evt["id"].GetVariant().GetString(), optionList);
+			GetEmptyEventsInHierarchy(evt["id"].GetVariant().GetString(), optionList);
 		}
 		else
 		{

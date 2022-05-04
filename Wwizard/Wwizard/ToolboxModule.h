@@ -9,7 +9,7 @@ class ToolboxModule
 public:
 	ToolboxModule() = delete;
 	ToolboxModule(std::unique_ptr<WwizardWwiseClient>& wwizardClient);
-	void GatherEmptyEvents();
+	void GetEmptyEvents();
 	void GatherFadersInHierarchy(); 
 
 	void DeleteEmptyEvent();
@@ -20,7 +20,7 @@ public:
 	const std::map<std::string, QueryResultFile>& GetFaderResultFiles();
 
 private:
-	void IterateGatherEmptyEvents(const std::string& guid, const std::vector<std::string>& optionList);
+	void GetEmptyEventsInHierarchy(const std::string& guid, const std::vector<std::string>& optionList);
 	bool IsEventEmptyOrInvalid(const int& count, const std::string& guid);
 	bool AreAllActionsEmpty(const std::string& parentGuid);
 

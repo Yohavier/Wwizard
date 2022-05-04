@@ -6,9 +6,20 @@ ColorCodingModule::ColorCodingModule(std::unique_ptr<WwizardWwiseClient>& wwizar
 	LoadColorSettings();
 }
 
-void ColorCodingModule::FindNamesInWwise()
+ColorCodingModule::~ColorCodingModule()
 {
-	colorHierarchy.clear();
+	SaveColorSettings();
+}
+
+void ColorCodingModule::BeginColorCodingProcess()
+{
+	ClearPreviousData();
+	FindObjectsAffectedByColorSettings();
+	ApplyColorSettings();
+}
+
+void ColorCodingModule::FindObjectsAffectedByColorSettings()
+{
 	for (const auto& colorSetting : colorSettings)
 	{
 		std::vector<std::string> optionList = { "path", "name", "type", "id", "color", "classId" };
@@ -30,32 +41,23 @@ void ColorCodingModule::FindNamesInWwise()
 				{
 					if (colName.size() == keywordStart + colorSetting.second.name.size() || colName[keywordStart + colorSetting.second.name.size()] == '_')
 					{
-						if (CheckIfHasColorProperty(colorObject["classId"].GetVariant().GetUInt32()))
+						if (CheckIfWwiseObjectHasColorProperty(colorObject["classId"].GetVariant().GetUInt32()))
 						{
-							CollectColorHierarchy(colorObject["id"].GetVariant().GetString(), "", colorSetting.second.settingMode, colorSetting.second.colorCode, colorObject["path"].GetVariant().GetString(), colorObject["color"].GetVariant().GetInt8());
+							CollectObjectsInColorHierarchy(colorObject["id"].GetVariant().GetString(), "", colorSetting.second.settingMode, colorSetting.second.colorCode, colorObject["path"].GetVariant().GetString(), colorObject["color"].GetVariant().GetInt8());
 						}
 					}
 				}
 			}
 		}
 	}
-	ApplyColors();
 }
 
-void ColorCodingModule::DeleteColorSetting(ColorSetting setting)
-{
-	if (colorSettings.find(setting.settingID) != colorSettings.end())
-	{
-		colorSettings.erase(setting.settingID);
-	}
-}
-
-void ColorCodingModule::CollectColorHierarchy(std::string currentID, std::string parentID, int mode, int applyableColorID, std::string path, int actualColor)
+void ColorCodingModule::CollectObjectsInColorHierarchy(std::string currentID, std::string parentID, int mode, int applyableColorID, std::string path, int actualColor)
 {
 	std::vector<std::string> optionList = { "path", "color", "name", "type", "id" };
 
 	AkJson result = wwizardClient->GetChildrenFromGuid(currentID, optionList);
-	
+
 	std::vector<std::string> childIDs;
 
 	for (const auto& child : result["return"].GetArray())
@@ -66,43 +68,43 @@ void ColorCodingModule::CollectColorHierarchy(std::string currentID, std::string
 		}
 	}
 
-	SettingMode newMode = (SettingMode)mode;
+	ColorSettingMode newMode = (ColorSettingMode)mode;
 
 	if (colorHierarchy.find(currentID) != colorHierarchy.end())
 	{
 		colorHierarchy.at(currentID).parentID = parentID;
-		SettingMode currentMode = (SettingMode)colorHierarchy.at(currentID).mode;
+		ColorSettingMode currentMode = (ColorSettingMode)colorHierarchy.at(currentID).colorSettingMode;
 
-		if (newMode == SettingMode::SingleHard)
+		if (newMode == ColorSettingMode::SingleHard)
 		{
-			colorHierarchy.at(currentID).mode = (int)SettingMode::SingleHard;
+			colorHierarchy.at(currentID).colorSettingMode = (int)ColorSettingMode::SingleHard;
 			colorHierarchy.at(currentID).applyableColorID = applyableColorID;
 		}
-		else if (newMode == SettingMode::HierarchyHard)
+		else if (newMode == ColorSettingMode::HierarchyHard)
 		{
-			if (currentMode != SettingMode::SingleSoft)
+			if (currentMode != ColorSettingMode::SingleSoft)
 			{
-				colorHierarchy.at(currentID).mode = (int)SettingMode::HierarchyHard;
+				colorHierarchy.at(currentID).colorSettingMode = (int)ColorSettingMode::HierarchyHard;
 				colorHierarchy.at(currentID).applyableColorID = applyableColorID;
 			}
 		}
-		else if (newMode == SettingMode::SingleSoft)
+		else if (newMode == ColorSettingMode::SingleSoft)
 		{
-			if (currentMode == SettingMode::HierarchySoft)
+			if (currentMode == ColorSettingMode::HierarchySoft)
 			{
-				colorHierarchy.at(currentID).mode = (int)SettingMode::SingleSoft;
+				colorHierarchy.at(currentID).colorSettingMode = (int)ColorSettingMode::SingleSoft;
 				colorHierarchy.at(currentID).applyableColorID = applyableColorID;
 			}
 		}
-		else if (colorHierarchy.at(currentID).mode == -1)
+		else if (colorHierarchy.at(currentID).colorSettingMode == -1)
 		{
-			colorHierarchy.at(currentID).mode = (int)newMode;
+			colorHierarchy.at(currentID).colorSettingMode = (int)newMode;
 			colorHierarchy.at(currentID).applyableColorID = applyableColorID;
 		}
 	}
 	else
 	{
-		colorHierarchy.emplace(currentID, ColorResult(currentID, parentID, childIDs, mode, applyableColorID, path));
+		colorHierarchy.emplace(currentID, ColorResult(currentID, parentID, mode, applyableColorID, path));
 	}
 
 	for (const auto& col : blockedColors)
@@ -113,60 +115,68 @@ void ColorCodingModule::CollectColorHierarchy(std::string currentID, std::string
 		}
 	}
 
-	for  (const auto& child : result["return"].GetArray())
+	for (const auto& child : result["return"].GetArray())
 	{
 		if (child["type"].GetVariant().GetString() != "Action" && child["type"].GetVariant().GetString() != "AudioFileSource")
 		{
-			if (newMode == SettingMode::HierarchyHard || newMode == SettingMode::HierarchySoft)
+			if (newMode == ColorSettingMode::HierarchyHard || newMode == ColorSettingMode::HierarchySoft)
 			{
-				CollectColorHierarchy(child["id"].GetVariant().GetString(), currentID, mode, applyableColorID, child["path"].GetVariant().GetString(), child["color"].GetVariant().GetInt8());
+				CollectObjectsInColorHierarchy(child["id"].GetVariant().GetString(), currentID, mode, applyableColorID, child["path"].GetVariant().GetString(), child["color"].GetVariant().GetInt8());
 			}
 			else
 			{
-				CollectColorHierarchy(child["id"].GetVariant().GetString(), currentID, -1, child["color"].GetVariant().GetInt8(), child["path"].GetVariant().GetString(), child["color"].GetVariant().GetInt8());
+				CollectObjectsInColorHierarchy(child["id"].GetVariant().GetString(), currentID, -1, child["color"].GetVariant().GetInt8(), child["path"].GetVariant().GetString(), child["color"].GetVariant().GetInt8());
 			}
 		}
 	}
 }
 
-void ColorCodingModule::ApplyColors()
+void ColorCodingModule::ApplyColorSettings()
 {
 	for (const auto& colorObject : colorHierarchy)
 	{
-		if (colorObject.second.mode == 2 || colorObject.second.mode == 3)
+		if (colorObject.second.colorSettingMode == 2 || colorObject.second.colorSettingMode == 3)
 		{
-			if (colorObject.second.parentID != "" && colorHierarchy.at(colorObject.second.parentID).mode != 0 && colorHierarchy.at(colorObject.second.parentID).mode != 1)
+			if (colorObject.second.parentID != "" && colorHierarchy.at(colorObject.second.parentID).colorSettingMode != 0 && colorHierarchy.at(colorObject.second.parentID).colorSettingMode != 1)
 			{
-				wwizardClient->SetProperty<bool>(colorObject.second.path, "OverrideColor", false);
+				wwizardClient->SetProperty<bool>(colorObject.second.objectPath, "OverrideColor", false);
 			}
 			else
 			{
-				wwizardClient->SetProperty<bool>(colorObject.second.path, "OverrideColor", true);
+				wwizardClient->SetProperty<bool>(colorObject.second.objectPath, "OverrideColor", true);
 
-				wwizardClient->SetProperty<int>(colorObject.second.path, "Color", colorObject.second.applyableColorID);
+				wwizardClient->SetProperty<int>(colorObject.second.objectPath, "Color", colorObject.second.applyableColorID);
 			}
 		}
 		else
 		{
-			wwizardClient->SetProperty<int>(colorObject.second.path, "OverrideColor", true);
-			wwizardClient->SetProperty<int>(colorObject.second.path, "Color", colorObject.second.applyableColorID);
+			wwizardClient->SetProperty<int>(colorObject.second.objectPath, "OverrideColor", true);
+			wwizardClient->SetProperty<int>(colorObject.second.objectPath, "Color", colorObject.second.applyableColorID);
 		}
 	}
 }
 
-void ColorCodingModule::AddColorSettings(std::string name, int colorCode)
+void ColorCodingModule::CreateColorSetting(std::string name, int colorCode)
 {
 	std::string newGUID = GenerateGuid();
 	colorSettings.emplace(newGUID, ColorSetting(name, newGUID, colorCode));
 }
 
-bool ColorCodingModule::CheckIfHasColorProperty(int classID)
+void ColorCodingModule::DeleteColorSetting(ColorSetting setting)
+{
+	if (colorSettings.find(setting.settingID) != colorSettings.end())
+	{
+		colorSettings.erase(setting.settingID);
+	}
+}
+
+bool ColorCodingModule::CheckIfWwiseObjectHasColorProperty(int classID)
 {
 	AkJson result = wwizardClient->GetObjectPropertyList(classID);
 
 	for (const auto& res : result["return"].GetArray())
 	{
-		if(res.GetVariant().GetString() == "Color")
+		if (res.GetVariant().GetString() == "Color")
 		{
 			return true;
 		}
@@ -205,7 +215,7 @@ void ColorCodingModule::SaveColorSettings()
 		rapidColorSettings.PushBack(rapidSetting, d.GetAllocator());
 	}
 	d.AddMember("ColorSettings", rapidColorSettings, d.GetAllocator());
-	
+
 	rapidjson::Value rapidBlockedColors;
 	rapidBlockedColors.SetObject();
 	rapidjson::Value rapidBlockedList(rapidjson::kArrayType);
@@ -217,7 +227,7 @@ void ColorCodingModule::SaveColorSettings()
 
 	rapidBlockedColors.AddMember("colorID", rapidBlockedList, d.GetAllocator());
 	d.AddMember("BlockedColors", rapidBlockedColors, d.GetAllocator());
-	
+
 	auto path = static_cast<std::string>(SOLUTION_DIR) + "SavedData/ColorSettings.json";
 	FILE* fp = fopen(path.c_str(), "wb");
 	if (fp != 0)
@@ -236,7 +246,7 @@ void ColorCodingModule::LoadColorSettings()
 {
 	auto path = static_cast<std::string>(SOLUTION_DIR) + "SavedData/ColorSettings.json";
 	FILE* fp = fopen(path.c_str(), "rb");
-	
+
 	if (fp != 0)
 	{
 		char* readBuffer = new char[65536];
@@ -245,7 +255,7 @@ void ColorCodingModule::LoadColorSettings()
 		rapidjson::Document d;
 		d.ParseStream(is);
 		fclose(fp);
-		
+
 		if (d.HasMember("ColorSettings"))
 		{
 			for (int i = 0; i < static_cast<int>(d["ColorSettings"].Size()); i++)
@@ -254,7 +264,7 @@ void ColorCodingModule::LoadColorSettings()
 				{
 					ColorSetting newColorSetting = ColorSetting(d["ColorSettings"][i]["name"].GetString(), d["ColorSettings"][i]["colorCode"].GetInt(), d["ColorSettings"][i]["settingID"].GetString(), d["ColorSettings"][i]["settingMode"].GetInt());
 					colorSettings.emplace(d["ColorSettings"][i]["settingID"].GetString(), newColorSetting);
-				}		
+				}
 			}
 		}
 
@@ -274,4 +284,14 @@ void ColorCodingModule::LoadColorSettings()
 const std::string ColorCodingModule::GenerateGuid()
 {
 	return std::to_string(((long long)rand() << 32) | rand());
+}
+
+void ColorCodingModule::ClearPreviousData()
+{
+	colorHierarchy.clear();
+}
+
+std::set<int> ColorCodingModule::GetBlockedColors()
+{
+	return blockedColors;
 }

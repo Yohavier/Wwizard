@@ -746,7 +746,7 @@ void GUI::RenderColorCodingModule()
     ImGui::Text("Single always stronger than hierarchy");
     if (ImGui::Button("Add  Setting"))
     {
-        colorCodingModule->AddColorSettings("", 0);
+        colorCodingModule->CreateColorSetting("", 0);
     }
 
     int id = 0;
@@ -794,8 +794,8 @@ void GUI::RenderColorCodingModule()
         }
         ImGui::Text("Mode: ");
         ImGui::SameLine();
-        ImGui::Combo("##mode", &colorSetting.second.settingMode, colorCodingModule->items, 4);
-        if (ImGui::Button("Delete Colorsetting"))
+        ImGui::Combo("##mode", &colorSetting.second.settingMode, colorCodingModule->colorSettingModes, 4);
+        if (ImGui::Button("Delete Color setting"))
         {
             colorCodingModule->DeleteColorSetting(colorSetting.second);
             ImGui::PopID();
@@ -855,7 +855,7 @@ void GUI::RenderColorCodingModule()
 
     if (ImGui::Button("Apply color coding to Wwise"))
     {
-        colorCodingModule->FindNamesInWwise();
+        colorCodingModule->BeginColorCodingProcess();
     }
     ImGui::End();
 }
@@ -1197,7 +1197,7 @@ void GUI::RenderLayoutToolbox()
         ImGui::Dummy(ImVec2(0, 10));
         if (ImGui::Button("Gather invalid events"))
         {
-            toolboxModule->GatherEmptyEvents();
+            toolboxModule->GetEmptyEvents();
         }
         ImGui::Checkbox("All Events", &toolboxModule->deleteEmptyEventsForAllEvents);
         if (ImGui::IsItemHovered() && GImGui->HoveredIdTimer > 0.5f)
