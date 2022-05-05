@@ -128,9 +128,9 @@ public:
 	const std::string& GetStringToReplace(const std::string& wwuType);
 
 private:
-	void CheckNamingConvention();
+	void BeginNamingConventionProcess();
 
-	void PreFetchAllWwuData(const std::string& directory);
+	void FetchWwuDataInDirectory(const std::string& directory);
 	void FetchSingleWwuData(const std::string& path);
 	void ScanWorkUnitXMLByPath(const std::string& wwuPath, std::string& namePath);
 	void StartCheckingNamingConvention(const std::string& path, std::string reconstructedPath);
@@ -146,7 +146,6 @@ private:
 	bool CheckRightPrefix(const std::string& nodeName, const std::string& nodeID, const std::string& wwuType);
 	bool CheckHierarchy(const std::string& currentName, const std::string& constructedName, const std::string& nameID);
 
-	bool DetermineResult();
 	void ClearOldData();
 	void AddIssueToList(const std::string& guid, const std::string& name, const Issue& issue);
 

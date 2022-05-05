@@ -33,25 +33,24 @@ NamingConventionModule::~NamingConventionModule()
 	SaveNamingConventionSettings();
 }
 
-void NamingConventionModule::CheckNamingConvention()
+void NamingConventionModule::BeginNamingConventionProcess()
 {
 	ClearOldData();
 
-	PreFetchAllWwuData(projectPath);
+	FetchWwuDataInDirectory(projectPath);
 
 	StartCheckingNamingConvention(projectPath, "");
 
 	currentNamingConventionThread = nullptr;
 }
 
-//Prefetch
-void NamingConventionModule::PreFetchAllWwuData(const std::string& directory)
+void NamingConventionModule::FetchWwuDataInDirectory(const std::string& directory)
 {
 	for (const auto& entry : std::filesystem::directory_iterator(directory))
 	{
 		if (std::filesystem::is_directory(entry))
 		{
-			PreFetchAllWwuData(entry.path().u8string());
+			FetchWwuDataInDirectory(entry.path().u8string());
 		}
 		else
 		{
@@ -75,16 +74,9 @@ void NamingConventionModule::FetchSingleWwuData(const std::string& path)
 	prefetchedWwuData.emplace_back(newWwuData);
 }
 
-
-//Helper
 void NamingConventionModule::ClearOldData()
 {
 	namingIssueResults.clear();
-}
-
-bool NamingConventionModule::DetermineResult()
-{
-	return namingIssueResults.empty();
 }
 
 void NamingConventionModule::AddIssueToList(const std::string& guid, const std::string& name, const Issue& issue)
@@ -95,7 +87,6 @@ void NamingConventionModule::AddIssueToList(const std::string& guid, const std::
 	}	
 }
 
-
 void NamingConventionModule::StartCheckNamingConventionThread()
 {
 	if (currentNamingConventionThread != nullptr)
@@ -104,12 +95,11 @@ void NamingConventionModule::StartCheckNamingConventionThread()
 	}
 
 	std::cout << "Start Naming Convention Thread" << std::endl;
-	std::thread namingConventionThread(&NamingConventionModule::CheckNamingConvention, this);
+	std::thread namingConventionThread(&NamingConventionModule::BeginNamingConventionProcess, this);
 	currentNamingConventionThread = &namingConventionThread;
 	namingConventionThread.detach();
 }
 
-//Getter
 const std::string& NamingConventionModule::GetErrorMessageFromIssue(const Issue& issue)
 {
 	return issueMessages[issue];
@@ -135,8 +125,6 @@ const std::string& NamingConventionModule::GetStringToReplace(const std::string&
 	return stringToReplace[wwuType];
 }
 
-
-//Scan Naming Convention
 void NamingConventionModule::StartCheckingNamingConvention(const std::string& folderPath, std::string constructedNamePath)
 {
 	for (const auto& entry : std::filesystem::directory_iterator(folderPath))
@@ -275,7 +263,6 @@ std::string NamingConventionModule::AddLastNamePathLayer(std::string& currentNam
 		return newNodeName;
 	}
 }
-
 
 bool NamingConventionModule::RunChecks(const std::string& nodeName, const std::string& nodeID, const std::string& wwuType, const std::string & lastAddedLayer, const std::string& reconstructedNamePath, const std::string& containerName)
 {
@@ -438,7 +425,6 @@ bool NamingConventionModule::CheckHierarchy(const std::string& currentName, cons
 	return true;
 }
 
-// Save and Loading
 void NamingConventionModule::SaveNamingConventionSettings()
 {
 	rapidjson::Document d;

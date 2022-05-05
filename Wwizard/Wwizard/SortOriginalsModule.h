@@ -39,7 +39,7 @@ private:
 	void ScanWorkUnitXMLByGuid(const std::string& guid, const bool& isMusic);
 	void IterateXMLChildren(const pugi::xml_node& parent, const bool& isMusic);
 
-	void fetchWwuData(const std::string& directory);
+	void FetchWwuDataInDirectory(const std::string& directory);
 	void FetchSingleWwuData(const std::string& wwuPath);
 	void ScanWorkUnitOriginalsUse();
 

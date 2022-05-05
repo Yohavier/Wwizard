@@ -48,13 +48,13 @@ void SortOriginalsModule::ScanOriginalsPath(const std::string path)
 	}
 }
  
-void SortOriginalsModule::fetchWwuData(const std::string& directory)
+void SortOriginalsModule::FetchWwuDataInDirectory(const std::string& directory)
 {
 	for (const auto& entry : std::filesystem::directory_iterator(directory))
 	{
 		if (std::filesystem::is_directory(entry))
 		{
-			fetchWwuData(entry.path().u8string());
+			FetchWwuDataInDirectory(entry.path().u8string());
 		}
 		else
 		{
@@ -494,8 +494,8 @@ void SortOriginalsModule::BeginScanProcess()
 {
 	ClearPreviousSortData();
 	ScanOriginalsPath(originalsPath);
-	fetchWwuData(actorMixerWwuPath);
-	fetchWwuData(interactiveMuisicWwuPath);
+	FetchWwuDataInDirectory(actorMixerWwuPath);
+	FetchWwuDataInDirectory(interactiveMuisicWwuPath);
 	ScanWorkUnitOriginalsUse();
 }
 

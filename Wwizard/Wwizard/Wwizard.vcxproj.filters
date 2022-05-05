@@ -31,6 +31,12 @@
     <Filter Include="Header Files\Helper">
       <UniqueIdentifier>{b6e0ad99-fb72-4339-bc68-ee1e9b3d1e21}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Source Files\GUI">
+      <UniqueIdentifier>{fb22ea13-314b-45bd-87d2-cb3981517264}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\GUI">
+      <UniqueIdentifier>{c7c7fa42-a585-4e65-99e8-c170e3791037}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp">
@@ -116,9 +122,6 @@
     <ClInclude Include="..\ThirdParty\imstb_truetype.h">
       <Filter>ImGui</Filter>
     </ClInclude>
-    <ClInclude Include="GUI.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="WwizardWwiseClient.h">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -154,6 +157,12 @@
     </ClInclude>
     <ClInclude Include="ColorCodingModule.h">
       <Filter>Header Files\Modules</Filter>
+    </ClInclude>
+    <ClInclude Include="GUI.h">
+      <Filter>Header Files\GUI</Filter>
+    </ClInclude>
+    <ClInclude Include="BaseLayout.h">
+      <Filter>Header Files\GUI</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

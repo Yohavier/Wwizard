@@ -178,6 +178,7 @@
     <ClInclude Include="..\ThirdParty\imstb_textedit.h" />
     <ClInclude Include="..\ThirdParty\imstb_truetype.h" />
     <ClInclude Include="Application.h" />
+    <ClInclude Include="BaseLayout.h" />
     <ClInclude Include="ColorCodingModule.h" />
     <ClInclude Include="GUI.h" />
     <ClInclude Include="Issues.h" />
