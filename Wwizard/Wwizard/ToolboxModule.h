@@ -3,8 +3,9 @@
 #include <set>
 #include "WwizardWwiseClient.h"
 #include "ResultFile.h"
+#include "BaseModule.h"
 
-class ToolboxModule
+class ToolboxModule : public BaseModule
 {
 public:
 	ToolboxModule() = delete;
@@ -19,6 +20,8 @@ public:
 	const std::map<std::string, QueryResultFile>& GetEventResultFiles();
 	const std::map<std::string, QueryResultFile>& GetFaderResultFiles();
 
+	void OnConnectionStatusChange(const bool newConnectionStatus) override;
+
 private:
 	void GetEmptyEventsInHierarchy(const std::string& guid, const std::vector<std::string>& optionList);
 	bool IsEventEmptyOrInvalid(const int& count, const std::string& guid);
@@ -26,7 +29,7 @@ private:
 
 	void IterateResetFaders(const std::string& guid, const std::vector<std::string>& optionList);
 	bool CheckObjectType(const std::string& type);
-
+	void ResetResultFiles();
 
 public:
 	bool deleteEmptyEventsForAllEvents = false;
@@ -37,6 +40,6 @@ private:
 	std::map<std::string, QueryResultFile> faderQueryResultFiles;
 	std::unique_ptr<WwizardWwiseClient>& wwizardClient;
 
-	std::set<std::string> faderContainers = { "ActorMixer", "Sound", "BlendContainer", "SwitchContainer", "RandomSequenceContainer", "AuxBus", "Bus", "MusicTrack", "MusicPlaylistContainer", "MusicSegment", "MusicSwitchContainer"};
+	const std::set<std::string> faderContainers = { "ActorMixer", "Sound", "BlendContainer", "SwitchContainer", "RandomSequenceContainer", "AuxBus", "Bus", "MusicTrack", "MusicPlaylistContainer", "MusicSegment", "MusicSwitchContainer"};
 };
 

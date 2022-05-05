@@ -403,6 +403,14 @@ const std::string QueryEditorModule::GetCurrentArgAsString()
     return "";
 }
 
+void QueryEditorModule::OnConnectionStatusChange(const bool newConnectionStatus)
+{
+    if (newConnectionStatus)
+    {
+        ResetQueryModule();
+    } 
+}
+
 void QueryEditorModule::AddQueryToAllQueriesMap(BaseQueryStructure& newQuery)
 {
     allQueries.insert({ newQuery.guid, newQuery });
@@ -413,7 +421,7 @@ const std::string QueryEditorModule::GenerateGuid()
     return std::to_string(((long long)rand() << 32) | rand());
 }
 
-void QueryEditorModule::ResetQueryModule(const std::unique_ptr<WwizardWwiseClient>& wwizardClient)
+void QueryEditorModule::ResetQueryModule()
 {
     queryResultFiles.clear();
     activeQueryDictionary.clear();

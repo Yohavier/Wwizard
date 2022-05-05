@@ -167,7 +167,11 @@ void GUI::Render(bool& isRunning)
     //g_pSwapChain->Present(0, 0); // Present without vsync
     if (wwizarWwiseClient->DidConnectionStatusChange())
     {
-        queryEditorModule->ResetQueryModule(wwizarWwiseClient);
+        namingConventionModule->OnConnectionStatusChange(wwizarWwiseClient->IsConnected());
+        colorCodingModule->OnConnectionStatusChange(wwizarWwiseClient->IsConnected());
+        toolboxModule->OnConnectionStatusChange(wwizarWwiseClient->IsConnected());
+        queryEditorModule->OnConnectionStatusChange(wwizarWwiseClient->IsConnected());
+        sortOriginalsModule->OnConnectionStatusChange(wwizarWwiseClient->IsConnected());
     }
 
     wwizarWwiseClient->SyncPreviousConnectionStatus();

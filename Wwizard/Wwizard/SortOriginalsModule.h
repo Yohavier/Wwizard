@@ -13,8 +13,9 @@
 #include <regex>
 #include "WwuLookUpData.h"
 #include <thread>
+#include "BaseModule.h"
 
-class SortOriginalsModule
+class SortOriginalsModule: public BaseModule
 {
 public:
 	SortOriginalsModule() = delete;
@@ -32,6 +33,8 @@ public:
 
 	void StartSortOriginalsThread();
 	void BeginScanProcess();
+
+	void OnConnectionStatusChange(const bool newConnectionStatus) override;
 
 private:
 	void ScanOriginalsPath(const std::string path);

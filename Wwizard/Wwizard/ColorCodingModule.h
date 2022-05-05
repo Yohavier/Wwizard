@@ -4,6 +4,7 @@
 #include "WwizardWwiseClient.h"
 #include <memory>
 #include <set>
+#include "BaseModule.h"
 
 struct ColorSetting
 {
@@ -54,7 +55,7 @@ public:
 	std::string objectPath;
 };
 
-class ColorCodingModule
+class ColorCodingModule : public BaseModule
 {
 public:
 	ColorCodingModule() = delete;
@@ -68,6 +69,8 @@ public:
 
 	void CreateColorSetting(std::string name, int colorCode);
 	void DeleteColorSetting(ColorSetting setting);
+
+	void OnConnectionStatusChange(const bool newConnectionStatus) override;
 
 private:
 	void FindObjectsAffectedByColorSettings();

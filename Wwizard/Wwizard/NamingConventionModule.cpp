@@ -125,6 +125,17 @@ const std::string& NamingConventionModule::GetStringToReplace(const std::string&
 	return stringToReplace[wwuType];
 }
 
+void NamingConventionModule::OnConnectionStatusChange(const bool newConnectionStatus)
+{
+	namingIssueResults.clear();
+	prefetchedWwuData.clear();
+
+	if (newConnectionStatus)
+	{
+		FetchWwuDataInDirectory(projectPath);
+	}
+}
+
 void NamingConventionModule::StartCheckingNamingConvention(const std::string& folderPath, std::string constructedNamePath)
 {
 	for (const auto& entry : std::filesystem::directory_iterator(folderPath))

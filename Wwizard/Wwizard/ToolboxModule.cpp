@@ -159,6 +159,12 @@ bool ToolboxModule::CheckObjectType(const std::string& type)
 	return false;
 }
 
+void ToolboxModule::ResetResultFiles()
+{
+	eventQueryResultFiles.clear();
+	faderQueryResultFiles.clear();
+}
+
 void ToolboxModule::ResetFader()
 {
 	for (const auto& fader : faderQueryResultFiles)
@@ -180,4 +186,9 @@ const std::map<std::string, QueryResultFile>& ToolboxModule::GetEventResultFiles
 const std::map<std::string, QueryResultFile>& ToolboxModule::GetFaderResultFiles()
 {
 	return faderQueryResultFiles;
+}
+
+void ToolboxModule::OnConnectionStatusChange(const bool newConnectionStatus)
+{
+	ResetResultFiles();
 }

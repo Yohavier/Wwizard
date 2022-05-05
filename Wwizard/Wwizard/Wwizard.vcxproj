@@ -157,6 +157,7 @@
     <ClCompile Include="..\ThirdParty\imgui_widgets.cpp" />
     <ClCompile Include="..\ThirdParty\pugixml-1.12\src\pugixml.cpp" />
     <ClCompile Include="Application.cpp" />
+    <ClCompile Include="BaseModule.cpp" />
     <ClCompile Include="ColorCodingLayout.cpp" />
     <ClCompile Include="ColorCodingModule.cpp" />
     <ClCompile Include="GUI.cpp" />
@@ -186,6 +187,7 @@
     <ClInclude Include="..\ThirdParty\imstb_truetype.h" />
     <ClInclude Include="Application.h" />
     <ClInclude Include="BaseLayout.h" />
+    <ClInclude Include="BaseModule.h" />
     <ClInclude Include="ColorCodingLayout.h" />
     <ClInclude Include="ColorCodingModule.h" />
     <ClInclude Include="GUI.h" />

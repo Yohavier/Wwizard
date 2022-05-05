@@ -5,6 +5,7 @@
 
 #include "WwizardWwiseClient.h"
 #include "ResultFile.h"
+#include "BaseModule.h"
 
 enum class QueryType
 {
@@ -40,7 +41,7 @@ struct BaseQueryStructure
 	{}
 };
 
-class QueryEditorModule
+class QueryEditorModule : public BaseModule
 {
 public:
 	QueryEditorModule(std::unique_ptr<WwizardWwiseClient>& wwizardClient);
@@ -50,7 +51,7 @@ public:
 	void RemoveFromActiveQueryList(const std::string& guid);
 	void SetQuerySelection(const std::string& guid);
 	void RunActiveQueries();
-	void ResetQueryModule(const std::unique_ptr<WwizardWwiseClient>& wwizardClient);
+	void ResetQueryModule();
 	void CreateNewQuery(const std::string name, const QueryType type, const std::string arg);
 	void SaveChangedQuery(const std::string newName, const std::string newArg, const std::string guid);
 	void DeleteQuery(const std::string& guid);
@@ -80,6 +81,8 @@ public:
 	const std::string& GetCurrentSelectionGuid();
 	const std::map<std::string, BaseQueryStructure&>& GetActiveQueryList();
 	const std::string GetCurrentArgAsString();
+
+	void OnConnectionStatusChange(const bool newConnectionStatus);
 
 private:
 	const std::string GenerateGuid();

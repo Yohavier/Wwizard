@@ -9,6 +9,7 @@
 #include "ResultFile.h"
 #include <thread>
 #include "WwizardWwiseClient.h"
+#include "BaseModule.h"
 
 struct WwuSettings
 {
@@ -112,7 +113,7 @@ struct ContainerSettings
 	}
 };
 
-class NamingConventionModule
+class NamingConventionModule : public BaseModule
 { 
 public:
 	NamingConventionModule(const std::string& wwiseProjPath, std::unique_ptr<WwizardWwiseClient>& wwizardClient);
@@ -126,6 +127,8 @@ public:
 	const std::set<std::string>& GetWhiteListedContainers();
 	const std::set<std::string>& GetWhiteListedWwuTypes();
 	const std::string& GetStringToReplace(const std::string& wwuType);
+
+	void OnConnectionStatusChange(const bool newConnectionStatus) override;
 
 private:
 	void BeginNamingConventionProcess();

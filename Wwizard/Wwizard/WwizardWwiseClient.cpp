@@ -24,7 +24,7 @@ WwizardWwiseClient::~WwizardWwiseClient()
     {
         std::cout << "Disconnect from Wwise Instance" << std::endl;
         wwiseClient.Disconnect();
-        system("taskkill /F /T /IM WwiseConsole.exe");
+        KillWwiseConsole();
     }
     std::cout << "End Wwizard Wwise Client" << std::endl;
 }

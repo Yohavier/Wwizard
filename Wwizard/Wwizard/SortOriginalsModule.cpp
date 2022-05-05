@@ -499,6 +499,21 @@ void SortOriginalsModule::BeginScanProcess()
 	ScanWorkUnitOriginalsUse();
 }
 
+void SortOriginalsModule::OnConnectionStatusChange(const bool newConnectionStatus)
+{
+	originalsDic.clear();
+	musicDic.clear();
+	sfxDic.clear();
+	unusedOriginalsPaths.clear();
+	fetchedWwuData.clear();
+
+	if (newConnectionStatus)
+	{
+		FetchWwuDataInDirectory(actorMixerWwuPath);
+		FetchWwuDataInDirectory(interactiveMuisicWwuPath);
+	}
+}
+
 void SortOriginalsModule::StartSortOriginalsThread()
 {
 	if (currentSortingThread != nullptr)

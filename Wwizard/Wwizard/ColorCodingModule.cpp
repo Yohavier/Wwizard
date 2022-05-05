@@ -170,6 +170,10 @@ void ColorCodingModule::DeleteColorSetting(ColorSetting setting)
 	}
 }
 
+void ColorCodingModule::OnConnectionStatusChange(const bool newConnectionStatus)
+{
+}
+
 bool ColorCodingModule::CheckIfWwiseObjectHasColorProperty(int classID)
 {
 	AkJson result = wwizardClient->GetObjectPropertyList(classID);
