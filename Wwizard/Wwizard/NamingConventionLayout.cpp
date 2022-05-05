@@ -145,24 +145,6 @@ void NamingConventionLayout::RenderLayout()
             ImGui::EndColumns();
             ImGui::EndTabItem();
         }
-        if (ImGui::BeginTabItem("Info"))
-        {
-            if (ImGui::CollapsingHeader("Issues messages"))
-            {
-                ImGui::Separator();
-                ImGui::Text("Hierarchy doesnt match");
-                ImGui::Text("muiltiple separators");
-                ImGui::Text("Space is not allowed");
-                ImGui::Separator();
-            }
-            if (ImGui::CollapsingHeader("Naming Convention"))
-            {
-                ImGui::Separator();
-                ImGui::Text("The separator to differentiate layers is '_'. Each underscore indicates that there is a new layer of description.");
-                ImGui::Separator();
-            }
-            ImGui::EndTabItem();
-        }
         ImGui::EndTabBar();
     }
     ImGui::End();
