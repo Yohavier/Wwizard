@@ -22,11 +22,11 @@ SortOriginalsModule::SortOriginalsModule(const std::string& wwiseProjPath)
 void SortOriginalsModule::ClearPreviousSortData() 
 {
 	originalsDic.clear();
-	prefetchedWwuData.clear();
+	fetchedWwuData.clear();
 	musicDic.clear();
 	sfxDic.clear();
 }
-//Originals 
+
 void SortOriginalsModule::ScanOriginalsPath(const std::string path)
 {
 	for (const auto& entry : std::filesystem::directory_iterator(path))
@@ -47,15 +47,14 @@ void SortOriginalsModule::ScanOriginalsPath(const std::string path)
 		}
 	}
 }
-
-//Wwu 
-void SortOriginalsModule::PreFetchAllWwuData(const std::string& directory)
+ 
+void SortOriginalsModule::fetchWwuData(const std::string& directory)
 {
 	for (const auto& entry : std::filesystem::directory_iterator(directory))
 	{
 		if (std::filesystem::is_directory(entry))
 		{
-			PreFetchAllWwuData(entry.path().u8string());
+			fetchWwuData(entry.path().u8string());
 		}
 		else
 		{
@@ -82,12 +81,12 @@ void SortOriginalsModule::FetchSingleWwuData(const std::string& path)
 		isMusic = true;
 	}
 	WwuLookUpData newWwuData = WwuLookUpData(data.attribute("Name").value(), data.attribute("ID").value(), data.attribute("PersistMode").value(), path, isMusic);
-	prefetchedWwuData.emplace_back(newWwuData);
+	fetchedWwuData.emplace_back(newWwuData);
 }
 
 void SortOriginalsModule::ScanWorkUnitOriginalsUse()
 {
-	for (const auto& data : prefetchedWwuData)
+	for (const auto& data : fetchedWwuData)
 	{
 		if (data.wwuType == "Standalone")
 		{
@@ -138,7 +137,7 @@ void SortOriginalsModule::IterateXMLChildren(const pugi::xml_node& parent, const
 
 void SortOriginalsModule::ScanWorkUnitXMLByGuid(const std::string& guid, const bool& isMusic)
 {
-	for (auto& data : prefetchedWwuData)
+	for (auto& data : fetchedWwuData)
 	{
 		if (data.guid == guid)
 		{
@@ -155,7 +154,7 @@ void SortOriginalsModule::ScanWorkUnitXMLByGuid(const std::string& guid, const b
 
 void SortOriginalsModule::CollectUnusedOriginals()
 {
-	Scan();
+	BeginScanProcess();
 	unusedOriginalsPaths.clear();
 	for (auto& originalWav : originalsDic)
 	{
@@ -167,22 +166,24 @@ void SortOriginalsModule::CollectUnusedOriginals()
 
 }
 
-void SortOriginalsModule::DeleteUnusedOriginals(const bool wantDelete)
+void SortOriginalsModule::DeleteUnusedOriginals()
 {
-	if (wantDelete)
+	for (auto& dPath : unusedOriginalsPaths)
 	{
-		for (auto& dPath : unusedOriginalsPaths)
-		{
-			std::filesystem::remove(std::filesystem::path(dPath));
-			originalsDic.erase(dPath);
-		}
+		std::filesystem::remove(std::filesystem::path(dPath));
+		originalsDic.erase(dPath);
 	}
+	ClearCollectedOriginalsList();
+}
+
+void SortOriginalsModule::ClearCollectedOriginalsList()
+{
 	unusedOriginalsPaths.clear();
 }
 
 void SortOriginalsModule::SortOriginals()
 {
-	Scan();
+	BeginScanProcess();
 	if (GetOriginalsCount() > 0)
 	{
 		std::filesystem::create_directory(originalsPath + "\\Multiuse");
@@ -260,7 +261,7 @@ void SortOriginalsModule::CreateFolderStructureFomWwu(const pugi::xml_node& pare
 			}
 			else if (static_cast<std::string>(children.attribute("PersistMode").value()) == "Reference")
 			{
-				for (const auto& data : prefetchedWwuData)
+				for (const auto& data : fetchedWwuData)
 				{
 					if (data.guid == static_cast<std::string>(children.attribute("ID").value()))
 					{
@@ -489,16 +490,29 @@ bool SortOriginalsModule::DeleteEmptyFolders(const std::string& directory)
 	return deleteFlag;
 }
 
-void SortOriginalsModule::Scan()
+void SortOriginalsModule::BeginScanProcess()
 {
 	ClearPreviousSortData();
 	ScanOriginalsPath(originalsPath);
-	PreFetchAllWwuData(actorMixerWwuPath);
-	PreFetchAllWwuData(interactiveMuisicWwuPath);
+	fetchWwuData(actorMixerWwuPath);
+	fetchWwuData(interactiveMuisicWwuPath);
 	ScanWorkUnitOriginalsUse();
 }
 
-//Getter
+void SortOriginalsModule::StartSortOriginalsThread()
+{
+	if (currentSortingThread != nullptr)
+	{
+		return;
+	}
+
+	std::cout << "Start Sorting Thread" << std::endl;
+	std::thread sortThread(&SortOriginalsModule::SortOriginals, this);
+	currentSortingThread = &sortThread;
+	sortThread.detach();
+}
+
+
 const int& SortOriginalsModule::GetOriginalsCount() 
 { 
 	return static_cast<int>(originalsDic.size()); 
@@ -524,15 +538,3 @@ const int& SortOriginalsModule::GetSFXCount()
 	return static_cast<int>(sfxDic.size());
 }
 
-void SortOriginalsModule::StartSortOriginalsThread()
-{
-	if (currentSortingThread != nullptr)
-	{
-		return;
-	}
-
-	std::cout << "Start Sorting Thread" << std::endl;
-	std::thread sortThread(&SortOriginalsModule::SortOriginals, this);
-	currentSortingThread = &sortThread;
-	sortThread.detach();
-}

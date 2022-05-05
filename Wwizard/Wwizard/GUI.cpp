@@ -887,7 +887,7 @@ void GUI::RenderLayoutSortOriginals()
 
     if (ImGui::Button("Scan", ImVec2(75, 25)))
     {
-        sortOriginalsModule->Scan();
+        sortOriginalsModule->BeginScanProcess();
     }
 
     ImGui::Separator();
@@ -907,13 +907,13 @@ void GUI::RenderLayoutSortOriginals()
     {
         if (ImGui::Button("Abort"))
         {
-            sortOriginalsModule->DeleteUnusedOriginals(false);
+            sortOriginalsModule->ClearCollectedOriginalsList();
             ImGui::CloseCurrentPopup();
         }
         ImGui::SameLine();
         if (ImGui::Button("Delete"))
         {
-            sortOriginalsModule->DeleteUnusedOriginals(true);
+            sortOriginalsModule->DeleteUnusedOriginals();
             ImGui::CloseCurrentPopup();
         }
         ImGui::Separator();

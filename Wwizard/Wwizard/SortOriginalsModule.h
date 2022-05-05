@@ -21,7 +21,8 @@ public:
 	SortOriginalsModule(const std::string& wwiseProjPath);
 
 	void CollectUnusedOriginals();
-	void DeleteUnusedOriginals(const bool wantDelete);
+	void DeleteUnusedOriginals();
+	void ClearCollectedOriginalsList();
 
 	const int& GetOriginalsCount();
 	const std::string& GetOriginalPath();
@@ -30,7 +31,7 @@ public:
 	const int& GetSFXCount();
 
 	void StartSortOriginalsThread();
-	void Scan();
+	void BeginScanProcess();
 
 private:
 	void ScanOriginalsPath(const std::string path);
@@ -38,7 +39,7 @@ private:
 	void ScanWorkUnitXMLByGuid(const std::string& guid, const bool& isMusic);
 	void IterateXMLChildren(const pugi::xml_node& parent, const bool& isMusic);
 
-	void PreFetchAllWwuData(const std::string& directory);
+	void fetchWwuData(const std::string& directory);
 	void FetchSingleWwuData(const std::string& wwuPath);
 	void ScanWorkUnitOriginalsUse();
 
@@ -78,10 +79,8 @@ private:
 	std::map<std::string, int> musicDic;
 	std::map<std::string, int> sfxDic;
 
-	std::vector<WwuLookUpData> prefetchedWwuData;
+	std::vector<WwuLookUpData> fetchedWwuData;
 	std::set<std::string> unusedOriginalsPaths;
-
-	const std::string container[6] = { "WorkUnit", "Folder", "BlendContainer", "RandomSequenceContainer", "ActorMixer", "SwitchContainer" };
 
 	std::thread* currentSortingThread = nullptr;
 	std::thread* currentScanThread = nullptr;
