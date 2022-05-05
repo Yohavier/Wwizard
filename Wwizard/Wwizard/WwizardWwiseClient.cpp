@@ -268,3 +268,17 @@ void WwizardWwiseClient::KillWwiseConsole()
 {
     system("taskkill /f /im WwiseConsole.exe");
 }
+
+bool WwizardWwiseClient::DidConnectionStatusChange()
+{
+    if (previousFrameConnectionStatus != wwiseClient.IsConnected())
+    {
+        return true;
+    }
+    return false;
+}
+
+void WwizardWwiseClient::SyncPreviousConnectionStatus()
+{
+    previousFrameConnectionStatus = IsConnected()   ;
+}

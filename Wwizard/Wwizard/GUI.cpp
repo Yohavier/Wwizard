@@ -165,6 +165,12 @@ void GUI::Render(bool& isRunning)
 
     g_pSwapChain->Present(1, 0); // Present with vsync
     //g_pSwapChain->Present(0, 0); // Present without vsync
+    if (wwizarWwiseClient->DidConnectionStatusChange())
+    {
+        queryEditorModule->ResetQueryModule(wwizarWwiseClient);
+    }
+
+    wwizarWwiseClient->SyncPreviousConnectionStatus();
 }
 
 void GUI::CreateTaskBar(bool& isRunning)
@@ -195,29 +201,27 @@ void GUI::CreateTaskBar(bool& isRunning)
         }
         if (ImGui::BeginMenu("Module"))
         {
-            bool enabled = wwizarWwiseClient->IsConnected();
-            if (ImGui::MenuItem("Naming Convention", NULL, false, enabled))
+            if (ImGui::MenuItem("Naming Convention", NULL, false, wwizarWwiseClient->IsConnected()))
             {
                 SetLayout(Layout::NAMINGCONVENTION);
             }
 
-            if (ImGui::MenuItem("Sort Originals", NULL, false, enabled))
+            if (ImGui::MenuItem("Sort Originals", NULL, false, wwizarWwiseClient->IsConnected()))
             {
                 SetLayout(Layout::SORTORIGINALS);
             }
 
-            if (ImGui::MenuItem("Query Editor", NULL, false, enabled))
+            if (ImGui::MenuItem("Query Editor", NULL, false, wwizarWwiseClient->IsConnected()))
             {
                 SetLayout(Layout::QUERYEDITOR);
-                queryEditorModule->ResetQueryModule(wwizarWwiseClient);
             }
 
-            if (ImGui::MenuItem("Color Coding", NULL, false, enabled))
+            if (ImGui::MenuItem("Color Coding", NULL, false, wwizarWwiseClient->IsConnected()))
             {
                 SetLayout(Layout::COLORCODING);
             }
 
-            if (ImGui::MenuItem("Toolbox", NULL, false, enabled))
+            if (ImGui::MenuItem("Toolbox", NULL, false, wwizarWwiseClient->IsConnected()))
             {
                 SetLayout(Layout::TOOLBOX);
             }
@@ -353,7 +357,7 @@ void CleanupDeviceD3D()
     if (g_pSwapChain) { g_pSwapChain->Release(); g_pSwapChain = NULL; }
     if (g_pd3dDevice) { g_pd3dDevice->Release(); g_pd3dDevice = NULL; }
 }
-
+ 
 void CreateRenderTarget()
 {
     ID3D10Texture2D* pBackBuffer;

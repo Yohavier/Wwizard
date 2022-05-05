@@ -65,6 +65,10 @@ public:
 
 	const AkJson GetObjectPropertyList(const int& classID);
 
+	bool DidConnectionStatusChange();
+
+	void SyncPreviousConnectionStatus();
+
 private:
 	void ReconnectionThread();
 
@@ -80,5 +84,7 @@ private:
 	Client wwiseClient;
 	std::unique_ptr<SettingHandler>& settings;
 	std::thread* currentConnectionThread = nullptr;
+
+	bool previousFrameConnectionStatus = false;
 };
 
