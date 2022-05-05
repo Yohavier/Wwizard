@@ -73,7 +73,7 @@ bool WwizardWwiseClient::ForceOpenWwiseInstance(const std::unique_ptr<SettingHan
         printf("CreateProcess failed (%d).\n", GetLastError());
         return false;
     }
-
+    
     WaitForSingleObject(pi.hProcess, 2000);
     CloseHandle(pi.hProcess);
     CloseHandle(pi.hThread);
@@ -186,6 +186,7 @@ void WwizardWwiseClient::StartReconnectionThread()
 
     std::cout << "Start New Connection Threat" << std::endl;
     wwiseClient.Disconnect();
+    KillWwiseConsole();
     std::thread t1(&WwizardWwiseClient::ReconnectionThread, this);
     currentConnectionThread = &t1;
     t1.detach();
@@ -261,4 +262,9 @@ const AkJson WwizardWwiseClient::ConvertVectorToAkJsonOption(const std::vector<s
     }
 
     return waapiOption;
+}
+
+void WwizardWwiseClient::KillWwiseConsole()
+{
+    system("taskkill /f /im WwiseConsole.exe");
 }

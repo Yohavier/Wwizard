@@ -2,7 +2,6 @@
 
 Application::Application()
 {
-    
     settingsHandler.reset(new SettingHandler());
     wwizardWwiseClient.reset(new WwizardWwiseClient(settingsHandler));
     queryEditorModule.reset(new QueryEditorModule(wwizardWwiseClient));

@@ -74,6 +74,8 @@ private:
 
 	bool ForceOpenWwiseInstance(const std::unique_ptr<SettingHandler>& settings);
 
+	void KillWwiseConsole();
+
 private:
 	Client wwiseClient;
 	std::unique_ptr<SettingHandler>& settings;
