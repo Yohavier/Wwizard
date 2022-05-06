@@ -69,6 +69,8 @@ public:
 
 	void SyncPreviousConnectionStatus();
 
+	void SaveCurrentProject();
+
 private:
 	void ReconnectionThread();
 

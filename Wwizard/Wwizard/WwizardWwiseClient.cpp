@@ -20,6 +20,7 @@ AkAssertHook g_pAssertHook = SampleAssertHook;
 
 WwizardWwiseClient::~WwizardWwiseClient()
 {
+    SaveCurrentProject();
     if (wwiseClient.IsConnected())
     {
         std::cout << "Disconnect from Wwise Instance" << std::endl;
@@ -281,4 +282,11 @@ bool WwizardWwiseClient::DidConnectionStatusChange()
 void WwizardWwiseClient::SyncPreviousConnectionStatus()
 {
     previousFrameConnectionStatus = IsConnected()   ;
+}
+
+void WwizardWwiseClient::SaveCurrentProject()
+{
+    AkJson empty(AkJson::Map{});
+
+    wwiseClient.Call(ak::wwise::core::project::save, empty, empty, empty);
 }
