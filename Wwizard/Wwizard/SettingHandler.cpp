@@ -67,3 +67,11 @@ void SettingHandler::WriteToJson()
         fclose(fp);
     }
 }
+
+const bool SettingHandler::IsProjectPathValid()
+{
+    std::string path = wwiseProjectPath;
+    path.erase(0, 1);
+    path.erase(path.size() - 1);
+    return std::filesystem::exists(path);
+}

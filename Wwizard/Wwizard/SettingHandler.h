@@ -7,6 +7,7 @@
 #include <rapidjson/filereadstream.h>
 #include <rapidjson/filewritestream.h>
 #include <rapidjson/writer.h>
+#include <filesystem>
 
 class SettingHandler
 {
@@ -28,6 +29,7 @@ public:
 	std::string& GetSDKPath() { return sdkPath; }
 	std::string& GetWaapiIP() { return waapiIP; }
 	int& GetWaaapiPort() { return waapiPort; }
+	const bool IsProjectPathValid();
 
 private:
 	void WriteToJson();

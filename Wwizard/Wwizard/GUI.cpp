@@ -165,7 +165,7 @@ void GUI::Render(bool& isRunning)
 
     g_pSwapChain->Present(1, 0); // Present with vsync
     //g_pSwapChain->Present(0, 0); // Present without vsync
-    if (wwizarWwiseClient->DidConnectionStatusChange())
+    if (wwizarWwiseClient->DidConnectionStatusChange() && settingHandler->IsProjectPathValid())
     {
         namingConventionModule->OnConnectionStatusChange(wwizarWwiseClient->IsConnected());
         colorCodingModule->OnConnectionStatusChange(wwizarWwiseClient->IsConnected());
@@ -173,7 +173,6 @@ void GUI::Render(bool& isRunning)
         queryEditorModule->OnConnectionStatusChange(wwizarWwiseClient->IsConnected());
         sortOriginalsModule->OnConnectionStatusChange(wwizarWwiseClient->IsConnected());
     }
-
     wwizarWwiseClient->SyncPreviousConnectionStatus();
 }
 
@@ -233,7 +232,7 @@ void GUI::CreateTaskBar(bool& isRunning)
             ImGui::EndMenu();
         }
 
-        if (wwizarWwiseClient->IsConnected())
+        if (wwizarWwiseClient->IsConnected() && settingHandler->IsProjectPathValid())
         {
             ImGui::PushStyleColor(ImGuiCol_Text, IM_COL32(0, 153, 0, 255));
             ImGui::Text("Connected");
@@ -261,7 +260,8 @@ void GUI::RenderLayoutSettings()
 
 void GUI::RenderLayoutQueryEditor()
 {
-   queryEditorLayout->RenderLayout();
+    if (settingHandler->IsProjectPathValid())
+        queryEditorLayout->RenderLayout();
 }
 
 void GUI::RenderLayoutHome()
@@ -271,17 +271,20 @@ void GUI::RenderLayoutHome()
 
 void GUI::RenderColorCodingModule()
 {
-    colorCodingLayout->RenderLayout();
+    if (settingHandler->IsProjectPathValid())
+        colorCodingLayout->RenderLayout();
 }
 
 void GUI::RenderLayoutSortOriginals()
 {
-    sortOriginalsLayout->RenderLayout();
+    if (settingHandler->IsProjectPathValid())
+        sortOriginalsLayout->RenderLayout();
 }
 
 void GUI::RenderLayoutNamingConvention()
 {
-    namingConventionLayout->RenderLayout();
+    if (settingHandler->IsProjectPathValid())
+        namingConventionLayout->RenderLayout();
 }
 
 void GUI::SetDefaultStyle()
