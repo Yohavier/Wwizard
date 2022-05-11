@@ -9,6 +9,7 @@ QueryEditorLayout::QueryEditorLayout(std::unique_ptr<WwizardWwiseClient>& wwizar
     auto outputNodeCreator = available_nodes.find("Output");
     outputNode = outputNodeCreator->second();
     nodes.insert({ outputNode->nodeGuid, outputNode });
+    outputNode->Pos = ImVec2(500,200);
 }
 
 void QueryEditorLayout::RenderLayout()
@@ -552,7 +553,7 @@ void QueryEditorLayout::ShowQueryNodeEditor()
         {
             for (const auto& desc : available_nodes)
             {
-                if (desc.first != "Query")
+                if (desc.first != "Query" && desc.first != "Output")
                 {
                     if (ImGui::MenuItem(desc.first.c_str()))
                     {

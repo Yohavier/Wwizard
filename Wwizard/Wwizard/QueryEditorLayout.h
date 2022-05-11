@@ -159,12 +159,11 @@ private:
     std::map<std::string, QueryResultFile> CalculateNextNode(MyNode* node);
 
 public:
-    
     std::map<std::string, std::function<MyNode* ()>> available_nodes{
     {"Query", [this]() -> MyNode* {  return new MyQueryNode("Query", {
     }, 
     {
-        {"Results", QueryResults}                                      // Output slots
+        {"Results", QueryResults}                                      
     }, this->wwizardWwiseClient, GenerateGuid()); }},
 
     {"And", []() -> MyNode* { return new MyNode("And", {
