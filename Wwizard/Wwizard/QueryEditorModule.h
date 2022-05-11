@@ -6,6 +6,7 @@
 #include "WwizardWwiseClient.h"
 #include "ResultFile.h"
 #include "BaseModule.h"
+#include "helper.h"
 
 enum class QueryType
 {
@@ -85,7 +86,6 @@ public:
 	void OnConnectionStatusChange(const bool newConnectionStatus);
 
 private:
-	const std::string GenerateGuid();
 	void FetchWwiseQueries();
 	void FetchWwiseFolderchildren(BaseQueryStructure& parentStructureFolder, const std::vector<std::string>& optionList);
 	const BaseQueryStructure* const GetCurrentSelectionQuery();

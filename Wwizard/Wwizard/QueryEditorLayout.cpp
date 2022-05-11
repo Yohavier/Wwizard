@@ -6,6 +6,9 @@ QueryEditorLayout::QueryEditorLayout(std::unique_ptr<WwizardWwiseClient>& wwizar
 	: BaseLayout(wwizardWwiseClient)
 	, queryEditorModule(queryEditorModule)
 {
+    auto outputNodeCreator = available_nodes.find("Output");
+    outputNode = outputNodeCreator->second();
+    nodes.insert({ outputNode->nodeGuid, outputNode });
 }
 
 void QueryEditorLayout::RenderLayout()
@@ -434,28 +437,31 @@ void QueryEditorLayout::ShowQueryNodeEditor()
 {
     // Canvas must be created after ImGui initializes, because constructor accesses ImGui style to configure default colors.
     static ImNodes::Ez::Context* context = ImNodes::Ez::CreateContext();
+    
     IM_UNUSED(context);
 
     if (ImGui::Begin("ImNodes", nullptr, ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoScrollWithMouse))
     {
         // We probably need to keep some state, like positions of nodes/slots for rendering connections.
         ImNodes::Ez::BeginCanvas();
+
         if (ImGui::BeginDragDropTarget())
         {
             if (const ImGuiPayload* payload = ImGui::AcceptDragDropPayload("Query"))
             {
                 std::string droppedGuid = *static_cast<std::string*> (payload->Data);
-        
-                nodes.push_back(available_nodes.find("Query")->second());
-                ImNodes::AutoPositionNode(nodes.back());
-                static_cast<MyQueryNode*>(nodes.back())->SetQueryDetails(queryEditorModule->GetAllQueries().find(droppedGuid)->second.name, droppedGuid);
-                static_cast<MyQueryNode*>(nodes.back())->RerunQuery();
+                auto newNode = available_nodes.find("Query")->second();
+                nodes.emplace(newNode->nodeGuid, newNode);
+     
+                ImNodes::AutoPositionNode(newNode);
+                static_cast<MyQueryNode*>(newNode)->SetQueryDetails(queryEditorModule->GetAllQueries().find(droppedGuid)->second.name, droppedGuid);
+                static_cast<MyQueryNode*>(newNode)->RerunQuery();
             }
             ImGui::EndDragDropTarget();
         }
         for (auto it = nodes.begin(); it != nodes.end();)
         {
-            MyNode* node = *it;
+            MyNode* node = it->second;
 
             // Start rendering node
             if (ImNodes::Ez::BeginNode(node, node->Title, &node->Pos, &node->Selected))
@@ -474,8 +480,19 @@ void QueryEditorLayout::ShowQueryNodeEditor()
                 if (ImNodes::GetNewConnection(&new_connection.InputNode, &new_connection.InputSlot,
                     &new_connection.OutputNode, &new_connection.OutputSlot))
                 {
+                    if (((MyNode*)new_connection.InputNode)->Title == "Output")
+                    {
+                        if (!((MyNode*)new_connection.InputNode)->Connections.empty())
+                        {
+                            Connection currentOutputConnection = ((MyNode*)new_connection.InputNode)->Connections[0];
+                            ((MyNode*)currentOutputConnection.InputNode)->DeleteConnection(currentOutputConnection);
+                            ((MyNode*)currentOutputConnection.OutputNode)->DeleteConnection(currentOutputConnection);
+                        }
+                    }
+
                     ((MyNode*)new_connection.InputNode)->Connections.push_back(new_connection);
                     ((MyNode*)new_connection.OutputNode)->Connections.push_back(new_connection);
+                    RecalculateNodeGraph();
                 }
 
                 // Render output connections of this node
@@ -493,6 +510,7 @@ void QueryEditorLayout::ShowQueryNodeEditor()
                         // Remove deleted connections
                         ((MyNode*)connection.InputNode)->DeleteConnection(connection);
                         ((MyNode*)connection.OutputNode)->DeleteConnection(connection);
+                        RecalculateNodeGraph();
                     }
                 }
             }
@@ -518,6 +536,7 @@ void QueryEditorLayout::ShowQueryNodeEditor()
 
                 delete node;
                 it = nodes.erase(it);
+                RecalculateNodeGraph();
             }
             else
                 ++it;
@@ -537,8 +556,10 @@ void QueryEditorLayout::ShowQueryNodeEditor()
                 {
                     if (ImGui::MenuItem(desc.first.c_str()))
                     {
-                        nodes.push_back(desc.second());
-                        ImNodes::AutoPositionNode(nodes.back());
+                        auto newNode = desc.second();
+                        nodes.emplace(newNode->nodeGuid, newNode);
+
+                        ImNodes::AutoPositionNode(newNode);
                     }
                 }
             }
@@ -556,4 +577,88 @@ void QueryEditorLayout::ShowQueryNodeEditor()
     }
     ImGui::End();
 
+}
+
+void QueryEditorLayout::RecalculateNodeGraph()
+{
+    std::cout << "Recalculate Graph" << std::endl;
+    for (auto result : CalculateNextNode(outputNode))
+    {
+        std::cout << result.second.name << std::endl;
+    }
+}
+
+std::map<std::string, QueryResultFile> QueryEditorLayout::CalculateNextNode(MyNode* node)
+{
+    std::map<std::string, QueryResultFile> emptyDefault;
+    if (node->Title == "And")
+    {
+        bool firstAnd = true;
+        std::map<std::string, QueryResultFile> tempAnd;
+        for (const auto& connection : node->Connections)
+        {
+            MyNode* nextNode = static_cast<MyNode*>(connection.OutputNode);
+            if (nextNode->nodeGuid != node->nodeGuid)
+            {
+                auto newResults = CalculateNextNode(nextNode);
+                if (firstAnd)
+                {
+                    for (auto& result : newResults)
+                    {
+                        tempAnd.insert({ result.first, result.second });
+                    }
+                }
+                else
+                {
+                    auto tempRemoveAnd = tempAnd;
+                    for (auto& alreadyCaptured : tempRemoveAnd)
+                    {
+                        if (newResults.find(alreadyCaptured.first) == newResults.end())
+                        {
+                            tempAnd.erase(alreadyCaptured.first);
+                        }
+                    }      
+                }
+                firstAnd = false;
+            }        
+        }
+        return tempAnd;
+    }
+    else if (node->Title == "Or")
+    {
+        std::map<std::string, QueryResultFile> tempOr;
+        for (const auto& connection : node->Connections)
+        {
+            MyNode* nextNode = static_cast<MyNode*>(connection.OutputNode);
+            if (nextNode->nodeGuid != node->nodeGuid)
+            {
+                for (auto& result : CalculateNextNode(nextNode))
+                {
+                    tempOr.insert({result.first, result.second});
+                }
+            }
+        }
+        return tempOr;
+    }
+    else if (node->Title == "Output")
+    {
+        for (const auto& connection : node->Connections)
+        {
+            MyNode* nextNode = static_cast<MyNode*>(connection.OutputNode);
+            if (nextNode->nodeGuid != node->nodeGuid)
+            {
+                return CalculateNextNode(nextNode);
+            }
+        }
+    }
+    else if (node->Title == "Query")
+    {
+        static_cast<MyQueryNode*>(node)->RerunQuery();
+        return static_cast<MyQueryNode*>(node)->queryResults;
+    }
+
+
+
+
+    return emptyDefault;
 }

@@ -116,7 +116,7 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>_DEBUG;_CRT_SECURE_NO_WARNINGS;_CONSOLE;%(PreprocessorDefinitions);SOLUTION_DIR=R"($(SolutionDir))";_SILENCE_ALL_CXX17_DEPRECATION_WARNINGS</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>$(SolutionDir)\ThirdParty\backends;$(SolutionDir)\ThirdParty;$(SolutionDir)\ThirdParty\WwiseSDK\external\rapidjson;$(SolutionDir)\ThirdParty\WwiseSDK\include;C:\Users\Jonas\Documents\GitHub\Wwizard\Wwizard\ThirdParty\ImNodes</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir)\ThirdParty\backends;$(SolutionDir)\ThirdParty;$(SolutionDir)\ThirdParty\WwiseSDK\external\rapidjson;$(SolutionDir)\ThirdParty\WwiseSDK\include;$(SolutionDir)\ThirdParty\ImNodes</AdditionalIncludeDirectories>
       <LanguageStandard>stdcpp17</LanguageStandard>
     </ClCompile>
     <Link>
@@ -195,6 +195,7 @@
     <ClInclude Include="ColorCodingLayout.h" />
     <ClInclude Include="ColorCodingModule.h" />
     <ClInclude Include="GUI.h" />
+    <ClInclude Include="helper.h" />
     <ClInclude Include="HomeLayout.h" />
     <ClInclude Include="Issues.h" />
     <ClInclude Include="NamingConventionLayout.h" />

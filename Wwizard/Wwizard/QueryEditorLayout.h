@@ -12,6 +12,7 @@
 #include <imgui.h>
 #include <imgui_internal.h>
 #include "ImNodesEz.h"
+#include "helper.h"
 
 struct Connection
 {
@@ -67,12 +68,13 @@ struct MyNode
 
     MyNode(const char* title,
         const std::vector<ImNodes::Ez::SlotInfo>&& input_slots,
-        const std::vector<ImNodes::Ez::SlotInfo>&& output_slots)
+        const std::vector<ImNodes::Ez::SlotInfo>&& output_slots,
+        const std::string nodeGuid)
+        :nodeGuid(nodeGuid)
+        ,Title(title)
+        ,InputSlots(input_slots)
+        ,OutputSlots(output_slots)
     {
-        Title = title;
-        InputSlots = input_slots;
-        OutputSlots = output_slots;
-        nodeContent = title;
     }
 
     /// Deletes connection from this node.
@@ -87,6 +89,8 @@ struct MyNode
             }
         }
     }
+
+    std::string nodeGuid;
 };
 
 struct MyQueryNode : public MyNode
@@ -94,12 +98,14 @@ struct MyQueryNode : public MyNode
     MyQueryNode(const char* title,
         const std::vector<ImNodes::Ez::SlotInfo>&& input_slots,
         const std::vector<ImNodes::Ez::SlotInfo>&& output_slots,
-        std::unique_ptr<WwizardWwiseClient>& wwizardWwiseClient)
+        std::unique_ptr<WwizardWwiseClient>& wwizardWwiseClient,
+        const std::string nodeGuid)
         :wwizardWwiseClient(wwizardWwiseClient)
     {
         MyNode::Title = title;
         MyNode::InputSlots = input_slots;
         MyNode::OutputSlots = output_slots;
+        MyNode::nodeGuid = nodeGuid;
     }
 
     void SetQueryDetails(std::string name, std::string guid)
@@ -113,19 +119,25 @@ struct MyQueryNode : public MyNode
     {
         queryResults.clear();
         AkJson results = wwizardWwiseClient->RunQueryFromGuuid(queryGuid);
-        for (const auto& result : results["return"].GetArray())
+        if (results.HasKey("return"))
         {
-
+            for (const auto& result : results["return"].GetArray())
+            {
+                queryResults.emplace(result["id"].GetVariant().GetString(), QueryResultFile(result["name"].GetVariant().GetString(), result["id"].GetVariant().GetString(), result["path"].GetVariant().GetString(), result["type"].GetVariant().GetString(), 0));
+            }
         }
     }
 
     std::string queryName = "";
     std::string queryGuid = "";
-    std::vector<QueryResultFile> queryResults;
     std::unique_ptr<WwizardWwiseClient>& wwizardWwiseClient;
     std::map<std::string, QueryResultFile> queryResults;
 };
 
+struct MyOutputNode : public MyNode
+{
+
+};
 
 class QueryEditorLayout : public BaseLayout
 {
@@ -143,6 +155,9 @@ private:
 	void ShowDetails();
 	void ShowQueryNodeEditor();
 
+    void RecalculateNodeGraph();
+    std::map<std::string, QueryResultFile> CalculateNextNode(MyNode* node);
+
 public:
     
     std::map<std::string, std::function<MyNode* ()>> available_nodes{
@@ -150,26 +165,27 @@ public:
     }, 
     {
         {"Results", QueryResults}                                      // Output slots
-    }, this->wwizardWwiseClient); }},
+    }, this->wwizardWwiseClient, GenerateGuid()); }},
 
     {"And", []() -> MyNode* { return new MyNode("And", {
-        {"Results 1", QueryResults},
-        {"Results 2", QueryResults}// Input slots
+        {"Results 1", QueryResults}
     }, {
         {"Results", QueryResults}// Output slots
-    }); }},
+    }, GenerateGuid()); }},
 
     {"Or", []() -> MyNode* { return new MyNode("Or", {
-        {"Results 1", QueryResults},
-        {"Results 2", QueryResults}  // Input slots
+        {"Results 1", QueryResults}
     }, {
         {"Results", QueryResults}// Output slots
-    }); }},
+    }, GenerateGuid()); }},
+    
+    {"Output", []() -> MyNode* { return new MyNode("Output", {{"Results", QueryResults}}, {}, GenerateGuid()); }},
 
     };
-    std::vector<MyNode*> nodes;
+    std::map<std::string, MyNode*> nodes;
 
 private:
 	bool useQueryNodeEditor = true;
 	const std::unique_ptr<QueryEditorModule>& queryEditorModule;
+    MyNode* outputNode;
 };

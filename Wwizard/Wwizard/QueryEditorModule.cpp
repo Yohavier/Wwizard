@@ -416,11 +416,6 @@ void QueryEditorModule::AddQueryToAllQueriesMap(BaseQueryStructure& newQuery)
     allQueries.insert({ newQuery.guid, newQuery });
 }
 
-const std::string QueryEditorModule::GenerateGuid()
-{
-    return std::to_string(((long long)rand() << 32) | rand());
-}
-
 void QueryEditorModule::ResetQueryModule()
 {
     queryResultFiles.clear();
