@@ -1,6 +1,7 @@
 #include "QueryEditorLayout.h"
 #include "WwiseColors.h"
 
+
 QueryEditorLayout::QueryEditorLayout(std::unique_ptr<WwizardWwiseClient>& wwizardWwiseClient, std::unique_ptr<QueryEditorModule>& queryEditorModule)
 	: BaseLayout(wwizardWwiseClient)
 	, queryEditorModule(queryEditorModule)
@@ -38,27 +39,31 @@ void QueryEditorLayout::RenderLayout()
     {
         ImGui::OpenPopup("Query Creator");
     }
-
-
+    ImGui::Checkbox("Node editor", &useQueryNodeEditor);
     ImGui::End();
 
-
+    
     //Active Queries Field
-
     if (!ImGui::Begin("Active Queries", (bool*)1))
     {
         ImGui::End();
         return;
     }
-    ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2(2, 2));
-    if (ImGui::BeginTable("activeWwiseQueries", 1, ImGuiTableFlags_BordersOuter | ImGuiTableFlags_Resizable))
+    if (useQueryNodeEditor)
     {
-        ShowActiveQueries();
-        ImGui::EndTable();
+        ShowQueryNodeEditor();
     }
-    ImGui::PopStyleVar();
+    else
+    {
+        ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2(2, 2));
+        if (ImGui::BeginTable("activeWwiseQueries", 1, ImGuiTableFlags_BordersOuter | ImGuiTableFlags_Resizable))
+        {
+            ShowActiveQueries();
+            ImGui::EndTable();
+        }
+        ImGui::PopStyleVar();
+    }
     ImGui::End();
-
     //Details window
     ShowDetails();
 
@@ -154,6 +159,12 @@ void QueryEditorLayout::ShowWwiseQueries(const BaseQueryStructure& queryObject)
             queryEditorModule->SetQuerySelection(queryObject.guid);
         }
 
+        if (ImGui::BeginDragDropSource())
+        {
+            ImGui::SetDragDropPayload("Query", &queryObject.guid, queryObject.guid.size());
+            ImGui::Text(queryObject.name.c_str());
+            ImGui::EndDragDropSource();
+        }
         if (is_selected)
             ImGui::SetItemDefaultFocus();
     }
@@ -417,4 +428,132 @@ void QueryEditorLayout::ShowDetails()
     }
     ImGui::PopStyleVar();
     ImGui::End();
+}
+
+void QueryEditorLayout::ShowQueryNodeEditor()
+{
+    // Canvas must be created after ImGui initializes, because constructor accesses ImGui style to configure default colors.
+    static ImNodes::Ez::Context* context = ImNodes::Ez::CreateContext();
+    IM_UNUSED(context);
+
+    if (ImGui::Begin("ImNodes", nullptr, ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoScrollWithMouse))
+    {
+        // We probably need to keep some state, like positions of nodes/slots for rendering connections.
+        ImNodes::Ez::BeginCanvas();
+        if (ImGui::BeginDragDropTarget())
+        {
+            if (const ImGuiPayload* payload = ImGui::AcceptDragDropPayload("Query"))
+            {
+                std::string droppedGuid = *static_cast<std::string*> (payload->Data);
+        
+                nodes.push_back(available_nodes.find("Query")->second());
+                ImNodes::AutoPositionNode(nodes.back());
+                static_cast<MyQueryNode*>(nodes.back())->SetQueryDetails(queryEditorModule->GetAllQueries().find(droppedGuid)->second.name, droppedGuid);
+                static_cast<MyQueryNode*>(nodes.back())->RerunQuery();
+            }
+            ImGui::EndDragDropTarget();
+        }
+        for (auto it = nodes.begin(); it != nodes.end();)
+        {
+            MyNode* node = *it;
+
+            // Start rendering node
+            if (ImNodes::Ez::BeginNode(node, node->Title, &node->Pos, &node->Selected))
+            {
+                // Render input nodes first (order is important)
+                ImNodes::Ez::InputSlots(node->InputSlots.data(), node->InputSlots.size());
+
+                // Custom node content may go here
+                ImGui::Text(node->nodeContent.c_str(), node->Title);
+
+                // Render output nodes first (order is important)
+                ImNodes::Ez::OutputSlots(node->OutputSlots.data(), node->OutputSlots.size());
+
+                // Store new connections when they are created
+                Connection new_connection;
+                if (ImNodes::GetNewConnection(&new_connection.InputNode, &new_connection.InputSlot,
+                    &new_connection.OutputNode, &new_connection.OutputSlot))
+                {
+                    ((MyNode*)new_connection.InputNode)->Connections.push_back(new_connection);
+                    ((MyNode*)new_connection.OutputNode)->Connections.push_back(new_connection);
+                }
+
+                // Render output connections of this node
+                for (const Connection& connection : node->Connections)
+                {
+                    // Node contains all it's connections (both from output and to input slots). This means that multiple
+                    // nodes will have same connection. We render only output connections and ensure that each connection
+                    // will be rendered once.
+                    if (connection.OutputNode != node)
+                        continue;
+
+                    if (!ImNodes::Connection(connection.InputNode, connection.InputSlot, connection.OutputNode,
+                        connection.OutputSlot))
+                    {
+                        // Remove deleted connections
+                        ((MyNode*)connection.InputNode)->DeleteConnection(connection);
+                        ((MyNode*)connection.OutputNode)->DeleteConnection(connection);
+                    }
+                }
+            }
+            // Node rendering is done. This call will render node background based on size of content inside node.
+            ImNodes::Ez::EndNode();
+
+            if (node->Selected && ImGui::IsKeyPressedMap(ImGuiKey_Delete) && ImGui::IsWindowFocused())
+            {
+                // Deletion order is critical: first we delete connections to us
+                for (auto& connection : node->Connections)
+                {
+                    if (connection.OutputNode == node)
+                    {
+                        ((MyNode*)connection.InputNode)->DeleteConnection(connection);
+                    }
+                    else
+                    {
+                        ((MyNode*)connection.OutputNode)->DeleteConnection(connection);
+                    }
+                }
+                // Then we delete our own connections, so we don't corrupt the list
+                node->Connections.clear();
+
+                delete node;
+                it = nodes.erase(it);
+            }
+            else
+                ++it;
+        }
+
+        if (ImGui::IsMouseReleased(1) && ImGui::IsWindowHovered() && !ImGui::IsMouseDragging(1))
+        {
+            ImGui::FocusWindow(ImGui::GetCurrentWindow());
+            ImGui::OpenPopup("NodesContextMenu");
+        }
+
+        if (ImGui::BeginPopup("NodesContextMenu"))
+        {
+            for (const auto& desc : available_nodes)
+            {
+                if (desc.first != "Query")
+                {
+                    if (ImGui::MenuItem(desc.first.c_str()))
+                    {
+                        nodes.push_back(desc.second());
+                        ImNodes::AutoPositionNode(nodes.back());
+                    }
+                }
+            }
+
+            ImGui::Separator();
+            if (ImGui::MenuItem("Reset Zoom"))
+                ImNodes::GetCurrentCanvas()->Zoom = 1;
+
+            if (ImGui::IsAnyMouseDown() && !ImGui::IsWindowHovered())
+                ImGui::CloseCurrentPopup();
+            ImGui::EndPopup();
+        }
+
+        ImNodes::Ez::EndCanvas();
+    }
+    ImGui::End();
+
 }

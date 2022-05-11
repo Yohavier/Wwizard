@@ -120,6 +120,12 @@
     <ClCompile Include="BaseModule.cpp">
       <Filter>Source Files\Modules</Filter>
     </ClCompile>
+    <ClCompile Include="..\ThirdParty\ImNodes\ImNodes.cpp">
+      <Filter>Source Files\ImGui</Filter>
+    </ClCompile>
+    <ClCompile Include="..\ThirdParty\ImNodes\ImNodesEz.cpp">
+      <Filter>Source Files\ImGui</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\ThirdParty\backends\imgui_impl_dx10.h">
@@ -214,6 +220,12 @@
     </ClInclude>
     <ClInclude Include="BaseModule.h">
       <Filter>Header Files\Modules</Filter>
+    </ClInclude>
+    <ClInclude Include="..\ThirdParty\ImNodes\ImNodes.h">
+      <Filter>Source Files\ImGui</Filter>
+    </ClInclude>
+    <ClInclude Include="..\ThirdParty\ImNodes\ImNodesEz.h">
+      <Filter>Source Files\ImGui</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

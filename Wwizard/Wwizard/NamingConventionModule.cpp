@@ -49,7 +49,7 @@ void NamingConventionModule::FetchWwuDataInDirectory(const std::string& director
 	for (const auto& entry : std::filesystem::directory_iterator(directory))
 	{
 		if (std::filesystem::is_directory(entry))
-		{
+		{ 
 			FetchWwuDataInDirectory(entry.path().u8string());
 		}
 		else
