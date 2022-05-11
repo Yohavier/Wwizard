@@ -43,22 +43,31 @@ void QueryEditorLayout::RenderLayout()
     {
         ImGui::OpenPopup("Query Creator");
     }
-    ImGui::Checkbox("Node editor", &useQueryNodeEditor);
+    if (ImGui::Checkbox("Node editor", &useQueryNodeEditor))
+    {
+        queryEditorModule->ResetQueryResults();
+
+        if (useQueryNodeEditor)
+            RecalculateNodeGraph();
+        else
+            queryEditorModule->RunActiveQueries();
+    }
     ImGui::End();
 
     
     //Active Queries Field
-    if (!ImGui::Begin("Active Queries", (bool*)1))
-    {
-        ImGui::End();
-        return;
-    }
     if (useQueryNodeEditor)
     {
         ShowQueryNodeEditor();
     }
     else
     {
+        if (!ImGui::Begin("Active Queries", (bool*)1))
+        {
+            ImGui::End();
+            return;
+        }
+
         ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2(2, 2));
         if (ImGui::BeginTable("activeWwiseQueries", 1, ImGuiTableFlags_BordersOuter | ImGuiTableFlags_Resizable))
         {
@@ -66,9 +75,9 @@ void QueryEditorLayout::RenderLayout()
             ImGui::EndTable();
         }
         ImGui::PopStyleVar();
+        ImGui::End();
     }
-    ImGui::End();
-    //Details window
+
     ShowDetails();
 
 
@@ -154,7 +163,7 @@ void QueryEditorLayout::ShowWwiseQueries(const BaseQueryStructure& queryObject)
 
         if (ImGui::Selectable(queryObject.name.c_str(), is_selected, ImGuiSelectableFlags_AllowDoubleClick))
         {
-            if (ImGui::IsMouseDoubleClicked(0))
+            if (ImGui::IsMouseDoubleClicked(0) && !useQueryNodeEditor)
             {
                 queryEditorModule->AddToActiveQueryList(queryObject.guid);
                 queryEditorModule->RunActiveQueries();
@@ -196,7 +205,7 @@ void QueryEditorLayout::ShowWaapiQueries()
 
             if (ImGui::Selectable(object.second.name.c_str(), is_selected, ImGuiSelectableFlags_AllowDoubleClick))
             {
-                if (ImGui::IsMouseDoubleClicked(0))
+                if (ImGui::IsMouseDoubleClicked(0) && !useQueryNodeEditor)
                 {
                     queryEditorModule->AddToActiveQueryList(object.second.guid);
                     queryEditorModule->RunActiveQueries();
@@ -236,7 +245,7 @@ void QueryEditorLayout::ShowWaqlQueries()
 
             if (ImGui::Selectable(object.second.name.c_str(), is_selected, ImGuiSelectableFlags_AllowDoubleClick))
             {
-                if (ImGui::IsMouseDoubleClicked(0))
+                if (ImGui::IsMouseDoubleClicked(0) && !useQueryNodeEditor)
                 {
                     queryEditorModule->AddToActiveQueryList(object.second.guid);
                     queryEditorModule->RunActiveQueries();
@@ -441,7 +450,7 @@ void QueryEditorLayout::ShowQueryNodeEditor()
     
     IM_UNUSED(context);
 
-    if (ImGui::Begin("ImNodes", nullptr, ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoScrollWithMouse))
+    if (ImGui::Begin("Querynode Editor", nullptr, ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoScrollWithMouse))
     {
         // We probably need to keep some state, like positions of nodes/slots for rendering connections.
         ImNodes::Ez::BeginCanvas();
@@ -582,11 +591,8 @@ void QueryEditorLayout::ShowQueryNodeEditor()
 
 void QueryEditorLayout::RecalculateNodeGraph()
 {
-    std::cout << "Recalculate Graph" << std::endl;
-    for (auto result : CalculateNextNode(outputNode))
-    {
-        std::cout << result.second.name << std::endl;
-    }
+    queryEditorModule->ResetQueryResults();
+    queryEditorModule->queryResultFiles = CalculateNextNode(outputNode);
 }
 
 std::map<std::string, QueryResultFile> QueryEditorLayout::CalculateNextNode(MyNode* node)

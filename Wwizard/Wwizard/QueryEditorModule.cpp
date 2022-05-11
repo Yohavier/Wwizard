@@ -505,3 +505,8 @@ const std::unique_ptr<BaseQueryStructure>& QueryEditorModule::GetWwiseQueryHiera
 {
     return wwiseQueryHierarchy;
 }
+
+void QueryEditorModule::ResetQueryResults()
+{
+    queryResultFiles.clear();
+}

@@ -48,6 +48,8 @@ public:
 	QueryEditorModule(std::unique_ptr<WwizardWwiseClient>& wwizardClient);
 	~QueryEditorModule();
 
+	friend class QueryEditorLayout;
+
 	void AddToActiveQueryList(const std::string& guid);
 	void RemoveFromActiveQueryList(const std::string& guid);
 	void SetQuerySelection(const std::string& guid);
@@ -56,6 +58,8 @@ public:
 	void CreateNewQuery(const std::string name, const QueryType type, const std::string arg);
 	void SaveChangedQuery(const std::string newName, const std::string newArg, const std::string guid);
 	void DeleteQuery(const std::string& guid);
+	void ResetQueryResults();
+
 
 	template<typename TReturn, typename TMap>
 	TReturn FindInMap(const TMap& findMap)
@@ -71,7 +75,6 @@ public:
 		}
 	}
 
-	//Getter
 	const std::map<std::string, const BaseQueryStructure&>& GetWaapiQueries();
 	const std::map<std::string, const BaseQueryStructure&>& GetWaqlQueries();
 	const std::map<std::string, const BaseQueryStructure&>& GetWwiseQueries();

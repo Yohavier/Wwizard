@@ -123,7 +123,14 @@ struct MyQueryNode : public MyNode
         {
             for (const auto& result : results["return"].GetArray())
             {
-                queryResults.emplace(result["id"].GetVariant().GetString(), QueryResultFile(result["name"].GetVariant().GetString(), result["id"].GetVariant().GetString(), result["path"].GetVariant().GetString(), result["type"].GetVariant().GetString(), 0));
+                if (result["color"].IsEmpty())
+                {
+                    queryResults.emplace(result["id"].GetVariant().GetString(), QueryResultFile(result["name"].GetVariant().GetString(), result["id"].GetVariant().GetString(), result["path"].GetVariant().GetString(), result["type"].GetVariant().GetString(), 0));
+                }
+                else
+                {
+                    queryResults.emplace(result["id"].GetVariant().GetString(), QueryResultFile(result["name"].GetVariant().GetString(), result["id"].GetVariant().GetString(), result["path"].GetVariant().GetString(), result["type"].GetVariant().GetString(), result["color"].GetVariant().GetInt32()));
+                }
             }
         }
     }
