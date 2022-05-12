@@ -16,21 +16,46 @@ void QueryEditorLayout::RenderLayout()
 {
     if (!wwizardWwiseClient->IsConnected())
         return;
-    //Available Queries Field
+
+    SettingWidget();
+
+    AvailableQueriesWidget();
+
+    ActiveQueriesWidget();
+
+    DetailsWidget();
+    
+    ResultWidget();
+}
+
+void QueryEditorLayout::SettingWidget()
+{
     ImGui::SetNextWindowSize(ImVec2(430, 450), ImGuiCond_FirstUseEver);
-    if (!ImGui::Begin("Available Queries", (bool*)1))
+    if (!ImGui::Begin("Settings", NULL, ImGuiWindowFlags_NoMove))
     {
         ImGui::End();
         return;
     }
-
-
-    if (ImGui::BeginTable("availableWwiseQueries", 1, ImGuiTableFlags_BordersOuter | ImGuiTableFlags_Resizable))
+    if (ImGui::BeginCombo("##QueryMode", current_item))
     {
-        ShowWwiseQueries(*queryEditorModule->GetWwiseQueryHierarchy());
-        ShowWaapiQueries();
-        ShowWaqlQueries();
-        ImGui::EndTable();
+        for (int n = 0; n < IM_ARRAYSIZE(items); n++)
+        {
+            bool is_selected = (current_item == items[n]);
+            if (ImGui::Selectable(items[n], is_selected))
+                current_item = items[n];
+            if (is_selected)
+                ImGui::SetItemDefaultFocus();
+        }
+        ImGui::EndCombo();
+    }
+
+    if (current_item == "Standard")
+    {
+        SetUseQueryNodeEditor(false);
+    }
+    else if (current_item == "Nodegraph")
+    {
+        SetUseQueryNodeEditor(true);
     }
 
     if (ImGui::BeginPopupModal("Query Creator"))
@@ -43,26 +68,38 @@ void QueryEditorLayout::RenderLayout()
     {
         ImGui::OpenPopup("Query Creator");
     }
-    if (ImGui::Checkbox("Node editor", &useQueryNodeEditor))
-    {
-        queryEditorModule->ResetQueryResults();
 
-        if (useQueryNodeEditor)
-            RecalculateNodeGraph();
-        else
-            queryEditorModule->RunActiveQueries();
+    ImGui::End();
+}
+
+void QueryEditorLayout::AvailableQueriesWidget()
+{
+    ImGui::SetNextWindowSize(ImVec2(430, 450), ImGuiCond_FirstUseEver);
+    if (!ImGui::Begin("Available Queries", NULL, ImGuiWindowFlags_NoMove))
+    {
+        ImGui::End();
+        return;
+    }
+
+    if (ImGui::BeginTable("availableWwiseQueries", 1, ImGuiTableFlags_BordersOuter | ImGuiTableFlags_Resizable))
+    {
+        ShowWwiseQueries(*queryEditorModule->GetWwiseQueryHierarchy());
+        ShowWaapiQueries();
+        ShowWaqlQueries();
+        ImGui::EndTable();
     }
     ImGui::End();
+}
 
-    
-    //Active Queries Field
+void QueryEditorLayout::ActiveQueriesWidget()
+{
     if (useQueryNodeEditor)
     {
         ShowQueryNodeEditor();
     }
     else
     {
-        if (!ImGui::Begin("Active Queries", (bool*)1))
+        if (!ImGui::Begin("Active Queries", NULL, ImGuiWindowFlags_NoMove))
         {
             ImGui::End();
             return;
@@ -77,13 +114,12 @@ void QueryEditorLayout::RenderLayout()
         ImGui::PopStyleVar();
         ImGui::End();
     }
+}
 
-    ShowDetails();
-
-
-    //Results
+void QueryEditorLayout::ResultWidget()
+{
     ImGui::SetNextWindowSize(ImVec2(430, 450), ImGuiCond_FirstUseEver);
-    if (!ImGui::Begin("Results", (bool*)1))
+    if (!ImGui::Begin("Results", NULL, ImGuiWindowFlags_NoMove))
     {
         ImGui::End();
         return;
@@ -97,6 +133,93 @@ void QueryEditorLayout::RenderLayout()
     ImGui::PopStyleVar();
     ImGui::End();
 }
+
+void QueryEditorLayout::DetailsWidget()
+{
+    ImGui::SetNextWindowSize(ImVec2(430, 450), ImGuiCond_FirstUseEver);
+    if (!ImGui::Begin("Details", NULL, ImGuiWindowFlags_NoMove))
+    {
+        ImGui::End();
+        return;
+    }
+    ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2(2, 2));
+
+    auto possibleSelectedQuery = queryEditorModule->FindInMap<const BaseQueryStructure*, const std::map<std::string, BaseQueryStructure>&>(queryEditorModule->GetAllQueries());
+    auto possibleSelectedFile = queryEditorModule->FindInMap<const QueryResultFile*, const std::map<std::string, QueryResultFile>&>(queryEditorModule->GetQueryResultFiles());
+
+    if (possibleSelectedQuery != nullptr)
+    {
+        static std::string nameText;
+        static std::string argText;
+        if (possibleSelectedQuery->structureType == QueryType::WAAPIQUERY || possibleSelectedQuery->structureType == QueryType::WAQLQUERY)
+        {
+            if (ImGui::Button("Edit Query"))
+            {
+                ImGui::OpenPopup("QueryEditing");
+                nameText = possibleSelectedQuery->name;
+                argText = queryEditorModule->GetCurrentArgAsString().c_str();
+            }
+        }
+
+        ImGui::Text(("Name : " + possibleSelectedQuery->name).c_str());
+        ImGui::Text(("Guid : " + possibleSelectedQuery->guid).c_str());
+        ImGui::Text(("Type : " + queryEditorModule->GetQueryTypeAsString(possibleSelectedQuery->structureType)).c_str());
+
+        if (possibleSelectedQuery->structureType == QueryType::WAAPIQUERY || possibleSelectedQuery->structureType == QueryType::WAQLQUERY)
+        {
+            ImGui::Text(("Arg : " + queryEditorModule->GetCurrentArgAsString()).c_str());
+        }
+        else if (possibleSelectedQuery->structureType == QueryType::WWISEQUERY)
+        {
+            ImGui::Text("Arg : ");
+            ImGui::SameLine();
+            if (ImGui::Button("Inspect Wwise Query"))
+            {
+                wwizardWwiseClient->FocusObjectInWwise(possibleSelectedQuery->guid);
+            }
+        }
+        if (ImGui::BeginPopup("QueryEditing"))
+        {
+            ImGui::Text("Edit Query");
+            ImGui::Separator();
+
+            ImGui::Text("name");
+            ImGui::SameLine();
+            ImGui::InputText("##1", &nameText);
+
+            ImGui::Text("arg");
+            ImGui::SameLine();
+            ImGui::InputText("##2", &argText);
+
+            ImGui::Separator();
+            if (ImGui::Button("Delete Query"))
+            {
+                queryEditorModule->DeleteQuery(possibleSelectedQuery->guid);
+                ImGui::CloseCurrentPopup();
+            }
+            ImGui::SameLine();
+            if (ImGui::Button("Close"))
+            {
+                ImGui::CloseCurrentPopup();
+            }
+            ImGui::SameLine();
+            if (ImGui::Button("Save"))
+            {
+                queryEditorModule->SaveChangedQuery(nameText, argText, possibleSelectedQuery->guid);
+                ImGui::CloseCurrentPopup();
+            }
+            ImGui::EndPopup();
+        }
+    }
+    else if (possibleSelectedFile != nullptr)
+    {
+        ImGui::Text(("Name : " + possibleSelectedFile->name).c_str());
+        ImGui::Text(("Guid : " + possibleSelectedFile->guid).c_str());
+    }
+    ImGui::PopStyleVar();
+    ImGui::End();
+}
+
 
 void QueryEditorLayout::ShowActiveQueries()
 {
@@ -357,92 +480,6 @@ void QueryEditorLayout::ShowQueryCreator()
     }
 }
 
-void QueryEditorLayout::ShowDetails()
-{
-    ImGui::SetNextWindowSize(ImVec2(430, 450), ImGuiCond_FirstUseEver);
-    if (!ImGui::Begin("Details", (bool*)1))
-    {
-        ImGui::End();
-        return;
-    }
-    ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2(2, 2));
-
-    auto possibleSelectedQuery = queryEditorModule->FindInMap<const BaseQueryStructure*, const std::map<std::string, BaseQueryStructure>&>(queryEditorModule->GetAllQueries());
-    auto possibleSelectedFile = queryEditorModule->FindInMap<const QueryResultFile*, const std::map<std::string, QueryResultFile>&>(queryEditorModule->GetQueryResultFiles());
-
-    if (possibleSelectedQuery != nullptr)
-    {
-        static std::string nameText;
-        static std::string argText;
-        if (possibleSelectedQuery->structureType == QueryType::WAAPIQUERY || possibleSelectedQuery->structureType == QueryType::WAQLQUERY)
-        {
-            if (ImGui::Button("Edit Query"))
-            {
-                ImGui::OpenPopup("QueryEditing");
-                nameText = possibleSelectedQuery->name;
-                argText = queryEditorModule->GetCurrentArgAsString().c_str();
-            }
-        }
-
-        ImGui::Text(("Name : " + possibleSelectedQuery->name).c_str());
-        ImGui::Text(("Guid : " + possibleSelectedQuery->guid).c_str());
-        ImGui::Text(("Type : " + queryEditorModule->GetQueryTypeAsString(possibleSelectedQuery->structureType)).c_str());
-
-        if (possibleSelectedQuery->structureType == QueryType::WAAPIQUERY || possibleSelectedQuery->structureType == QueryType::WAQLQUERY)
-        {
-            ImGui::Text(("Arg : " + queryEditorModule->GetCurrentArgAsString()).c_str());
-        }
-        else if (possibleSelectedQuery->structureType == QueryType::WWISEQUERY)
-        {
-            ImGui::Text("Arg : ");
-            ImGui::SameLine();
-            if (ImGui::Button("Inspect Wwise Query"))
-            {
-                wwizardWwiseClient->FocusObjectInWwise(possibleSelectedQuery->guid);
-            }
-        }
-        if (ImGui::BeginPopup("QueryEditing"))
-        {
-            ImGui::Text("Edit Query");
-            ImGui::Separator();
-
-            ImGui::Text("name");
-            ImGui::SameLine();
-            ImGui::InputText("##1", &nameText);
-
-            ImGui::Text("arg");
-            ImGui::SameLine();
-            ImGui::InputText("##2", &argText);
-
-            ImGui::Separator();
-            if (ImGui::Button("Delete Query"))
-            {
-                queryEditorModule->DeleteQuery(possibleSelectedQuery->guid);
-                ImGui::CloseCurrentPopup();
-            }
-            ImGui::SameLine();
-            if (ImGui::Button("Close"))
-            {
-                ImGui::CloseCurrentPopup();
-            }
-            ImGui::SameLine();
-            if (ImGui::Button("Save"))
-            {
-                queryEditorModule->SaveChangedQuery(nameText, argText, possibleSelectedQuery->guid);
-                ImGui::CloseCurrentPopup();
-            }
-            ImGui::EndPopup();
-        }
-    }
-    else if (possibleSelectedFile != nullptr)
-    {
-        ImGui::Text(("Name : " + possibleSelectedFile->name).c_str());
-        ImGui::Text(("Guid : " + possibleSelectedFile->guid).c_str());
-    }
-    ImGui::PopStyleVar();
-    ImGui::End();
-}
-
 void QueryEditorLayout::ShowQueryNodeEditor()
 {
     // Canvas must be created after ImGui initializes, because constructor accesses ImGui style to configure default colors.
@@ -450,7 +487,7 @@ void QueryEditorLayout::ShowQueryNodeEditor()
     
     IM_UNUSED(context);
 
-    if (ImGui::Begin("Querynode Editor", nullptr, ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoScrollWithMouse))
+    if (ImGui::Begin("Querynode Editor", nullptr, ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoScrollWithMouse | ImGuiWindowFlags_NoMove))
     {
         // We probably need to keep some state, like positions of nodes/slots for rendering connections.
         ImNodes::Ez::BeginCanvas();
@@ -523,11 +560,22 @@ void QueryEditorLayout::ShowQueryNodeEditor()
                         RecalculateNodeGraph();
                     }
                 }
+
+                if (node->Selected)
+                {
+                    if (node->Title == "Query")
+                    {
+                        if (node != currentSelectedNode)
+                        {
+                            UpdateSelectedNode(node);
+                        }
+                    } 
+                }
             }
             // Node rendering is done. This call will render node background based on size of content inside node.
             ImNodes::Ez::EndNode();
 
-            if (node->Selected && ImGui::IsKeyPressedMap(ImGuiKey_Delete) && ImGui::IsWindowFocused())
+            if (node->Selected && ImGui::IsKeyPressedMap(ImGuiKey_Delete) && node->Title != "Output")
             {
                 // Deletion order is critical: first we delete connections to us
                 for (auto& connection : node->Connections)
@@ -593,6 +641,21 @@ void QueryEditorLayout::RecalculateNodeGraph()
 {
     queryEditorModule->ResetQueryResults();
     queryEditorModule->queryResultFiles = CalculateNextNode(outputNode);
+}
+
+void QueryEditorLayout::SetUseQueryNodeEditor(bool newState)
+{
+    useQueryNodeEditor = newState;
+
+    if (newState)
+    {
+        RecalculateNodeGraph();
+    }
+    else
+    {
+        queryEditorModule->ResetQueryResults();
+        queryEditorModule->RunActiveQueries();
+    }
 }
 
 std::map<std::string, QueryResultFile> QueryEditorLayout::CalculateNextNode(MyNode* node)
@@ -668,4 +731,10 @@ std::map<std::string, QueryResultFile> QueryEditorLayout::CalculateNextNode(MyNo
 
 
     return emptyDefault;
+}
+
+void QueryEditorLayout::UpdateSelectedNode(MyNode* newCurrentSelectedNode)
+{
+    currentSelectedNode = newCurrentSelectedNode;
+    queryEditorModule->SetQuerySelection(static_cast<MyQueryNode*>(newCurrentSelectedNode)->queryGuid);
 }

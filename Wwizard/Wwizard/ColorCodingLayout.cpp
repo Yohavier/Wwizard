@@ -11,7 +11,7 @@ ColorCodingLayout::ColorCodingLayout(std::unique_ptr<WwizardWwiseClient>& wwizar
 void ColorCodingLayout::RenderLayout()
 {
     ImGui::SetNextWindowSize(ImVec2(1000, 1000), ImGuiCond_FirstUseEver);
-    if (!ImGui::Begin("Color Coding", (bool*)1))
+    if (!ImGui::Begin("Color Coding", NULL, ImGuiWindowFlags_NoMove))
     {
         ImGui::End();
         return;

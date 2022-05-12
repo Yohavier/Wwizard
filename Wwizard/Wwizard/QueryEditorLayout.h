@@ -159,10 +159,18 @@ private:
 	void ShowWaqlQueries();
 	void ShowWwiseQueries(const BaseQueryStructure& queryObject);
 	void ShowQueryCreator();
-	void ShowDetails();
+	void DetailsWidget();
 	void ShowQueryNodeEditor();
 
+    void SettingWidget();
+    void AvailableQueriesWidget();
+    void ActiveQueriesWidget();
+    void ResultWidget();
+
     void RecalculateNodeGraph();
+    void SetUseQueryNodeEditor(bool newState);
+    void UpdateSelectedNode(MyNode* newSelectedNode);
+
     std::map<std::string, QueryResultFile> CalculateNextNode(MyNode* node);
 
 public:
@@ -194,4 +202,7 @@ private:
 	bool useQueryNodeEditor = true;
 	const std::unique_ptr<QueryEditorModule>& queryEditorModule;
     MyNode* outputNode;
+    const char* items[2] = { "Standard", "Nodegraph" };
+    const char* current_item = items[0];
+    MyNode* currentSelectedNode;
 };

@@ -14,7 +14,7 @@ void SortOriginalsLayout::RenderLayout()
     if (!wwizardWwiseClient->IsConnected())
         return;
     ImGui::SetNextWindowSize(ImVec2(430, 450), ImGuiCond_FirstUseEver);
-    if (!ImGui::Begin("Sort Originals"))
+    if (!ImGui::Begin("Sort Originals", NULL, ImGuiWindowFlags_NoMove))
     {
         ImGui::End();
         return;
@@ -87,7 +87,7 @@ void SortOriginalsLayout::RenderLayout()
 
 
     ImGui::SetNextWindowSize(ImVec2(430, 450), ImGuiCond_FirstUseEver);
-    if (!ImGui::Begin("Sorting Settings"))
+    if (!ImGui::Begin("Sorting Settings", NULL, ImGuiWindowFlags_NoMove))
     {
         ImGui::End();
         return;

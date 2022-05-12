@@ -9,7 +9,7 @@ NamingConventionLayout::NamingConventionLayout(std::unique_ptr<WwizardWwiseClien
 void NamingConventionLayout::RenderLayout()
 {
     ImGui::SetNextWindowSize(ImVec2(430, 450), ImGuiCond_FirstUseEver);
-    if (!ImGui::Begin("Naming Convention"))
+    if (!ImGui::Begin("Naming Convention", NULL, ImGuiWindowFlags_NoMove))
     {
         ImGui::End();
         return;

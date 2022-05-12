@@ -13,7 +13,7 @@ void ToolboxLayout::RenderLayout()
         return;
 
     ImGui::SetNextWindowSize(ImVec2(430, 450), ImGuiCond_FirstUseEver);
-    if (!ImGui::Begin("Toolbox"))
+    if (!ImGui::Begin("Toolbox", NULL, ImGuiWindowFlags_NoMove))
     {
         ImGui::End();
         return;
