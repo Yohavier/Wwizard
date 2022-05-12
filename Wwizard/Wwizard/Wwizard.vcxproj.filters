@@ -37,6 +37,9 @@
     <Filter Include="Header Files\GUI">
       <UniqueIdentifier>{c7c7fa42-a585-4e65-99e8-c170e3791037}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Header Files\Modules\QueryEditorModule">
+      <UniqueIdentifier>{4b24c65a-bdac-4531-9e83-7990629860b8}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp">
@@ -164,9 +167,6 @@
     <ClInclude Include="..\ThirdParty\imgui_stdlib.h">
       <Filter>ImGui</Filter>
     </ClInclude>
-    <ClInclude Include="QueryEditorModule.h">
-      <Filter>Header Files\Modules</Filter>
-    </ClInclude>
     <ClInclude Include="SortOriginalsModule.h">
       <Filter>Header Files\Modules</Filter>
     </ClInclude>
@@ -229,6 +229,12 @@
     </ClInclude>
     <ClInclude Include="helper.h">
       <Filter>Header Files\Helper</Filter>
+    </ClInclude>
+    <ClInclude Include="QueryEditorModule.h">
+      <Filter>Header Files\Modules\QueryEditorModule</Filter>
+    </ClInclude>
+    <ClInclude Include="MyNode.h">
+      <Filter>Header Files\Modules\QueryEditorModule</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

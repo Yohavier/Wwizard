@@ -337,6 +337,12 @@ void QueryEditorLayout::ShowWaapiQueries()
                 queryEditorModule->SetQuerySelection(object.second.guid);
             }
 
+            if (ImGui::BeginDragDropSource())
+            {
+                ImGui::SetDragDropPayload("Query", &object.second.guid, sizeof(object.second.guid));
+                ImGui::Text(object.second.name.c_str());
+                ImGui::EndDragDropSource();
+            }
             if (is_selected)
                 ImGui::SetItemDefaultFocus();
 
@@ -361,7 +367,7 @@ void QueryEditorLayout::ShowWaqlQueries()
     {
         int counter = 0;
 
-        for (auto& object : queryEditorModule->GetWaqlQueries())
+        for (const auto& object : queryEditorModule->GetWaqlQueries())
         {
             ImGui::PushID(counter);
             const bool is_selected = (queryEditorModule->GetCurrentSelectionGuid() == object.second.guid && ImGui::IsWindowFocused());
@@ -375,6 +381,13 @@ void QueryEditorLayout::ShowWaqlQueries()
                 }
 
                 queryEditorModule->SetQuerySelection(object.second.guid);
+            }
+
+            if (ImGui::BeginDragDropSource())
+            {
+                ImGui::SetDragDropPayload("Query", &object.second.guid, sizeof(object.second.guid));
+                ImGui::Text(object.second.guid.c_str());
+                ImGui::EndDragDropSource();
             }
 
             if (is_selected)
@@ -501,7 +514,8 @@ void QueryEditorLayout::ShowQueryNodeEditor()
                 nodes.emplace(newNode->nodeGuid, newNode);
      
                 ImNodes::AutoPositionNode(newNode);
-                static_cast<MyQueryNode*>(newNode)->SetQueryDetails(queryEditorModule->GetAllQueries().find(droppedGuid)->second.name, droppedGuid);
+                auto a = queryEditorModule->GetAllQueries().find(droppedGuid);
+                static_cast<MyQueryNode*>(newNode)->SetQueryDetails(a->second.name, droppedGuid);
                 static_cast<MyQueryNode*>(newNode)->RerunQuery();
             }
             ImGui::EndDragDropTarget();

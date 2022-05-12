@@ -198,6 +198,7 @@
     <ClInclude Include="helper.h" />
     <ClInclude Include="HomeLayout.h" />
     <ClInclude Include="Issues.h" />
+    <ClInclude Include="MyNode.h" />
     <ClInclude Include="NamingConventionLayout.h" />
     <ClInclude Include="NamingConventionModule.h" />
     <ClInclude Include="QueryEditorLayout.h" />

@@ -105,6 +105,7 @@ private:
 	std::map<std::string, const BaseQueryStructure&> wwiseQueries;
 
 	std::map<std::string, QueryResultFile> queryResultFiles;
+
 	std::unique_ptr<BaseQueryStructure> wwiseQueryHierarchy;
 
 	std::map<std::string, BaseQueryStructure&> activeQueryDictionary;

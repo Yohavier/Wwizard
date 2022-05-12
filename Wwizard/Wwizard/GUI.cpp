@@ -139,7 +139,7 @@ void GUI::Render(bool& isRunning)
         ImGui::DockSpace(dockspace_id, ImVec2(0.0f, 0.0f), dockspace_flags);
     }
 
-    ImGui::ShowDemoWindow();
+    //ImGui::ShowDemoWindow();
     CreateTaskBar(isRunning);
         
     if (layouts.find(currentLayout) != layouts.end())
