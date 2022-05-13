@@ -192,17 +192,23 @@
     <ClInclude Include="Application.h" />
     <ClInclude Include="BaseLayout.h" />
     <ClInclude Include="BaseModule.h" />
+    <ClInclude Include="BaseQueryStructure.h" />
     <ClInclude Include="ColorCodingLayout.h" />
     <ClInclude Include="ColorCodingModule.h" />
+    <ClInclude Include="ColorResult.h" />
+    <ClInclude Include="ColorSetting.h" />
+    <ClInclude Include="ColorSettingMode.h" />
+    <ClInclude Include="ContainerSetting.h" />
     <ClInclude Include="GUI.h" />
     <ClInclude Include="helper.h" />
     <ClInclude Include="HomeLayout.h" />
-    <ClInclude Include="Issues.h" />
+    <ClInclude Include="NamingIssues.h" />
     <ClInclude Include="MyNode.h" />
     <ClInclude Include="NamingConventionLayout.h" />
     <ClInclude Include="NamingConventionModule.h" />
     <ClInclude Include="QueryEditorLayout.h" />
     <ClInclude Include="QueryEditorModule.h" />
+    <ClInclude Include="QueryType.h" />
     <ClInclude Include="ResultFile.h" />
     <ClInclude Include="SettingHandler.h" />
     <ClInclude Include="SettingLayout.h" />
@@ -213,6 +219,7 @@
     <ClInclude Include="WwiseColors.h" />
     <ClInclude Include="WwizardWwiseClient.h" />
     <ClInclude Include="WwuLookUpData.h" />
+    <ClInclude Include="WwuSetting.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

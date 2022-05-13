@@ -28,9 +28,6 @@
     <Filter Include="Source Files\plugixml">
       <UniqueIdentifier>{246949a0-5e70-4b67-a24c-c1ace78c8a98}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Header Files\Helper">
-      <UniqueIdentifier>{b6e0ad99-fb72-4339-bc68-ee1e9b3d1e21}</UniqueIdentifier>
-    </Filter>
     <Filter Include="Source Files\GUI">
       <UniqueIdentifier>{fb22ea13-314b-45bd-87d2-cb3981517264}</UniqueIdentifier>
     </Filter>
@@ -39,6 +36,18 @@
     </Filter>
     <Filter Include="Header Files\Modules\QueryEditorModule">
       <UniqueIdentifier>{4b24c65a-bdac-4531-9e83-7990629860b8}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\Modules\ColorCodingModule">
+      <UniqueIdentifier>{a6d74a84-fbea-4a3c-a49d-4794570c5bf5}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\Modules\NamingConventionModule">
+      <UniqueIdentifier>{5bbcab69-ec5c-467b-966f-9fa50d0b502d}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\Modules\Helper">
+      <UniqueIdentifier>{b6e0ad99-fb72-4339-bc68-ee1e9b3d1e21}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\ImGui\ImNodes">
+      <UniqueIdentifier>{4fdb5e35-8bef-464f-ab71-c26b4e05fc53}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
@@ -124,10 +133,10 @@
       <Filter>Source Files\Modules</Filter>
     </ClCompile>
     <ClCompile Include="..\ThirdParty\ImNodes\ImNodes.cpp">
-      <Filter>Source Files\ImGui</Filter>
+      <Filter>Source Files\ImGui\ImNodes</Filter>
     </ClCompile>
     <ClCompile Include="..\ThirdParty\ImNodes\ImNodesEz.cpp">
-      <Filter>Source Files\ImGui</Filter>
+      <Filter>Source Files\ImGui\ImNodes</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -170,22 +179,13 @@
     <ClInclude Include="SortOriginalsModule.h">
       <Filter>Header Files\Modules</Filter>
     </ClInclude>
-    <ClInclude Include="NamingConventionModule.h">
-      <Filter>Header Files\Modules</Filter>
-    </ClInclude>
     <ClInclude Include="WwuLookUpData.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="ResultFile.h">
-      <Filter>Header Files\Helper</Filter>
-    </ClInclude>
-    <ClInclude Include="Issues.h">
-      <Filter>Header Files\Helper</Filter>
+      <Filter>Header Files\Modules\Helper</Filter>
     </ClInclude>
     <ClInclude Include="ToolboxModule.h">
-      <Filter>Header Files\Modules</Filter>
-    </ClInclude>
-    <ClInclude Include="ColorCodingModule.h">
       <Filter>Header Files\Modules</Filter>
     </ClInclude>
     <ClInclude Include="GUI.h">
@@ -204,7 +204,7 @@
       <Filter>Header Files\GUI</Filter>
     </ClInclude>
     <ClInclude Include="WwiseColors.h">
-      <Filter>Header Files\Helper</Filter>
+      <Filter>Header Files\Modules\Helper</Filter>
     </ClInclude>
     <ClInclude Include="QueryEditorLayout.h">
       <Filter>Header Files\GUI</Filter>
@@ -221,20 +221,50 @@
     <ClInclude Include="BaseModule.h">
       <Filter>Header Files\Modules</Filter>
     </ClInclude>
-    <ClInclude Include="..\ThirdParty\ImNodes\ImNodes.h">
-      <Filter>Source Files\ImGui</Filter>
-    </ClInclude>
-    <ClInclude Include="..\ThirdParty\ImNodes\ImNodesEz.h">
-      <Filter>Source Files\ImGui</Filter>
-    </ClInclude>
     <ClInclude Include="helper.h">
-      <Filter>Header Files\Helper</Filter>
+      <Filter>Header Files\Modules\Helper</Filter>
     </ClInclude>
     <ClInclude Include="QueryEditorModule.h">
       <Filter>Header Files\Modules\QueryEditorModule</Filter>
     </ClInclude>
     <ClInclude Include="MyNode.h">
       <Filter>Header Files\Modules\QueryEditorModule</Filter>
+    </ClInclude>
+    <ClInclude Include="BaseQueryStructure.h">
+      <Filter>Header Files\Modules\QueryEditorModule</Filter>
+    </ClInclude>
+    <ClInclude Include="QueryType.h">
+      <Filter>Header Files\Modules\QueryEditorModule</Filter>
+    </ClInclude>
+    <ClInclude Include="ColorSetting.h">
+      <Filter>Header Files\Modules\ColorCodingModule</Filter>
+    </ClInclude>
+    <ClInclude Include="ColorCodingModule.h">
+      <Filter>Header Files\Modules\ColorCodingModule</Filter>
+    </ClInclude>
+    <ClInclude Include="ColorResult.h">
+      <Filter>Header Files\Modules\ColorCodingModule</Filter>
+    </ClInclude>
+    <ClInclude Include="ColorSettingMode.h">
+      <Filter>Header Files\Modules\ColorCodingModule</Filter>
+    </ClInclude>
+    <ClInclude Include="NamingConventionModule.h">
+      <Filter>Header Files\Modules\NamingConventionModule</Filter>
+    </ClInclude>
+    <ClInclude Include="WwuSetting.h">
+      <Filter>Header Files\Modules\NamingConventionModule</Filter>
+    </ClInclude>
+    <ClInclude Include="ContainerSetting.h">
+      <Filter>Header Files\Modules\NamingConventionModule</Filter>
+    </ClInclude>
+    <ClInclude Include="NamingIssues.h">
+      <Filter>Header Files\Modules\NamingConventionModule</Filter>
+    </ClInclude>
+    <ClInclude Include="..\ThirdParty\ImNodes\ImNodesEz.h">
+      <Filter>Source Files\ImGui\ImNodes</Filter>
+    </ClInclude>
+    <ClInclude Include="..\ThirdParty\ImNodes\ImNodes.h">
+      <Filter>Source Files\ImGui\ImNodes</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

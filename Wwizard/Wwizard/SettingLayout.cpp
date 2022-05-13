@@ -18,7 +18,7 @@ SettingLayout::SettingLayout(std::unique_ptr<WwizardWwiseClient>& wwizardWwiseCl
 void SettingLayout::RenderLayout()
 {
     ImGui::SetNextWindowSize(ImVec2(430, 450), ImGuiCond_FirstUseEver);
-    if (!ImGui::Begin("Settings", (bool*)1))
+    if (!ImGui::Begin("Settings", NULL, ImGuiWindowFlags_NoMove))
     {
         ImGui::End();
         return;

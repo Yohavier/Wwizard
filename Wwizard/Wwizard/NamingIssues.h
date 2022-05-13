@@ -1,5 +1,5 @@
 #pragma once
-enum class Issue
+enum class NamingIssue
 {
 	HIERARCHY,
 	SPACE,

@@ -31,7 +31,7 @@ void QueryEditorLayout::RenderLayout()
 void QueryEditorLayout::SettingWidget()
 {
     ImGui::SetNextWindowSize(ImVec2(430, 450), ImGuiCond_FirstUseEver);
-    if (!ImGui::Begin("Settings", NULL, ImGuiWindowFlags_NoMove))
+    if (!ImGui::Begin("Config", NULL, ImGuiWindowFlags_NoMove))
     {
         ImGui::End();
         return;
@@ -528,13 +528,13 @@ void QueryEditorLayout::ShowQueryNodeEditor()
             if (ImNodes::Ez::BeginNode(node, node->Title, &node->Pos, &node->Selected))
             {
                 // Render input nodes first (order is important)
-                ImNodes::Ez::InputSlots(node->InputSlots.data(), node->InputSlots.size());
+                ImNodes::Ez::InputSlots(node->InputSlots.data(), static_cast<int>(node->InputSlots.size()));
 
                 // Custom node content may go here
                 ImGui::Text(node->nodeContent.c_str(), node->Title);
 
                 // Render output nodes first (order is important)
-                ImNodes::Ez::OutputSlots(node->OutputSlots.data(), node->OutputSlots.size());
+                ImNodes::Ez::OutputSlots(node->OutputSlots.data(), static_cast<int>(node->OutputSlots.size()));
 
                 // Store new connections when they are created
                 Connection new_connection;

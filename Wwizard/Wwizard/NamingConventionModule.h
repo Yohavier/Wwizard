@@ -5,113 +5,13 @@
 #include "WwuLookUpData.h"
 #include <set>
 #include <map>
-#include "Issues.h"
+#include "NamingIssues.h"
 #include "ResultFile.h"
 #include <thread>
 #include "WwizardWwiseClient.h"
 #include "BaseModule.h"
-
-struct WwuSettings
-{
-	WwuSettings() = default;
-	WwuSettings(std::string prefixToApply, bool applyPrefix, bool applyNamingConventionCheck, bool allowSpace)
-		: prefixToApply(prefixToApply)
-		, applyPrefix(applyPrefix)
-		, applyNamingConventionCheck(applyNamingConventionCheck)
-		, allowSpace(allowSpace)
-	{}
-
-	std::string prefixToApply = "";	
-
-	bool applyPrefix = false;
-	bool applyNamingConventionCheck = false;
-	bool allowSpace = false;
-	bool allowUpperCase = false;
-};
-
-struct ContainerSettings
-{
-	ContainerSettings() = default;
-	ContainerSettings(bool allowNumberSuffix, bool allowStringSuffix, int suffixLayers, int maxNumberAllowed, std::string stringSuffixes)
-		: allowNumberSuffix(allowNumberSuffix)
-		, allowStringSuffix(allowStringSuffix)
-		, suffixLayers(suffixLayers)
-		, maxNumberAllowed(maxNumberAllowed)
-		, stringSuffixes(stringSuffixes)
-	{
-
-	}
-
-	bool allowNumberSuffix = false;
-	bool allowStringSuffix = false;
-
-	int suffixLayers = 0;
-	int maxNumberAllowed =  0;
-
-	std::string stringSuffixes ="";
-
-	bool IsStringInSuffixList(std::string layer) 
-	{
-		std::string newSuffix;
-		for (auto& c : stringSuffixes)
-		{
-			if (c != ' ')
-			{
-				if (c == ',')
-				{
-					if (newSuffix == layer)
-					{
-						return true;
-					}
-					newSuffix = "";
-				}
-				else
-				{
-					newSuffix += c;
-				}
-			}
-		}
-		if (newSuffix != "")
-		{
-			if (newSuffix == layer)
-			{
-				return true;
-			}
-		}
-
-		return false;
-	}
-
-	bool IsNumberInRange(std::string number)
-	{
-
-		if (std::to_string(maxNumberAllowed).size() == number.size())
-		{
-			int numLayer = std::stoi(number);
-			if (numLayer <= maxNumberAllowed)
-			{
-				return true;
-			}
-		}
-		return false;
-	}
-
-	bool IsSuffixCountInRange(int layerCount)
-	{
-		if (layerCount <= maxNumberAllowed)
-		{
-			return true;
-		}
-		return false;
-	}
-
-	bool IsNumber(const std::string& s)
-	{
-		std::string::const_iterator it = s.begin();
-		while (it != s.end() && std::isdigit(*it)) ++it;
-		return !s.empty() && it == s.end();
-	}
-};
+#include "ContainerSetting.h"
+#include "WwuSetting.h"
 
 class NamingConventionModule : public BaseModule
 { 
@@ -122,7 +22,7 @@ public:
 	
 	void StartCheckNamingConventionThread();
 
-	const std::string& GetErrorMessageFromIssue(const Issue& issue);
+	const std::string& GetErrorMessageFromIssue(const NamingIssue& issue);
 	const std::map<std::string, NamingResultFile>& GetNamingIssues();
 	const std::set<std::string>& GetWhiteListedContainers();
 	const std::set<std::string>& GetWhiteListedWwuTypes();
@@ -150,7 +50,7 @@ private:
 	bool CheckHierarchy(const std::string& currentName, const std::string& constructedName, const std::string& nameID);
 
 	void ClearOldData();
-	void AddIssueToList(const std::string& guid, const std::string& name, const Issue& issue);
+	void AddIssueToList(const std::string& guid, const std::string& name, const NamingIssue& issue);
 
 	void SaveNamingConventionSettings();
 	void LoadNamingConventionSettings();
@@ -170,9 +70,9 @@ private:
 
 	std::thread* currentNamingConventionThread = nullptr;
 
-	std::map<Issue, std::string> issueMessages = { {Issue::HIERARCHY, "Hierarchy doesnt match"},
-		{Issue::SEPARATOR, "Multiple Separators or suffix is wrong"}, {Issue::SPACE, "Space is not allowed"},
-		{Issue::UPPERCASE, "Uppercase is not allowed"}, {Issue::PREFIX, "Wrong Prefix"} };
+	std::map<NamingIssue, std::string> issueMessages = { {NamingIssue::HIERARCHY, "Hierarchy doesnt match"},
+		{NamingIssue::SEPARATOR, "Multiple Separators or suffix is wrong"}, {NamingIssue::SPACE, "Space is not allowed"},
+		{NamingIssue::UPPERCASE, "Uppercase is not allowed"}, {NamingIssue::PREFIX, "Wrong Prefix"} };
 
 	std::set<std::string> whitelistedContainers = { "Folder", "Switch", "AudioDevice", "SwitchGroup",
 		"SoundBank", "Event", "DialogueEvent", "Bus", "AuxBus", "MusicSegment", "MusicTrack", "MusicSwitchContainer",

@@ -1,6 +1,6 @@
 #pragma once
 #include <string>
-#include "Issues.h"
+#include "NamingIssues.h"
 
 struct BaseResultFile
 {
@@ -17,11 +17,11 @@ struct BaseResultFile
 struct NamingResultFile : public BaseResultFile
 {
 	NamingResultFile() = delete;
-	NamingResultFile(std::string guid, std::string currentName, Issue issue)
+	NamingResultFile(std::string guid, std::string currentName, NamingIssue issue)
 		: BaseResultFile(guid, currentName)
 		, issue(issue)
 	{}
-	Issue issue;
+	NamingIssue issue;
 };
 
 struct QueryResultFile : public BaseResultFile

@@ -79,7 +79,7 @@ void NamingConventionModule::ClearOldData()
 	namingIssueResults.clear();
 }
 
-void NamingConventionModule::AddIssueToList(const std::string& guid, const std::string& name, const Issue& issue)
+void NamingConventionModule::AddIssueToList(const std::string& guid, const std::string& name, const NamingIssue& issue)
 {
 	if (namingIssueResults.find(guid) == namingIssueResults.end())
 	{
@@ -100,7 +100,7 @@ void NamingConventionModule::StartCheckNamingConventionThread()
 	namingConventionThread.detach();
 }
 
-const std::string& NamingConventionModule::GetErrorMessageFromIssue(const Issue& issue)
+const std::string& NamingConventionModule::GetErrorMessageFromIssue(const NamingIssue& issue)
 {
 	return issueMessages[issue];
 }
@@ -296,7 +296,7 @@ bool NamingConventionModule::CheckNameForSpace(const std::string& nodeName, cons
 		size_t loc = currentName.find(" ");
 		if (loc < currentName.size())
 		{
-			AddIssueToList(nodeID, nodeName, Issue::SPACE);
+			AddIssueToList(nodeID, nodeName, NamingIssue::SPACE);
 			return false;
 		}
 	}
@@ -310,7 +310,7 @@ bool NamingConventionModule::CheckForMultipleSeparatorsPerLayer(const std::strin
 	{
 		if (!IsCorrectSuffix(currentName, newNameLayer.substr(newNameLayer.find("_") + 1), containerName))
 		{
-			AddIssueToList(nodeID, nodeName, Issue::SEPARATOR);
+			AddIssueToList(nodeID, nodeName, NamingIssue::SEPARATOR);
 			return false;
 		}
 	}
@@ -392,7 +392,7 @@ bool NamingConventionModule::CheckUppercaseRule(const std::string& nodeName, con
 	
 	if (std::any_of(currentName.begin(), currentName.end(), isupper))
 	{
-		AddIssueToList(nodeID, nodeName, Issue::UPPERCASE);
+		AddIssueToList(nodeID, nodeName, NamingIssue::UPPERCASE);
 		return false;
 	}
 
@@ -414,13 +414,13 @@ bool NamingConventionModule::CheckRightPrefix(const std::string& nodeName, const
 	{
 		if (name.substr(0, separatorPlace) != rightPrefix)
 		{
-			AddIssueToList(nodeID, nodeName, Issue::PREFIX);
+			AddIssueToList(nodeID, nodeName, NamingIssue::PREFIX);
 			return false;
 		}
 	}
 	else if (name != rightPrefix)
 	{
-		AddIssueToList(nodeID, nodeName, Issue::PREFIX);
+		AddIssueToList(nodeID, nodeName, NamingIssue::PREFIX);
 		return false;
 	}
 	return true;
@@ -430,7 +430,7 @@ bool NamingConventionModule::CheckHierarchy(const std::string& currentName, cons
 {
 	if (currentName != constructedName)
 	{
-		AddIssueToList(nameID, currentName, Issue::HIERARCHY);
+		AddIssueToList(nameID, currentName, NamingIssue::HIERARCHY);
 		return false;
 	}
 	return true;
