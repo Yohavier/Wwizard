@@ -7,6 +7,7 @@
 #include "ResultFile.h"
 #include "BaseModule.h"
 #include "helper.h"
+#include "MyNode.h"
 
 enum class QueryType
 {
@@ -60,7 +61,6 @@ public:
 	void DeleteQuery(const std::string& guid);
 	void ResetQueryResults();
 
-
 	template<typename TReturn, typename TMap>
 	TReturn FindInMap(const TMap& findMap)
 	{
@@ -87,6 +87,8 @@ public:
 	const std::string GetCurrentArgAsString();
 
 	void OnConnectionStatusChange(const bool newConnectionStatus);
+	void RunNodeGraph(MyNode* node);
+	std::map<std::string, QueryResultFile> CalculateNode(MyNode* node);
 
 private:
 	void FetchWwiseQueries();

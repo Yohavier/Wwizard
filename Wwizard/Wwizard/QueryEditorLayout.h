@@ -39,8 +39,6 @@ private:
     void SetUseQueryNodeEditor(bool newState);
     void UpdateSelectedNode(MyNode* newSelectedNode);
 
-    std::map<std::string, QueryResultFile> CalculateNextNode(MyNode* node);
-
 public:
     std::map<std::string, std::function<MyNode* ()>> available_nodes
     {
@@ -60,7 +58,7 @@ private:
 	const std::unique_ptr<QueryEditorModule>& queryEditorModule;
    
     MyNode* outputNode;
-    MyNode* currentSelectedNode;
+    MyNode* currentSelectedNode = nullptr;
 
     const char* items[2] = { "Standard", "Nodegraph" };
     const char* current_item = items[0];

@@ -653,8 +653,7 @@ void QueryEditorLayout::ShowQueryNodeEditor()
 
 void QueryEditorLayout::RecalculateNodeGraph()
 {
-    queryEditorModule->ResetQueryResults();
-    queryEditorModule->queryResultFiles = CalculateNextNode(outputNode);
+    queryEditorModule->RunNodeGraph(outputNode);
 }
 
 void QueryEditorLayout::SetUseQueryNodeEditor(bool newState)
@@ -670,81 +669,6 @@ void QueryEditorLayout::SetUseQueryNodeEditor(bool newState)
         queryEditorModule->ResetQueryResults();
         queryEditorModule->RunActiveQueries();
     }
-}
-
-std::map<std::string, QueryResultFile> QueryEditorLayout::CalculateNextNode(MyNode* node)
-{
-    std::map<std::string, QueryResultFile> emptyDefault;
-    if (node->Title == "And")
-    {
-        bool firstAnd = true;
-        std::map<std::string, QueryResultFile> tempAnd;
-        for (const auto& connection : node->Connections)
-        {
-            MyNode* nextNode = static_cast<MyNode*>(connection.OutputNode);
-            if (nextNode->nodeGuid != node->nodeGuid)
-            {
-                auto newResults = CalculateNextNode(nextNode);
-                if (firstAnd)
-                {
-                    for (auto& result : newResults)
-                    {
-                        tempAnd.insert({ result.first, result.second });
-                    }
-                }
-                else
-                {
-                    auto tempRemoveAnd = tempAnd;
-                    for (auto& alreadyCaptured : tempRemoveAnd)
-                    {
-                        if (newResults.find(alreadyCaptured.first) == newResults.end())
-                        {
-                            tempAnd.erase(alreadyCaptured.first);
-                        }
-                    }      
-                }
-                firstAnd = false;
-            }        
-        }
-        return tempAnd;
-    }
-    else if (node->Title == "Or")
-    {
-        std::map<std::string, QueryResultFile> tempOr;
-        for (const auto& connection : node->Connections)
-        {
-            MyNode* nextNode = static_cast<MyNode*>(connection.OutputNode);
-            if (nextNode->nodeGuid != node->nodeGuid)
-            {
-                for (auto& result : CalculateNextNode(nextNode))
-                {
-                    tempOr.insert({result.first, result.second});
-                }
-            }
-        }
-        return tempOr;
-    }
-    else if (node->Title == "Output")
-    {
-        for (const auto& connection : node->Connections)
-        {
-            MyNode* nextNode = static_cast<MyNode*>(connection.OutputNode);
-            if (nextNode->nodeGuid != node->nodeGuid)
-            {
-                return CalculateNextNode(nextNode);
-            }
-        }
-    }
-    else if (node->Title == "Query")
-    {
-        static_cast<MyQueryNode*>(node)->RerunQuery();
-        return static_cast<MyQueryNode*>(node)->queryResults;
-    }
-
-
-
-
-    return emptyDefault;
 }
 
 void QueryEditorLayout::UpdateSelectedNode(MyNode* newCurrentSelectedNode)
