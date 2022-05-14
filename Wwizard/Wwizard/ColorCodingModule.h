@@ -5,7 +5,7 @@
 #include <memory>
 #include <set>
 #include "BaseModule.h"
-#include "ColorResult.h"
+#include "ResultFile.h"
 #include "ColorSetting.h"
 #include "ColorSettingMode.h"
 
@@ -28,7 +28,7 @@ public:
 
 private:
 	void FindObjectsAffectedByColorSettings();
-	void CollectObjectsInColorHierarchy(std::string currentID, std::string parentID, int mode, int applyableColorID, std::string path, int actualColor);
+	void CollectObjectsInColorHierarchy(std::string currentID, std::string parentID, int mode, int applyableColorID, std::string path, int actualColor, std::string name);
 	void ApplyColorSettings();
 	void LoadColorSettings();
 	void SaveColorSettings();
@@ -45,6 +45,6 @@ public:
 private:
 	std::unique_ptr<WwizardWwiseClient>& wwizardClient;
 
-	std::map<std::string, ColorResult> colorHierarchy = {};
+	std::map<std::string, ColorResultFile> colorHierarchy = {};
 };
 

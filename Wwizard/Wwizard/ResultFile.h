@@ -38,3 +38,21 @@ struct QueryResultFile : public BaseResultFile
 	std::string path;
 	int color;
 };
+
+struct ColorResultFile : public BaseResultFile
+{
+public:
+	ColorResultFile() = delete;
+	ColorResultFile(std::string objectID, std::string parentID, int colorSettingMode, int applyableColorID, std::string objectPath, std::string name)
+		: parentID(parentID)
+		, colorSettingMode(colorSettingMode)
+		, applyableColorID(applyableColorID)
+		, objectPath(objectPath)
+		, BaseResultFile(objectID, name)
+	{}
+
+	std::string parentID;
+	int colorSettingMode = 0;
+	int applyableColorID = 0;
+	std::string objectPath;
+};

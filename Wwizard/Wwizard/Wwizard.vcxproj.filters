@@ -242,9 +242,6 @@
     <ClInclude Include="ColorCodingModule.h">
       <Filter>Header Files\Modules\ColorCodingModule</Filter>
     </ClInclude>
-    <ClInclude Include="ColorResult.h">
-      <Filter>Header Files\Modules\ColorCodingModule</Filter>
-    </ClInclude>
     <ClInclude Include="ColorSettingMode.h">
       <Filter>Header Files\Modules\ColorCodingModule</Filter>
     </ClInclude>

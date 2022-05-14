@@ -195,7 +195,6 @@
     <ClInclude Include="BaseQueryStructure.h" />
     <ClInclude Include="ColorCodingLayout.h" />
     <ClInclude Include="ColorCodingModule.h" />
-    <ClInclude Include="ColorResult.h" />
     <ClInclude Include="ColorSetting.h" />
     <ClInclude Include="ColorSettingMode.h" />
     <ClInclude Include="ContainerSetting.h" />

@@ -43,7 +43,7 @@ void ColorCodingModule::FindObjectsAffectedByColorSettings()
 					{
 						if (CheckIfWwiseObjectHasColorProperty(colorObject["classId"].GetVariant().GetUInt32()))
 						{
-							CollectObjectsInColorHierarchy(colorObject["id"].GetVariant().GetString(), "", colorSetting.second.settingMode, colorSetting.second.colorCode, colorObject["path"].GetVariant().GetString(), colorObject["color"].GetVariant().GetInt8());
+							CollectObjectsInColorHierarchy(colorObject["id"].GetVariant().GetString(), "", colorSetting.second.settingMode, colorSetting.second.colorCode, colorObject["path"].GetVariant().GetString(), colorObject["color"].GetVariant().GetInt8(), colName);
 						}
 					}
 				}
@@ -52,8 +52,8 @@ void ColorCodingModule::FindObjectsAffectedByColorSettings()
 	}
 }
 
-void ColorCodingModule::CollectObjectsInColorHierarchy(std::string currentID, std::string parentID, int mode, int applyableColorID, std::string path, int actualColor)
-{
+void ColorCodingModule::CollectObjectsInColorHierarchy(std::string currentID, std::string parentID, int mode, int applyableColorID, std::string path, int actualColor, std::string name)
+{	
 	std::vector<std::string> optionList = { "path", "color", "name", "type", "id" };
 
 	AkJson result = wwizardClient->GetChildrenFromGuid(currentID, optionList);
@@ -104,7 +104,7 @@ void ColorCodingModule::CollectObjectsInColorHierarchy(std::string currentID, st
 	}
 	else
 	{
-		colorHierarchy.emplace(currentID, ColorResult(currentID, parentID, mode, applyableColorID, path));
+		colorHierarchy.emplace(currentID, ColorResultFile(currentID, parentID, mode, applyableColorID, path, name));
 	}
 
 	for (const auto& col : blockedColors)
@@ -121,11 +121,18 @@ void ColorCodingModule::CollectObjectsInColorHierarchy(std::string currentID, st
 		{
 			if (newMode == ColorSettingMode::HierarchyHard || newMode == ColorSettingMode::HierarchySoft)
 			{
-				CollectObjectsInColorHierarchy(child["id"].GetVariant().GetString(), currentID, mode, applyableColorID, child["path"].GetVariant().GetString(), child["color"].GetVariant().GetInt8());
+				CollectObjectsInColorHierarchy(child["id"].GetVariant().GetString(), currentID, mode, applyableColorID, child["path"].GetVariant().GetString(), child["color"].GetVariant().GetInt8(), name);
 			}
 			else
 			{
-				CollectObjectsInColorHierarchy(child["id"].GetVariant().GetString(), currentID, -1, child["color"].GetVariant().GetInt8(), child["path"].GetVariant().GetString(), child["color"].GetVariant().GetInt8());
+				if (child.HasKey("color"))
+				{
+					CollectObjectsInColorHierarchy(child["id"].GetVariant().GetString(), currentID, -1, child["color"].GetVariant().GetInt8(), child["path"].GetVariant().GetString(), child["color"].GetVariant().GetInt8(), name);
+				}
+				else
+				{
+					CollectObjectsInColorHierarchy(child["id"].GetVariant().GetString(), currentID, -1, 0, child["path"].GetVariant().GetString(), 0, name);
+				}
 			}
 		}
 	}
