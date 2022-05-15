@@ -377,7 +377,8 @@ const std::string QueryEditorModule::GetCurrentArgAsString()
             {
                 if (rawArg.at(i) == '\\')
                 {
-                    if (rawArg.at(i + 1) == '\\')
+                    int nextSlot = i + 1;
+                    if (rawArg.at(nextSlot) == '\\')
                     {
                         processedArg += "\\";
                         i++;
