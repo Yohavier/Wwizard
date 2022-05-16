@@ -1,3 +1,4 @@
+#pragma once
 #include "QueryEditorModule.h"
 #include <fstream>
 #include <cstdlib>

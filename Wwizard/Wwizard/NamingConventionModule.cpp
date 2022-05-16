@@ -1,3 +1,4 @@
+#pragma once
 #include "NamingConventionModule.h"
 #include <iostream>
 #include <fstream>
@@ -13,24 +14,28 @@
 NamingConventionModule::NamingConventionModule(const std::string& wwiseProjPath, std::unique_ptr<WwizardWwiseClient>& wwizardClient)
 	:wwizardClient(wwizardClient)
 {
-	std::string relativeWwiseProjPath = wwiseProjPath;
-	relativeWwiseProjPath.erase(0, 1);
-	relativeWwiseProjPath.erase(relativeWwiseProjPath.size() - 1);
-	for (int i = static_cast<int>(relativeWwiseProjPath.size()) - 1; i > 0; i--)
-	{
-		if (relativeWwiseProjPath.at(i) == '\\')
-			break;
-		else
-			relativeWwiseProjPath.erase(i);
-	}
-	projectPath = relativeWwiseProjPath;
-
+	SetProjectPath(wwiseProjPath);
 	LoadNamingConventionSettings();
 }
 
 NamingConventionModule::~NamingConventionModule()
 {
 	SaveNamingConventionSettings();
+}
+
+void NamingConventionModule::SetProjectPath(std::string newProjectPath)
+{
+	newProjectPath.erase(0, 1);
+	newProjectPath.erase(newProjectPath.size() - 1);
+	for (int i = static_cast<int>(newProjectPath.size()) - 1; i > 0; i--)
+	{
+		if (newProjectPath.at(i) == '\\')
+			break;
+		else
+			newProjectPath.erase(i);
+	}
+	projectPath = newProjectPath;
+
 }
 
 void NamingConventionModule::BeginNamingConventionProcess()
@@ -568,3 +573,9 @@ void NamingConventionModule::LoadNamingConventionSettings()
 		}
 	}
 }
+
+void NamingConventionModule::OnSettingsChange(const std::string projectPath, const std::string sdkPath)
+{
+	SetProjectPath(projectPath);
+}
+

@@ -1,3 +1,4 @@
+#pragma once
 #include "SettingHandler.h"
 
 void SettingHandler::SaveSettings(const std::string wwiseProjectPath, const std::string sdkPath, const std::string waapiIP, const int waapiPort)
@@ -8,6 +9,7 @@ void SettingHandler::SaveSettings(const std::string wwiseProjectPath, const std:
 	this->waapiPort = waapiPort;
 
     WriteToJson();
+    settingChangeFlag = true;
 }
 
 void SettingHandler::LoadSettings()

@@ -1,3 +1,4 @@
+#pragma once
 #include "QueryEditorLayout.h"
 #include "WwiseColors.h"
 

@@ -1,3 +1,4 @@
+#pragma once
 #include "NamingConventionLayout.h"
 
 NamingConventionLayout::NamingConventionLayout(std::unique_ptr<WwizardWwiseClient>& wwizardWwiseClient, std::unique_ptr<NamingConventionModule>& namingConventionModule)

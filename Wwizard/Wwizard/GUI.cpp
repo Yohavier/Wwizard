@@ -1,3 +1,4 @@
+#pragma once
 #include "GUI.h"
 #include "WwiseColors.h"
 

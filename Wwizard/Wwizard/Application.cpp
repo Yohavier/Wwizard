@@ -1,3 +1,4 @@
+#pragma once
 #include "Application.h" 
 
 Application::Application()
@@ -19,8 +20,15 @@ void Application::Loop()
     m_isRunning = true;
     while (m_isRunning)
     {
+        if (settingsHandler->settingChangeFlag)
+        {
+            settingsHandler->settingChangeFlag = false;
+            namingConventionModule->OnSettingsChange(settingsHandler->GetWwisProjectPathRef(), settingsHandler->GetSDKPath());
+            sortOriginalsModule->OnSettingsChange(settingsHandler->GetWwisProjectPathRef(), settingsHandler->GetSDKPath());
+        }
         myGUI->Render(m_isRunning);
     }
 }
+
 
 

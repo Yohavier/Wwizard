@@ -1,3 +1,4 @@
+#pragma once
 #include "ColorCodingModule.h"
 
 ColorCodingModule::ColorCodingModule(std::unique_ptr<WwizardWwiseClient>& wwizardClient)

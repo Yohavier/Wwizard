@@ -39,5 +39,6 @@ public:
 	std::string sdkPath;
 	std::string waapiIP;
 	int waapiPort;
+	bool settingChangeFlag;
 };
 

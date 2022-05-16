@@ -28,7 +28,9 @@ public:
 	const std::set<std::string>& GetWhiteListedWwuTypes();
 	const std::string& GetStringToReplace(const std::string& wwuType);
 
+	void SetProjectPath(std::string newProjectPath);
 	void OnConnectionStatusChange(const bool newConnectionStatus) override;
+	void OnSettingsChange(const std::string projectPath, const std::string sdkPath) override;
 
 private:
 	void BeginNamingConventionProcess();

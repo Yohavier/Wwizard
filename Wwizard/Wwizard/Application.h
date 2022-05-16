@@ -15,6 +15,7 @@ class Application
 public:
 	Application();
 
+
 private:
 	void Loop();
 

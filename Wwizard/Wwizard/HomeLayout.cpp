@@ -1,3 +1,4 @@
+#pragma once
 #include "HomeLayout.h"
 
 HomeLayout::HomeLayout(std::unique_ptr<WwizardWwiseClient>& wwizardWwiseClient)

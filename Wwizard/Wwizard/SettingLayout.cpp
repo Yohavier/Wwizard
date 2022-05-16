@@ -1,3 +1,4 @@
+#pragma once
 #include "SettingLayout.h"
 
 static std::string projectPathSetting;

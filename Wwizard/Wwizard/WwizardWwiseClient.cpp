@@ -1,3 +1,4 @@
+#pragma once
 #include "WwizardWwiseClient.h"
 #include <windows.h>
 #include <atlstr.h>

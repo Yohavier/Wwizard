@@ -1,3 +1,4 @@
+#pragma once
 #include "ToolboxModule.h"
 
 ToolboxModule::ToolboxModule(std::unique_ptr<WwizardWwiseClient>& wwizardClient)

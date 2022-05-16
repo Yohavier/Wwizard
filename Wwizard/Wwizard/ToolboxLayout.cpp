@@ -1,3 +1,4 @@
+#pragma once
 #include "ToolboxLayout.h"
 #include "WwiseColors.h"
 

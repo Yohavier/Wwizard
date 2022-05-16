@@ -1,22 +1,27 @@
+#pragma once
 #include "SortOriginalsModule.h"
 
 SortOriginalsModule::SortOriginalsModule(const std::string& wwiseProjPath)
 {
-	std::string relativeWwiseProjectPath = wwiseProjPath;
-	relativeWwiseProjectPath.erase(0, 1);
-	relativeWwiseProjectPath.erase(relativeWwiseProjectPath.size() - 1);
-	for (int i = static_cast<int>(relativeWwiseProjectPath.size()) - 1; i > 0; i--)
+	SetProjectPath(wwiseProjPath);
+}
+
+void SortOriginalsModule::SetProjectPath(std::string newProjectPath)
+{
+	newProjectPath.erase(0, 1);
+	newProjectPath.erase(newProjectPath.size() - 1);
+	for (int i = static_cast<int>(newProjectPath.size()) - 1; i > 0; i--)
 	{
-		if (relativeWwiseProjectPath.at(i) == '\\')
+		if (newProjectPath.at(i) == '\\')
 			break;
 		else
-			relativeWwiseProjectPath.erase(i);
+			newProjectPath.erase(i);
 	}
 
-	projectPath = relativeWwiseProjectPath;
-	originalsPath = relativeWwiseProjectPath + "Originals\\SFX";
-	actorMixerWwuPath = relativeWwiseProjectPath + "Actor-Mixer Hierarchy";
-	interactiveMuisicWwuPath = relativeWwiseProjectPath + "Interactive Music Hierarchy";
+	projectPath = newProjectPath;
+	originalsPath = newProjectPath + "Originals\\SFX";
+	actorMixerWwuPath = newProjectPath + "Actor-Mixer Hierarchy";
+	interactiveMuisicWwuPath = newProjectPath + "Interactive Music Hierarchy";
 }
 
 void SortOriginalsModule::ClearPreviousSortData() 
@@ -553,3 +558,7 @@ const int& SortOriginalsModule::GetSFXCount()
 	return static_cast<int>(sfxDic.size());
 }
 
+void SortOriginalsModule::OnSettingsChange(const std::string projectPath, const std::string sdkPath)
+{
+	SetProjectPath(projectPath);
+}
