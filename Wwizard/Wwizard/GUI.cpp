@@ -61,7 +61,7 @@ GUI::GUI(std::unique_ptr<WwizardWwiseClient>& wwizardWwiseClient,
     ImGui_ImplDX10_Init(g_pd3dDevice);
 
     float fontSize = 18.0f;
-    auto fontpath = static_cast<std::string>(SOLUTION_DIR) + "assets/fonts/OpenSans-Bold.ttf";
+    auto fontpath = static_cast<std::string>(SOLUTION_DIR) + "/assets/fonts/OpenSans-Bold.ttf";
     io->FontDefault = io->Fonts->AddFontFromFileTTF(fontpath.c_str(), fontSize);
     SetDefaultStyle();
 

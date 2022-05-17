@@ -8,15 +8,20 @@ SortOriginalsModule::SortOriginalsModule(const std::string& wwiseProjPath)
 
 void SortOriginalsModule::SetProjectPath(std::string newProjectPath)
 {
+
 	newProjectPath.erase(0, 1);
-	newProjectPath.erase(newProjectPath.size() - 1);
-	for (int i = static_cast<int>(newProjectPath.size()) - 1; i > 0; i--)
+	if (newProjectPath.size() > 0)
 	{
-		if (newProjectPath.at(i) == '\\')
-			break;
-		else
-			newProjectPath.erase(i);
+		newProjectPath.erase(newProjectPath.size() - 1);
+		for (int i = static_cast<int>(newProjectPath.size()) - 1; i > 0; i--)
+		{
+			if (newProjectPath.at(i) == '\\')
+				break;
+			else
+				newProjectPath.erase(i);
+		}
 	}
+
 
 	projectPath = newProjectPath;
 	originalsPath = newProjectPath + "Originals\\SFX";
