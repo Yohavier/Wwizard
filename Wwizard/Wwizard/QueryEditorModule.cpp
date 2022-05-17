@@ -173,7 +173,7 @@ void QueryEditorModule::RunActiveQueries()
 
 void QueryEditorModule::LoadWaqlQueriesFromJson()
 {
-    auto path = static_cast<std::string>(SOLUTION_DIR) + "SavedData/CustomQueries.json";
+    auto path = static_cast<std::string>(SOLUTION_DIR) + "/SavedData/CustomQueries.json";
     FILE* fp = fopen(path.c_str(), "rb");
     if (fp != 0)
     {
@@ -208,7 +208,7 @@ void QueryEditorModule::LoadWaqlQueriesFromJson()
 
 void QueryEditorModule::LoadWaapiQueriesFromJson()
 {
-    auto path = static_cast<std::string>(SOLUTION_DIR) + "SavedData/CustomQueries.json";
+    auto path = static_cast<std::string>(SOLUTION_DIR) + "/SavedData/CustomQueries.json";
     FILE* fp = fopen(path.c_str(), "rb"); 
     if (fp != 0)
     {
@@ -522,7 +522,7 @@ void QueryEditorModule::RunNodeGraph(MyNode* node)
 std::map<std::string, QueryResultFile> QueryEditorModule::CalculateNode(MyNode* node)
 {
     std::map<std::string, QueryResultFile> emptyDefault;
-    if (node->Title == "And")
+    if (static_cast<std::string>(node->Title) == "And")
     {
         bool firstAnd = true;
         std::map<std::string, QueryResultFile> tempAnd;
@@ -555,7 +555,7 @@ std::map<std::string, QueryResultFile> QueryEditorModule::CalculateNode(MyNode* 
         }
         return tempAnd;
     }
-    else if (node->Title == "Or")
+    else if (static_cast<std::string>(node->Title) == "Or")
     {
         std::map<std::string, QueryResultFile> tempOr;
         for (const auto& connection : node->Connections)
@@ -571,7 +571,7 @@ std::map<std::string, QueryResultFile> QueryEditorModule::CalculateNode(MyNode* 
         }
         return tempOr;
     }
-    else if (node->Title == "Output")
+    else if (static_cast<std::string>(node->Title) == "Output")
     {
         for (const auto& connection : node->Connections)
         {
@@ -582,7 +582,7 @@ std::map<std::string, QueryResultFile> QueryEditorModule::CalculateNode(MyNode* 
             }
         }
     }
-    else if (node->Title == "Query")
+    else if (static_cast<std::string>(node->Title) == "Query")
     {
         static_cast<MyQueryNode*>(node)->RerunQuery();
         return static_cast<MyQueryNode*>(node)->queryResults;

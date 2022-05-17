@@ -50,11 +50,12 @@ void QueryEditorLayout::SettingWidget()
         ImGui::EndCombo();
     }
 
-    if (current_item == "Standard")
+    if (static_cast<std::string>(current_item) == "Standard")
     {
         SetUseQueryNodeEditor(false);
     }
-    else if (current_item == "Nodegraph")
+
+    else if (static_cast<std::string>(current_item) == "Nodegraph")
     {
         SetUseQueryNodeEditor(true);
     }
@@ -659,17 +660,20 @@ void QueryEditorLayout::RecalculateNodeGraph()
 
 void QueryEditorLayout::SetUseQueryNodeEditor(bool newState)
 {
-    useQueryNodeEditor = newState;
+    if (useQueryNodeEditor != newState)
+    {
+        if (newState)
+        {
+            RecalculateNodeGraph();
+        }
+        else
+        {
+            queryEditorModule->ResetQueryResults();
+            queryEditorModule->RunActiveQueries();
+        }
+    }
 
-    if (newState)
-    {
-        RecalculateNodeGraph();
-    }
-    else
-    {
-        queryEditorModule->ResetQueryResults();
-        queryEditorModule->RunActiveQueries();
-    }
+    useQueryNodeEditor = newState;
 }
 
 void QueryEditorLayout::UpdateSelectedNode(MyNode* newCurrentSelectedNode)

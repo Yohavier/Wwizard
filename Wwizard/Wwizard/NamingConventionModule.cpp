@@ -514,7 +514,7 @@ void NamingConventionModule::SaveNamingConventionSettings()
 	}
 	d.AddMember("ContainerSettings", rapidjsonContainerSettings, d.GetAllocator());
 
-	auto path = static_cast<std::string>(SOLUTION_DIR) + "SavedData/NamingConventionSettings.json";
+	auto path = static_cast<std::string>(SOLUTION_DIR) + "/SavedData/NamingConventionSettings.json";
 	FILE* fp = fopen(path.c_str(), "wb");
 	if (fp != 0)
 	{
@@ -530,7 +530,7 @@ void NamingConventionModule::SaveNamingConventionSettings()
 
 void NamingConventionModule::LoadNamingConventionSettings()
 {
-	auto path = static_cast<std::string>(SOLUTION_DIR) + "SavedData/NamingConventionSettings.json";
+	auto path = static_cast<std::string>(SOLUTION_DIR) + "/SavedData/NamingConventionSettings.json";
 	FILE* fp = fopen(path.c_str(), "rb");
 	if (fp != 0)
 	{

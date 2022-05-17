@@ -50,12 +50,12 @@ GUI::GUI(std::unique_ptr<WwizardWwiseClient>& wwizardWwiseClient,
     IMGUI_CHECKVERSION();
     ImGui::CreateContext();
     io = &ImGui::GetIO();
+    ImGui::LoadIniSettingsFromDisk((static_cast<std::string>(SOLUTION_DIR) + "/SavedData/imgui.ini").c_str());
     (void)io;
     io->ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;       // Enable Keyboard Controls
     //io.ConfigFlags |= ImGuiConfigFlags_NavEnableGamepad;      // Enable Gamepad Controls
     io->ConfigFlags |= ImGuiConfigFlags_DockingEnable;           // Enable Docking
     io->ConfigFlags |= ImGuiConfigFlags_ViewportsEnable;         // Enable Multi-Viewport / Platform Windows
-
     // Setup Platform/Renderer backends
     ImGui_ImplWin32_Init(hwnd);
     ImGui_ImplDX10_Init(g_pd3dDevice);

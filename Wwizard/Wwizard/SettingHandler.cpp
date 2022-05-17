@@ -14,7 +14,7 @@ void SettingHandler::SaveSettings(const std::string wwiseProjectPath, const std:
 
 void SettingHandler::LoadSettings()
 {
-    auto path = static_cast<std::string>(SOLUTION_DIR) + "SavedData/Settings.json";
+    auto path = static_cast<std::string>(SOLUTION_DIR) + "/SavedData/Settings.json";
     FILE* fp = fopen(path.c_str(), "rb");
     if (fp != 0)
     {
@@ -56,7 +56,7 @@ void SettingHandler::WriteToJson()
     waapiPortValue.SetInt(waapiPort);
     d.AddMember("waapiPort", waapiPortValue, d.GetAllocator());
 
-    auto path = static_cast<std::string>(SOLUTION_DIR) + "SavedData/Settings.json";
+    auto path = static_cast<std::string>(SOLUTION_DIR) + "/SavedData/Settings.json";
     FILE* fp = fopen(path.c_str(), "wb");
     if (fp != 0)
     {
