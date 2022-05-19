@@ -2,6 +2,7 @@ cmake_minimum_required(VERSION "3.23.1")
 
 project("Wwizard")
 
+
 file(GLOB_RECURSE HEADER_QUERYMODULE
 	Wwizard/Wwizard/QueryEditorModule.h)
 
@@ -128,10 +129,10 @@ file(GLOB_RECURSE HEADER
 )
 source_group("Header Files" FILES ${HEADER})
 
+
+
 add_executable("${PROJECT_NAME}" ${SRC} ${SRC_IMGUI_IMNODES} ${IMGUI} ${HEADER} ${HEADER_GUI} 
 								 ${HEADER_MODULES} ${HEADER_MODULES_COLORCODING} ${HEADER_MODULES_HELPER} ${HEADER_MODULES_NAMINGCONVENTION} ${HEADER_MODULES_QUERYEDITOR})
-
-
 
 target_link_libraries("${PROJECT_NAME}" d3d10.lib)
 target_link_libraries("${PROJECT_NAME}" d3dcompiler.lib)
