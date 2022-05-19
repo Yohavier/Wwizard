@@ -1,3 +1,5 @@
+[![CMake](https://github.com/Yohavier/Wwizard/actions/workflows/cmake.yml/badge.svg?branch=main)](https://github.com/Yohavier/Wwizard/actions/workflows/cmake.yml)
+
 # Wwizard
 This is a tool, that extends Wwise a bit. Its made to improve your project workflows and keep it tidy. 
 In the other two folders I explain a bit about my best practices and ideas about how to improve wwise. 
@@ -9,8 +11,10 @@ Main features are:
   - sort originals
   - advanced query editor
 
-## Best Practices
+
+
+# Best Practices
 A small gathering of do's and dont's. 
 
-## Naming Convention 
+# Naming Convention 
 How to name everything in your Wwise Project, so it makes sense, is easy to read and can be used for further automation/processing. 
