@@ -663,7 +663,7 @@ void QueryEditorLayout::SetUseQueryNodeEditor(bool newState)
     if (useQueryNodeEditor != newState)
     {
         if (newState)
-        {
+        {   
             RecalculateNodeGraph();
         }
         else

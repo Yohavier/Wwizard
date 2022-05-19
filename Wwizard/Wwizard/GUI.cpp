@@ -50,7 +50,7 @@ GUI::GUI(std::unique_ptr<WwizardWwiseClient>& wwizardWwiseClient,
     IMGUI_CHECKVERSION();
     ImGui::CreateContext();
     io = &ImGui::GetIO();
-    ImGui::LoadIniSettingsFromDisk((static_cast<std::string>(SOLUTION_DIR) + "/SavedData/imgui.ini").c_str());
+    ImGui::LoadIniSettingsFromDisk((static_cast<std::string>(SOLUTION_DIR) + "/Wwizard/SavedData/imgui.ini").c_str());
     (void)io;
     io->ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;       // Enable Keyboard Controls
     //io.ConfigFlags |= ImGuiConfigFlags_NavEnableGamepad;      // Enable Gamepad Controls
@@ -61,7 +61,7 @@ GUI::GUI(std::unique_ptr<WwizardWwiseClient>& wwizardWwiseClient,
     ImGui_ImplDX10_Init(g_pd3dDevice);
 
     float fontSize = 18.0f;
-    auto fontpath = static_cast<std::string>(SOLUTION_DIR) + "/assets/fonts/OpenSans-Bold.ttf";
+    auto fontpath = static_cast<std::string>(SOLUTION_DIR) + "/Wwizard/assets/fonts/OpenSans-Bold.ttf";
     io->FontDefault = io->Fonts->AddFontFromFileTTF(fontpath.c_str(), fontSize);
     SetDefaultStyle();
 

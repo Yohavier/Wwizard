@@ -173,7 +173,7 @@ void QueryEditorModule::RunActiveQueries()
 
 void QueryEditorModule::LoadWaqlQueriesFromJson()
 {
-    auto path = static_cast<std::string>(SOLUTION_DIR) + "/SavedData/CustomQueries.json";
+    auto path = static_cast<std::string>(SOLUTION_DIR) + "/Wwizard/SavedData/CustomQueries.json";
     FILE* fp = fopen(path.c_str(), "rb");
     if (fp != 0)
     {
@@ -208,7 +208,7 @@ void QueryEditorModule::LoadWaqlQueriesFromJson()
 
 void QueryEditorModule::LoadWaapiQueriesFromJson()
 {
-    auto path = static_cast<std::string>(SOLUTION_DIR) + "/SavedData/CustomQueries.json";
+    auto path = static_cast<std::string>(SOLUTION_DIR) + "/Wwizard/SavedData/CustomQueries.json";
     FILE* fp = fopen(path.c_str(), "rb"); 
     if (fp != 0)
     {

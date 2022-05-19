@@ -240,7 +240,7 @@ void ColorCodingModule::SaveColorSettings()
 	rapidBlockedColors.AddMember("colorID", rapidBlockedList, d.GetAllocator());
 	d.AddMember("BlockedColors", rapidBlockedColors, d.GetAllocator());
 
-	auto path = static_cast<std::string>(SOLUTION_DIR) + "/SavedData/ColorSettings.json";
+	auto path = static_cast<std::string>(SOLUTION_DIR) + "/Wwizard/SavedData/ColorSettings.json";
 	FILE* fp = fopen(path.c_str(), "wb");
 	if (fp != 0)
 	{
@@ -256,7 +256,7 @@ void ColorCodingModule::SaveColorSettings()
 
 void ColorCodingModule::LoadColorSettings()
 {
-	auto path = static_cast<std::string>(SOLUTION_DIR) + "/SavedData/ColorSettings.json";
+	auto path = static_cast<std::string>(SOLUTION_DIR) + "/Wwizard/SavedData/ColorSettings.json";
 	FILE* fp = fopen(path.c_str(), "rb");
 
 	if (fp != 0)
