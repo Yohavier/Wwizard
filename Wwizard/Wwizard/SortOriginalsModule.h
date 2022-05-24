@@ -25,11 +25,11 @@ public:
 	void DeleteUnusedOriginals();
 	void ClearCollectedOriginalsList();
 
-	const int& GetOriginalsCount();
+	const int GetOriginalsCount();
 	const std::string& GetOriginalPath();
 	const std::set<std::string>& GetUnusedOriginals();
-	const int& GetMusicCount();
-	const int& GetSFXCount();
+	const int GetMusicCount();
+	const int GetSFXCount();
 
 	void StartSortOriginalsThread();
 	void BeginScanProcess();

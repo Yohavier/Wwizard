@@ -538,8 +538,11 @@ void SortOriginalsModule::StartSortOriginalsThread()
 }
 
 
-const int& SortOriginalsModule::GetOriginalsCount() 
+const int SortOriginalsModule::GetOriginalsCount() 
 { 
+	if (originalsDic.empty())
+		return 0;
+
 	return static_cast<int>(originalsDic.size()); 
 }
 
@@ -553,13 +556,19 @@ const std::set<std::string>& SortOriginalsModule::GetUnusedOriginals()
 	return unusedOriginalsPaths;
 }
 
-const int& SortOriginalsModule::GetMusicCount()
+const int SortOriginalsModule::GetMusicCount()
 {
+	if (musicDic.empty())
+		return 0;
+
 	return static_cast<int>(musicDic.size());
 }
 
-const int& SortOriginalsModule::GetSFXCount()
+const int SortOriginalsModule::GetSFXCount()
 {
+	if (sfxDic.empty())
+		return 0;
+
 	return static_cast<int>(sfxDic.size());
 }
 
