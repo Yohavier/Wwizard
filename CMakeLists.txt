@@ -150,4 +150,4 @@ add_compile_definitions(SOLUTION_DIR="${PROJECT_SOURCE_DIR}")
 add_compile_definitions(_SILENCE_ALL_CXX17_DEPRECATION_WARNINGS)
 target_compile_features(${PROJECT_NAME} PRIVATE cxx_std_17)
 
-target_link_libraries("${PROJECT_NAME}" ${CMAKE_CURRENT_SOURCE_DIR}/Wwizard/ThirdParty/WwiseSDK/x64_vc160/Debug/lib/AkAutobahn.lib)
+target_link_libraries("${PROJECT_NAME}" debug ${CMAKE_CURRENT_SOURCE_DIR}/Wwizard/ThirdParty/WwiseSDK/x64_vc160/Debug/lib/AkAutobahn.lib optimized ${CMAKE_CURRENT_SOURCE_DIR}/Wwizard/ThirdParty/WwiseSDK/x64_vc160/Release/lib/AkAutobahn.lib)
