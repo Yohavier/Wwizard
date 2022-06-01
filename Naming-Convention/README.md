@@ -42,7 +42,7 @@ The goal of this naming convention is that every name matches with the following
 
 #### Additional Rules 
 - Eventsuffix can be _lp, _start, _stop
-- Versions 0 to 99
+- Versions 00 to 99
 
 <br/>
 <br/>
