@@ -3,6 +3,7 @@
 
 **Table of Content**
  - [Intro](#intro)
+    - [Good to know](#good-to-know)
  - [Dependencies](#dependencies)
  - [Getting Started](#getting-started)
  - [Color Coding](#color-coding)
@@ -26,13 +27,16 @@ Main features are:
   - advanced query editor
   - toolbox with smaller features
 
+### Good to know
+- if Wwise is open and you double click, in Wwizard on a query result for example, Wwise will focus on that file.
+
 ## Dependencies
 The GUI is done with [Dear ImGui](https://github.com/ocornut/imgui) and an extension for a [Node Graph](https://github.com/rokups/ImNodes)
 
 ## Getting-Started
 First head to the settings Tab you should see something like that. 
 
-![settings](https://user-images.githubusercontent.com/40822700/172848545-e164232e-37fe-4719-9c51-57c30f0d926b.PNG)
+<img src="https://user-images.githubusercontent.com/40822700/172848545-e164232e-37fe-4719-9c51-57c30f0d926b.PNG" width="1000">
 
 In most cases you only have to set the project path and the sdk path. Once everything is right and found the "Connected" sign should turn green. If its red check if the paths and IP/Port are right.
 
@@ -55,10 +59,28 @@ The rule is single is always stronger than hierarchy and hard is stronger than s
 
 you can also define colors, that can never change, for example red to mark errors and not change them.
 
-This is the colorpicker that opens everytime you click on one of the colored boxes.
-![wwise colors](https://user-images.githubusercontent.com/40822700/172857025-8594a42e-662f-4f18-bb2b-a6c332bf201f.PNG)
+This is the colorpicker that opens everytime you click on one of the colored boxes.</br>
+<img src="https://user-images.githubusercontent.com/40822700/172857025-8594a42e-662f-4f18-bb2b-a6c332bf201f.PNG" width="300">
 
 ## Naming Convention
+Define a naming convention in the following setting tabs and check for it. This module doesnt correct anything, but outputs a little error message on what is wrong. It only displays the first wrong name in a hierarchy.
+
+![naming convention](https://user-images.githubusercontent.com/40822700/172955558-cdf05809-62fa-44bb-8b80-feda90b3a642.PNG)
+
+In the activation tab you can set the in which work tab the naming convention should be checked. </br>
+![activation](https://user-images.githubusercontent.com/40822700/172955527-5be5df7d-08c7-4da1-ba5f-f64c9bcd48f4.PNG)
+
+Lets you allow space and UpperCase</br>
+<img src="https://user-images.githubusercontent.com/40822700/172955532-e117fb13-2b2e-4162-a275-91218c28913e.PNG" width="600">
+
+Define a Prefix for each work tab.</br>
+<img src="https://user-images.githubusercontent.com/40822700/172955542-c5984f10-8b44-44e5-a68d-4f6421e5a025.PNG" width="600">
+
+Defining a suffix is a bit more complex. You can allow strings and numbers and also multiple suffixes. 
+separate multiple suffixes with a ",". Max number defines the max number of the suffix. Furthermore Max Layers allows you howmany suffixes you like.
+
+![suffix](https://user-images.githubusercontent.com/40822700/172955547-22c045ad-0a8e-44c3-af55-c05fd4d686a8.PNG)
+
 
 ## Sort Originals
 ![sort Originals](https://user-images.githubusercontent.com/40822700/172855032-ceb77347-b72a-4304-a48f-02e7c08278c0.PNG)
@@ -75,7 +97,7 @@ Sort Originals Button: Also deletes unused .wav and sorts the remaining one depe
 Here is an overview of the whole Query Editor. In the details you can click on inspect query to find it in the Wwise editor, if it is open and the query is a Wwise query of course.
 ![queryeditor](https://user-images.githubusercontent.com/40822700/172952216-a9400311-5909-4407-803b-97ece9d57ca7.PNG)
 
-The config window lets you choose between just activating queries, every file found with one of the queries will be displayed in the results. But there is also the option to configure everything within the node editor.
+The config window lets you choose between just activating queries, every file found with one of the queries will be displayed in the results. But there is also the option to configure everything within the node editor.</br>
 ![config](https://user-images.githubusercontent.com/40822700/172952205-30db5a4e-0569-4ab0-b74e-ac76de3c914e.PNG)
 
 ### Node Editor
