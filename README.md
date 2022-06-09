@@ -9,6 +9,7 @@
  - [Naming Convention](#naming-convention)
  - [Sort Originals](#sort-originals)
  - [Query Editor](#query-editor)
+    - [Node Editor](#node-editor)
  - [Toolbox](#toolbox)
     - [Remove invalid events](#remove-invalid-events)
     - [Reset faders](#reset-faders)
@@ -71,6 +72,24 @@ Delete unused Originals Button: deletes all the originals .wav files, that are n
 Sort Originals Button: Also deletes unused .wav and sorts the remaining one depending on the selected settings.
 
 ## Query Editor
+Here is an overview of the whole Query Editor. In the details you can click on inspect query to find it in the Wwise editor, if it is open and the query is a Wwise query of course.
+![queryeditor](https://user-images.githubusercontent.com/40822700/172952216-a9400311-5909-4407-803b-97ece9d57ca7.PNG)
+
+The config window lets you choose between just activating queries, every file found with one of the queries will be displayed in the results. But there is also the option to configure everything within the node editor.
+![config](https://user-images.githubusercontent.com/40822700/172952205-30db5a4e-0569-4ab0-b74e-ac76de3c914e.PNG)
+
+### Node Editor
+Via drag and drop you can drop any query into the nodegraph and connect things. For further configuration you can use a "And" and "Or" node. 
+
+Or: Every file found will be in the results. </br>
+And: Only files that are found in every query will be displayed in the results.
+
+![nodegraph](https://user-images.githubusercontent.com/40822700/172952233-9732aee3-c718-4973-bd97-a9037d74cac8.PNG)
+
+### Create a new query
+You can also create new queries with Waapi or Waql and save them. Currently it is a bit hard to create new ones, because there is no help/IntelliSense and one needs to know about Waapi or Waql. 
+
+![create query](https://user-images.githubusercontent.com/40822700/172952210-41513759-1a39-4afe-8b6b-11171f68d725.PNG)
 
 ## Toolbox
 ### Remove invalid events
