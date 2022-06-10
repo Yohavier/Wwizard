@@ -14,6 +14,7 @@
  - [Toolbox](#toolbox)
     - [Remove invalid events](#remove-invalid-events)
     - [Reset faders](#reset-faders)
+ - [Issues](#issues)
 
 ## Intro
 This is a tool, that extends Wwise a bit. Its made to improve your project workflows and keep it tidy. 
@@ -122,3 +123,7 @@ This one has 2 modes either you use it on all events by ticking the checkbox or 
 ![toolbox fader](https://user-images.githubusercontent.com/40822700/172851047-c6e23df9-214a-4195-8bb4-05298748394c.PNG)
 Resets the fader in a hierarchy except for the ones, that have the text in their comments.
 This can be used for Master-Mixer Hierarchy, Interactive Music Hierachy and Actor-Mixer Hierarchy.
+
+
+## Issues
+-  Too long file names in Wwise might break the sort originals module, because it wants to create folders.
