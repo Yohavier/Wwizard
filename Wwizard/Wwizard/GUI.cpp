@@ -237,7 +237,7 @@ void GUI::CreateTaskBar(bool& isRunning)
         if (wwizarWwiseClient->IsConnected() && settingHandler->IsProjectPathValid())
         {
             ImGui::PushStyleColor(ImGuiCol_Text, IM_COL32(0, 153, 0, 255));
-            ImGui::Text("Connected");
+            ImGui::Text(("Connected" + wwizarWwiseClient->GetConnectionSuffixInfo()).c_str());
             ImGui::PopStyleColor();
         }
         else

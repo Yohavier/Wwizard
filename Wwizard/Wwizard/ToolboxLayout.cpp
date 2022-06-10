@@ -106,7 +106,7 @@ void ToolboxLayout::RenderLayout()
         ImGui::BeginColumns("Faders", 2);
         ImGui::Text("Controls");
         ImGui::Dummy(ImVec2(0, 10));
-        ImGui::Text("Input");
+        ImGui::Text("Ignore Tag: ");
         ImGui::SameLine();
         ImGui::InputText("##", &toolboxModule->ignoreFaderNote);
         if (ImGui::Button("Get Faders in Hierarchy"))

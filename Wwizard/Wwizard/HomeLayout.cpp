@@ -1,5 +1,6 @@
 #pragma once
 #include "HomeLayout.h"
+#include <Windows.h>
 
 HomeLayout::HomeLayout(std::unique_ptr<WwizardWwiseClient>& wwizardWwiseClient)
     :BaseLayout(wwizardWwiseClient)
@@ -14,6 +15,16 @@ void HomeLayout::RenderLayout()
         ImGui::End();
         return;
     }
-
+    ImGui::Text("Here is the project documentation: ");
+    ImGui::SameLine();
+    if (ImGui::Button("github.com/Yohavier/Wwizard"))
+    {
+        OpenGithubInBrowser();
+    }
     ImGui::End();
+}
+
+void HomeLayout::OpenGithubInBrowser()
+{
+    ShellExecute(NULL, "open", "http://github.com/Yohavier/Wwizard",NULL, NULL, SW_SHOWNORMAL);
 }

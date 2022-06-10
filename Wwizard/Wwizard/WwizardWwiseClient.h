@@ -53,6 +53,11 @@ public:
 		return currentSelectedGuid;
 	}
 
+	const std::string& GetConnectionSuffixInfo()
+	{
+		return connectionSuffixInfo;
+	}
+
 	void DeleteObjectInWwise(const std::string& guid);
 
 	const AkJson GetPropertyFromGuid(const std::string& parentGuid);
@@ -105,4 +110,5 @@ private:
 
 	std::string currentSelectedGuid = "";
 	std::string currentSelectedName = "";
+	std::string connectionSuffixInfo = "";
 };

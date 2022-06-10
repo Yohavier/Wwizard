@@ -40,14 +40,14 @@ bool WwizardWwiseClient::Connect(const std::unique_ptr<SettingHandler>& settings
 
     if (wwiseClient.Connect(settings->GetWaapiIP().c_str(),settings->GetWaaapiPort()))
     {
-        std::cout << "Connected to Wwise Instance!" << std::endl;
+        connectionSuffixInfo = " with Wwise Instance";
         SubscribeToSelectionChanged();
         SubscribeToPreDeleted();
         return true;
     }
     else if (ForceOpenWwiseInstance(settings))
     {
-        std::cout << "Force open Wwise Instance!" << std::endl;
+        connectionSuffixInfo = " with WwiseConsole";
         return true;
     }
     else
