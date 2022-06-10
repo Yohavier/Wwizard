@@ -58,21 +58,21 @@ private:
 	void SortOriginals();
 
 public:
-	bool workUnitFlag;
-	bool physicalFolderFlag;
-	bool virtualFolderFlag;
-	bool actorMixerFlag;
-	bool randomContainerFlag;
-	bool sequenceContainerFlag;
-	bool switchContainerFlag;
-	bool blendContainerFlag;
-	bool soundSFXFlag;
-	bool voiceSoundFlag;
+	bool workUnitFlag = false;
+	bool physicalFolderFlag = false;
+	bool virtualFolderFlag = false;
+	bool actorMixerFlag = false;
+	bool randomContainerFlag = false;
+	bool sequenceContainerFlag = false;
+	bool switchContainerFlag = false;
+	bool blendContainerFlag = false;
+	bool soundSFXFlag = false;
+	bool voiceSoundFlag = false;
 
-	bool musicSwitchContainerFlag;
-	bool musicPlaylistContainerFlag;
-	bool musicSegmentFlag;	
-	bool musicTrackFlag;
+	bool musicSwitchContainerFlag = false;
+	bool musicPlaylistContainerFlag = false;
+	bool musicSegmentFlag = false;
+	bool musicTrackFlag = false;
 
 private:
 	std::string originalsPath;
