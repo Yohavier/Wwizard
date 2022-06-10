@@ -32,23 +32,26 @@ void ColorCodingLayout::RenderLayout()
 
         if (ImGui::BeginPopupModal("ColorPicker"))
         {
-            ImGui::BeginColumns("Color Pop Up", 7);
-            int column = 0;
-            for (const auto& color : wwiseColors)
+            if (ImGui::BeginTable("Colors", 14))
             {
-                if (ImGui::ColorButton(std::to_string(color.first).c_str(), color.second, 0, ImVec2(50, 50)))
+                int column = 0;
+                for (const auto& color : wwiseColors)
                 {
-                    colorSetting.second.colorCode = color.first;
-                    ImGui::CloseCurrentPopup();
+                    ImGui::TableNextColumn();
+                    if (ImGui::ColorButton(std::to_string(color.first).c_str(), color.second, 0, ImVec2(50, 50)))
+                    {
+                        colorSetting.second.colorCode = color.first;
+                        ImGui::CloseCurrentPopup();
+                    }
+                    column++;
+                    if (column == 14)
+                    {
+                        ImGui::TableNextRow();
+                        column = 0;
+                    }
                 }
-                column++;
-                if (column == 4)
-                {
-                    ImGui::NextColumn();
-                    column = 0;
-                }
-            }
-            ImGui::EndColumns();
+                ImGui::EndTable();
+            }      
 
             ImGui::Dummy(ImVec2(0.0f, 20.0f));
             ImGui::SetCursorPosX(ImGui::GetCursorPosX() + ImGui::GetWindowSize().x * 0.25f);
@@ -82,23 +85,26 @@ void ColorCodingLayout::RenderLayout()
     ImGui::Text("Colors that should never change");
     if (ImGui::BeginPopupModal("ColorSelector"))
     {
-        ImGui::BeginColumns("Color Pop Up", 7);
-        int column = 0;
-        for (const auto& color : wwiseColors)
+        if (ImGui::BeginTable("Colors", 14))
         {
-            if (ImGui::ColorButton(std::to_string(color.first).c_str(), color.second, 0, ImVec2(50, 50)))
+            int column = 0;
+            for (const auto& color : wwiseColors)
             {
-                colorCodingModule->blockedColors.insert(color.first);
-                ImGui::CloseCurrentPopup();
+                ImGui::TableNextColumn();
+                if (ImGui::ColorButton(std::to_string(color.first).c_str(), color.second, 0, ImVec2(50, 50)))
+                {
+                    colorCodingModule->blockedColors.insert(color.first);
+                    ImGui::CloseCurrentPopup();
+                }
+                column++;
+                if (column == 14)
+                {
+                    ImGui::TableNextRow();
+                    column = 0;
+                }
             }
-            column++;
-            if (column == 4)
-            {
-                ImGui::NextColumn();
-                column = 0;
-            }
+            ImGui::EndTable();
         }
-        ImGui::EndColumns();
 
         ImGui::Dummy(ImVec2(0.0f, 20.0f));
         ImGui::SetCursorPosX(ImGui::GetCursorPosX() + ImGui::GetWindowSize().x * 0.25f);
