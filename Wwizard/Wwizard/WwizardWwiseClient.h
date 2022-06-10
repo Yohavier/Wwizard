@@ -11,7 +11,7 @@
 using namespace AK::WwiseAuthoringAPI;
 
 class WwizardWwiseClient
-{ 
+{
 public:
 	WwizardWwiseClient() = delete;
 	WwizardWwiseClient(std::unique_ptr<SettingHandler>& settings)
@@ -21,13 +21,13 @@ public:
 	}
 
 	~WwizardWwiseClient();
-	
+
 	void StartReconnectionThread();
 
 	const AkJson GetObjectFromPath(const std::string& path, std::vector<std::string>& returnValues);
 
 	const AkJson RunQueryFromGuuid(const std::string& guuid);
-	
+
 	const AkJson RunCustomQuery(const AkJson arg);
 
 	const AkJson GetProjectInfo();
@@ -42,6 +42,16 @@ public:
 	const AkJson GetChildrenFromGuid(const std::string& guid, const std::vector<std::string>& optionList);
 
 	const AkJson GetSelectedObjectsInWwise(const std::vector<std::string>& option);
+
+	const std::string GetSelectedObjectNameInWwise()
+	{
+		return currentSelectedName;
+	}
+
+	const std::string GetSelectedObjectGuidInWwise()
+	{
+		return currentSelectedGuid;
+	}
 
 	void DeleteObjectInWwise(const std::string& guid);
 
@@ -60,7 +70,7 @@ public:
 		AkJson empty(AkJson::Map{});
 		wwiseClient.Call(ak::wwise::core::object::setProperty, waapiArg, empty, empty, 500);
 	}
-	
+
 	const AkJson GetObjectsByPartName(const std::string& name, const std::vector<std::string>& optionList);
 
 	const AkJson GetObjectPropertyList(const int& classID);
@@ -82,11 +92,17 @@ private:
 
 	void KillWwiseConsole();
 
+	void SubscribeToSelectionChanged();
+
+	void SubscribeToPreDeleted();
+
 private:
 	Client wwiseClient;
 	std::unique_ptr<SettingHandler>& settings;
 	std::thread* currentConnectionThread = nullptr;
 
 	bool previousFrameConnectionStatus = false;
-};
 
+	std::string currentSelectedGuid = "";
+	std::string currentSelectedName = "";
+};

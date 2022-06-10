@@ -24,19 +24,10 @@ void ToolboxModule::GetEmptyEvents()
 			}
 		}
 	}
-	else
+	else if(wwizardClient->GetSelectedObjectGuidInWwise() != "")
 	{
 		waapiResult = wwizardClient->GetSelectedObjectsInWwise(optionList);
-		if (!waapiResult["objects"].IsEmpty())
-		{
-			if (waapiResult["objects"].GetArray()[0]["category"].GetVariant().GetString() == "Events")
-			{
-				for (const auto& results : waapiResult["objects"].GetArray())
-				{
-					GetEmptyEventsInHierarchy(results["id"].GetVariant().GetString(), optionList);
-				}
-			}
-		}
+		GetEmptyEventsInHierarchy(wwizardClient->GetSelectedObjectGuidInWwise(), optionList);
 	}
 }
 

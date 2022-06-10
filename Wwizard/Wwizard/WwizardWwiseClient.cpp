@@ -41,6 +41,8 @@ bool WwizardWwiseClient::Connect(const std::unique_ptr<SettingHandler>& settings
     if (wwiseClient.Connect(settings->GetWaapiIP().c_str(),settings->GetWaaapiPort()))
     {
         std::cout << "Connected to Wwise Instance!" << std::endl;
+        SubscribeToSelectionChanged();
+        SubscribeToPreDeleted();
         return true;
     }
     else if (ForceOpenWwiseInstance(settings))
@@ -53,6 +55,44 @@ bool WwizardWwiseClient::Connect(const std::unique_ptr<SettingHandler>& settings
         std::cout << "Failed to Connect to Wwise Instance!" << std::endl;
         return false;
     }
+}
+
+void WwizardWwiseClient::SubscribeToSelectionChanged()
+{
+    AkJson waapiOption(AkJson::Map{ { "return", AkJson::Array{ AkVariant("name"), AkVariant("id")}}});
+    AkJson waapiResult;
+    uint64_t i = 0;
+
+
+    auto selectionChanged = [this](uint64_t, const JsonProvider& in_rJson)
+    {
+        auto result = in_rJson.GetAkJson();
+        currentSelectedName = result["objects"].GetArray()[0]["name"].GetVariant().GetString();
+        currentSelectedGuid = result["objects"].GetArray()[0]["id"].GetVariant().GetString();
+    };
+
+    wwiseClient.Subscribe("ak.wwise.ui.selectionChanged", waapiOption, selectionChanged, i, waapiResult);
+}
+
+void WwizardWwiseClient::SubscribeToPreDeleted()
+{
+    AkJson waapiOption(AkJson::Map{ { "return", AkJson::Array{ AkVariant("name"), AkVariant("id")}} });
+    AkJson waapiResult;
+    uint64_t i = 0;
+
+
+    auto preDeletedObject = [this](uint64_t, const JsonProvider& in_rJson)
+    {
+        auto result = in_rJson.GetAkJson();
+        auto a = result["object"]["id"].GetVariant().GetString();
+        if (currentSelectedGuid ==a)
+        {
+            currentSelectedName = "";
+            currentSelectedGuid = "";
+        }
+    };
+
+    wwiseClient.Subscribe("ak.wwise.core.object.preDeleted", waapiOption, preDeletedObject, i, waapiResult);
 }
 
 bool WwizardWwiseClient::ForceOpenWwiseInstance(const std::unique_ptr<SettingHandler>& settings)

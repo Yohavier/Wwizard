@@ -18,7 +18,7 @@ void ToolboxLayout::RenderLayout()
     {
         ImGui::End();
         return;
-    }
+    }   
     ImGui::PushStyleColor(ImGuiCol_Header, ImVec4(ConvertWwiseColorToRGB(15)));
     ImGui::PushStyleColor(ImGuiCol_HeaderHovered, ImVec4(ConvertWwiseColorToRGB(15)));
     ImGui::PushStyleColor(ImGuiCol_HeaderActive, ImVec4(ConvertWwiseColorToRGB(16)));
@@ -27,16 +27,45 @@ void ToolboxLayout::RenderLayout()
     {
         ImGui::BeginColumns("events", 2);
         ImGui::Text("Controls");
+        ImGui::Text("Selected Item: ");
+        ImGui::SameLine();
+        ImGui::Text(wwizardWwiseClient->GetSelectedObjectNameInWwise().c_str());
         ImGui::Dummy(ImVec2(0, 10));
+
+
+        if (toolboxModule->deleteEmptyEventsForAllEvents)
+        {
+            ImGui::PushStyleColor(ImGuiCol_Text, IM_COL32(153, 0, 0, 255));
+        }
+        else
+        {
+            ImGui::PushStyleColor(ImGuiCol_Text, IM_COL32(0, 153, 0, 255));
+        }
+        ImGui::Text("Hierarchy");
+        ImGui::PopStyleColor();
+        ImGui::SameLine();
+        ImGui::Checkbox("##All Events", &toolboxModule->deleteEmptyEventsForAllEvents);
+        if (ImGui::IsItemHovered() && GImGui->HoveredIdTimer > 0.5)
+            ImGui::SetTooltip("true: all events will be checked \nfalse: only the selected hierarchy will be checked");
+        ImGui::SameLine();
+        if (!toolboxModule->deleteEmptyEventsForAllEvents)
+        {
+            ImGui::PushStyleColor(ImGuiCol_Text, IM_COL32(153, 0, 0, 255));
+        }
+        else
+        {
+            ImGui::PushStyleColor(ImGuiCol_Text, IM_COL32(0, 153, 0, 255));
+        }
+        ImGui::Text("All events");
+        ImGui::PopStyleColor();
+
+        ImGui::Dummy(ImVec2(0, 5));
+
         if (ImGui::Button("Gather invalid events"))
         {
             toolboxModule->GetEmptyEvents();
         }
-        ImGui::Checkbox("All Events", &toolboxModule->deleteEmptyEventsForAllEvents);
-        if (ImGui::IsItemHovered() && GImGui->HoveredIdTimer > 0.5f)
-            ImGui::SetTooltip("If checked all events will be checked.");
-
-        ImGui::Dummy(ImVec2(0, 5));
+        ImGui::SameLine();
         if (!toolboxModule->GetEventResultFiles().empty())
         {
             if (ImGui::Button("Delete"))
@@ -44,6 +73,7 @@ void ToolboxLayout::RenderLayout()
                 toolboxModule->DeleteEmptyEvent();
             }
         }
+        ImGui::Dummy(ImVec2(0, 5));
 
         ImGui::NextColumn();
         ImGui::Text("Invalid Events");
