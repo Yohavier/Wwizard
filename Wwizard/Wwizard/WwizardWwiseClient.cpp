@@ -38,7 +38,7 @@ bool WwizardWwiseClient::Connect(const std::unique_ptr<SettingHandler>& settings
         wwiseClient.Disconnect();
     }
 
-    if (wwiseClient.Connect(settings->waapiIP.c_str(),settings->waapiPort))
+    if (wwiseClient.Connect(settings->GetWaapiIP().c_str(),settings->GetWaaapiPort()))
     {
         std::cout << "Connected to Wwise Instance!" << std::endl;
         return true;
@@ -57,7 +57,7 @@ bool WwizardWwiseClient::Connect(const std::unique_ptr<SettingHandler>& settings
 
 bool WwizardWwiseClient::ForceOpenWwiseInstance(const std::unique_ptr<SettingHandler>& settings)
 {
-    std::string commandline = settings->GetSDKPath() + " waapi-server " + settings->GetWwisProjectPathRef() + " --allow-migration --wamp-port " + std::to_string(settings->waapiPort);
+    std::string commandline = settings->GetSDKPathHyphen() + " waapi-server " + settings->GetWwiseProjectPathRefHyphen() + " --allow-migration --wamp-port " + std::to_string(settings->GetWaaapiPort());
     
     std::vector<TCHAR> buffer(commandline.begin(), commandline.end());
     buffer.push_back(_T('\0'));
@@ -80,7 +80,7 @@ bool WwizardWwiseClient::ForceOpenWwiseInstance(const std::unique_ptr<SettingHan
     CloseHandle(pi.hProcess);
     CloseHandle(pi.hThread);
 
-    if (wwiseClient.Connect(settings->waapiIP.c_str(), settings->waapiPort))
+    if (wwiseClient.Connect(settings->GetWaapiIP().c_str(), settings->GetWaaapiPort()))
     {
         return true;
     }

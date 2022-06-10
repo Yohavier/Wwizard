@@ -10,7 +10,7 @@ SettingLayout::SettingLayout(std::unique_ptr<WwizardWwiseClient>& wwizardWwiseCl
 	: BaseLayout(wwizardWwiseClient)
 	, settingHandler(settingHandler)
 {
-    projectPathSetting = settingHandler->GetWwisProjectPathRef();
+    projectPathSetting = settingHandler->GetWwiseProjectPathRef();
     sdkPathSetting = settingHandler->GetSDKPath();
     waapiIPSetting = settingHandler->GetWaapiIP();
     waapiPortSetting = settingHandler->GetWaaapiPort();
@@ -47,7 +47,6 @@ void SettingLayout::RenderLayout()
         {
             settingHandler->SaveSettings(projectPathSetting, sdkPathSetting, waapiIPSetting, waapiPortSetting);
             wwizardWwiseClient->StartReconnectionThread();
-            //queryEditorModule->ResetQueryModule(wwizarWwiseClient);
         }
         else
         {

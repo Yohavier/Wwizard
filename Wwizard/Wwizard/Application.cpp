@@ -6,8 +6,8 @@ Application::Application()
     settingsHandler.reset(new SettingHandler());
     wwizardWwiseClient.reset(new WwizardWwiseClient(settingsHandler));
     queryEditorModule.reset(new QueryEditorModule(wwizardWwiseClient));
-    sortOriginalsModule.reset(new SortOriginalsModule(settingsHandler->GetWwisProjectPathRef()));
-    namingConventionModule.reset(new NamingConventionModule(settingsHandler->GetWwisProjectPathRef(), wwizardWwiseClient));
+    sortOriginalsModule.reset(new SortOriginalsModule(settingsHandler->GetWwiseProjectPathRefHyphen()));
+    namingConventionModule.reset(new NamingConventionModule(settingsHandler->GetWwiseProjectPathRefHyphen(), wwizardWwiseClient));
     colorCodingModule.reset(new ColorCodingModule(wwizardWwiseClient));
     toolboxModule.reset(new ToolboxModule(wwizardWwiseClient));
     myGUI.reset(new GUI(wwizardWwiseClient, settingsHandler, queryEditorModule, sortOriginalsModule, namingConventionModule, toolboxModule, colorCodingModule));
@@ -23,8 +23,8 @@ void Application::Loop()
         if (settingsHandler->settingChangeFlag)
         {
             settingsHandler->settingChangeFlag = false;
-            namingConventionModule->OnSettingsChange(settingsHandler->GetWwisProjectPathRef(), settingsHandler->GetSDKPath());
-            sortOriginalsModule->OnSettingsChange(settingsHandler->GetWwisProjectPathRef(), settingsHandler->GetSDKPath());
+            namingConventionModule->OnSettingsChange(settingsHandler->GetWwiseProjectPathRefHyphen(), settingsHandler->GetSDKPathHyphen());
+            sortOriginalsModule->OnSettingsChange(settingsHandler->GetWwiseProjectPathRefHyphen(), settingsHandler->GetSDKPathHyphen());
         }
         myGUI->Render(m_isRunning);
     }

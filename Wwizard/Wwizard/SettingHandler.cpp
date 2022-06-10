@@ -3,12 +3,15 @@
 
 void SettingHandler::SaveSettings(const std::string wwiseProjectPath, const std::string sdkPath, const std::string waapiIP, const int waapiPort)
 {
-	this->wwiseProjectPath = wwiseProjectPath;
-	this->sdkPath = sdkPath;
-	this->waapiIP = waapiIP;
-	this->waapiPort = waapiPort;
+    this->wwiseProjectPath = wwiseProjectPath;
+    this->sdkPath = sdkPath;
+    this->waapiIP = waapiIP;
+    this->waapiPort = waapiPort;
 
+    wwiseProjectPathWithHyphens = '"' + wwiseProjectPath + '"';
+    sdkPathWithHyphens = '"' + sdkPath + '"';
     WriteToJson();
+
     settingChangeFlag = true;
 }
 
@@ -31,6 +34,9 @@ void SettingHandler::LoadSettings()
             this->sdkPath = settingDoc["sdkPath"].GetString();
             this->waapiIP = settingDoc["waapiIP"].GetString();
             this->waapiPort = settingDoc["waapiPort"].GetInt();
+
+            wwiseProjectPathWithHyphens = '"' + wwiseProjectPath + '"';
+            sdkPathWithHyphens = '"' + sdkPath + '"';
         }
     }   
 }
@@ -73,7 +79,5 @@ void SettingHandler::WriteToJson()
 const bool SettingHandler::IsProjectPathValid()
 {
     std::string path = wwiseProjectPath;
-    path.erase(0, 1);
-    path.erase(path.size() - 1);
     return std::filesystem::exists(path);
 }
