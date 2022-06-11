@@ -1,5 +1,6 @@
 #pragma once
 #include "NamingConventionLayout.h"
+#include "GuiHelper.h"
 
 NamingConventionLayout::NamingConventionLayout(std::unique_ptr<WwizardWwiseClient>& wwizardWwiseClient, std::unique_ptr<NamingConventionModule>& namingConventionModule)
     : BaseLayout(wwizardWwiseClient)
@@ -26,12 +27,10 @@ void NamingConventionLayout::RenderLayout()
             if (ImGui::BeginTable("Naming Issues", 2, ImGuiTableFlags_BordersOuter | ImGuiTableFlags_Resizable))
             {
                 ImGui::TableNextColumn();
-                ImGui::PushStyleColor(ImGuiCol_Text, IM_COL32(99, 131, 197, 255));
-                ImGui::Text("Current Name");
+                ColoredHeadline("CurrentName");
                 ImGui::Separator();
                 ImGui::TableNextColumn();
-                ImGui::Text("Desired Name");
-                ImGui::PopStyleColor();
+                ColoredHeadline("Desired Name");
                 ImGui::Separator();
                 ImGui::TableNextRow();
 
@@ -60,15 +59,13 @@ void NamingConventionLayout::RenderLayout()
             ImGui::Separator();
             ImGui::BeginColumns("workunit", 4);
             int i = 0;
-            ImGui::PushStyleColor(ImGuiCol_Text, IM_COL32(99, 131, 197, 255));
-            ImGui::Text("Workunit");
+            ColoredHeadline("Workunit");
             ImGui::NextColumn();
-            ImGui::Text("Space");
+            ColoredHeadline("Space");
             ImGui::NextColumn();
-            ImGui::Text("Uppercase");
+            ColoredHeadline("Uppercase");
             ImGui::NextColumn();
-            ImGui::Text("Prefix");
-            ImGui::PopStyleColor();
+            ColoredHeadline("Prefix");
             ImGui::Separator();
             ImGui::NextColumn();
             for (const auto& wwuType : namingConventionModule->GetWhiteListedWwuTypes())
@@ -99,15 +96,13 @@ void NamingConventionLayout::RenderLayout()
         if (ImGui::BeginTabItem("Container Settings"))
         {
             ImGui::BeginColumns("suffix", 4);
-            ImGui::PushStyleColor(ImGuiCol_Text, IM_COL32(99, 131, 197, 255));
-            ImGui::Text("Container");
+            ColoredHeadline("Container");
             ImGui::NextColumn();
-            ImGui::Text("String suffix");
+            ColoredHeadline("String suffix");
             ImGui::NextColumn();
-            ImGui::Text("Number suffix");
+            ColoredHeadline("Number suffix");
             ImGui::NextColumn();
-            ImGui::Text("Multiple suffix");
-            ImGui::PopStyleColor();
+            ColoredHeadline("Multiple suffix");
             ImGui::Separator();
             ImGui::NextColumn();
 
@@ -154,3 +149,4 @@ void NamingConventionLayout::RenderLayout()
     }
     ImGui::End();
 }
+
