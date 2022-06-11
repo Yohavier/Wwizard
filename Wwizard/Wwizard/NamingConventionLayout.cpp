@@ -26,9 +26,13 @@ void NamingConventionLayout::RenderLayout()
             if (ImGui::BeginTable("Naming Issues", 2, ImGuiTableFlags_BordersOuter | ImGuiTableFlags_Resizable))
             {
                 ImGui::TableNextColumn();
+                ImGui::PushStyleColor(ImGuiCol_Text, IM_COL32(99, 131, 197, 255));
                 ImGui::Text("Current Name");
+                ImGui::Separator();
                 ImGui::TableNextColumn();
                 ImGui::Text("Desired Name");
+                ImGui::PopStyleColor();
+                ImGui::Separator();
                 ImGui::TableNextRow();
 
 
@@ -51,97 +55,97 @@ void NamingConventionLayout::RenderLayout()
             }
             ImGui::EndTabItem();
         }
-        if (ImGui::BeginTabItem("Activation Settings"))
-        {
-            ImGui::Text("Select in which field the naming convention should be checked.");
-            ImGui::Separator();
-            for (auto& wwuType : namingConventionModule->GetWhiteListedWwuTypes())
-            {
-                ImGui::Checkbox(namingConventionModule->GetStringToReplace(wwuType).substr(1).c_str(), &(namingConventionModule->wwuSettings[wwuType].applyNamingConventionCheck));
-            }
-            ImGui::EndTabItem();
-        }
-        if (ImGui::BeginTabItem("Additional Settings"))
+        if (ImGui::BeginTabItem("Workunit Settings"))
         {
             ImGui::Separator();
-            ImGui::BeginColumns("additional", 3);
+            ImGui::BeginColumns("workunit", 4);
+            int i = 0;
+            ImGui::PushStyleColor(ImGuiCol_Text, IM_COL32(99, 131, 197, 255));
+            ImGui::Text("Workunit");
+            ImGui::NextColumn();
+            ImGui::Text("Space");
+            ImGui::NextColumn();
+            ImGui::Text("Uppercase");
+            ImGui::NextColumn();
+            ImGui::Text("Prefix");
+            ImGui::PopStyleColor();
+            ImGui::Separator();
+            ImGui::NextColumn();
             for (const auto& wwuType : namingConventionModule->GetWhiteListedWwuTypes())
             {
-                ImGui::Text(namingConventionModule->GetStringToReplace(wwuType).substr(1).c_str());
+                ImGui::PushID(i);
+                ImGui::Checkbox(namingConventionModule->GetStringToReplace(wwuType).substr(1).c_str(), &(namingConventionModule->wwuSettings[wwuType].applyNamingConventionCheck));
                 ImGui::NextColumn();
-                ImGui::Checkbox(("## allowSpace" + namingConventionModule->GetStringToReplace(wwuType).substr(1)).c_str(), &(namingConventionModule->wwuSettings[wwuType].allowSpace));
+
+                ImGui::Checkbox(("##allowSpace" + namingConventionModule->GetStringToReplace(wwuType).substr(1)).c_str(), &(namingConventionModule->wwuSettings[wwuType].allowSpace));
+                ImGui::NextColumn();
+
+                ImGui::Checkbox(("##allowUpperCase" + namingConventionModule->GetStringToReplace(wwuType).substr(1)).c_str(), &(namingConventionModule->wwuSettings[wwuType].allowUpperCase));
+                ImGui::NextColumn();
+
+                ImGui::Checkbox("##Prefix", &(namingConventionModule->wwuSettings[wwuType].applyPrefix));
                 ImGui::SameLine();
-                ImGui::Text("Allow Space");
+                ImGui::PushItemWidth(100);
+                ImGui::InputText("##PrefixInput", &(namingConventionModule->wwuSettings[wwuType].prefixToApply));
+                ImGui::PopItemWidth();
+                ImGui::Separator();
                 ImGui::NextColumn();
-                ImGui::Checkbox(("## allowUpperCase" + namingConventionModule->GetStringToReplace(wwuType).substr(1)).c_str(), &(namingConventionModule->wwuSettings[wwuType].allowUpperCase));
-                ImGui::SameLine();
-                ImGui::Text("Allow Upper Case");
-                ImGui::NextColumn();
+                ImGui::PopID();
+                i++;
             }
             ImGui::EndColumns();
             ImGui::EndTabItem();
         }
-        if (ImGui::BeginTabItem("Prefix Settings"))
+        if (ImGui::BeginTabItem("Container Settings"))
         {
-            ImGui::Text("This tab lets you add a prefix to each Physical Folder of Wwise (Type of Work Units).");
+            ImGui::BeginColumns("suffix", 4);
+            ImGui::PushStyleColor(ImGuiCol_Text, IM_COL32(99, 131, 197, 255));
+            ImGui::Text("Container");
+            ImGui::NextColumn();
+            ImGui::Text("String suffix");
+            ImGui::NextColumn();
+            ImGui::Text("Number suffix");
+            ImGui::NextColumn();
+            ImGui::Text("Multiple suffix");
+            ImGui::PopStyleColor();
             ImGui::Separator();
-            ImGui::BeginColumns("prefix", 2);
-            for (auto& wwuType : namingConventionModule->GetWhiteListedWwuTypes())
-            {
-                ImGui::Checkbox(namingConventionModule->GetStringToReplace(wwuType).substr(1).c_str(), &(namingConventionModule->wwuSettings[wwuType].applyPrefix));
-                ImGui::NextColumn();
-                std::string identificationName = "##" + namingConventionModule->GetStringToReplace(wwuType);
-                ImGui::InputText(identificationName.c_str(), &(namingConventionModule->wwuSettings[wwuType].prefixToApply));
-                ImGui::NextColumn();
-            }
-            ImGui::EndColumns();
-            ImGui::EndTabItem();
-        }
-        if (ImGui::BeginTabItem("Suffix Settings"))
-        {
-            ImGui::Text("This tab lets you add a suffix to each container. To the naming convention.");
-            ImGui::Text("If you have multiple text suffixes you want to make possible, please separate them with a comma.");
-            ImGui::Text("Max Layers lets you define how many layers the suffix has. 'tree_lp_01' has two suffix layers. You can only have one number suffixlayer.");
-            ImGui::Separator();
-            ImGui::BeginColumns("suffix", 2);
-            int columnCounter = 0;
+            ImGui::NextColumn();
+
+            int i = 0;
             for (auto& containerType : namingConventionModule->GetWhiteListedContainers())
             {
-                columnCounter++;
-                ImGui::PushItemWidth(200);
+                ImGui::PushID(i);
                 ImGui::Text(containerType.c_str());
                 std::string currentContainerID = "##" + containerType;
+                ImGui::NextColumn();
 
-                ImGui::Text("Apply String");
-                ImGui::SameLine();
-                ImGui::Checkbox((currentContainerID + "ApplyString").c_str(), &(namingConventionModule->containerSettings[containerType].allowStringSuffix));
 
+                ImGui::Checkbox("##ApplyString", &(namingConventionModule->containerSettings[containerType].allowStringSuffix));
                 ImGui::SameLine();
-                ImGui::Text("Apply Number");
-                ImGui::SameLine();
-                ImGui::Checkbox((currentContainerID + "ApplyNumber").c_str(), &(namingConventionModule->containerSettings[containerType].allowNumberSuffix));
+                ImGui::PushItemWidth(100);
+                ImGui::InputText("##Layers", &(namingConventionModule->containerSettings[containerType].stringSuffixes));
+                ImGui::PopItemWidth();
+                ImGui::NextColumn();
 
-                ImGui::SameLine();
-                ImGui::Text("Max Layers");
-                ImGui::SameLine();
-                ImGui::InputInt((currentContainerID + "MaxSuffixLayers").c_str(), &(namingConventionModule->containerSettings[containerType].suffixLayers));
-
-                ImGui::Text("Layers");
-                ImGui::SameLine();
-                ImGui::InputText((currentContainerID + "Layers").c_str(), &(namingConventionModule->containerSettings[containerType].stringSuffixes));
-
+                ImGui::Checkbox("##ApplyNumber", &(namingConventionModule->containerSettings[containerType].allowNumberSuffix));
                 ImGui::SameLine();
                 ImGui::Text("Max Number");
                 ImGui::SameLine();
-                ImGui::InputInt((currentContainerID + "MaxNumber").c_str(), &(namingConventionModule->containerSettings[containerType].maxNumberAllowed), ImGuiInputTextFlags_NoHorizontalScroll);
+                ImGui::PushItemWidth(100);
+                ImGui::InputInt("##MaxNumber", &(namingConventionModule->containerSettings[containerType].maxNumberAllowed),1);
                 ImGui::PopItemWidth();
-                if (columnCounter == 2)
-                {
-                    ImGui::Separator();
-                    columnCounter = 0;
-                }
                 ImGui::NextColumn();
 
+                ImGui::Text("Max Layers");
+                ImGui::SameLine();
+                ImGui::PushItemWidth(100);
+                ImGui::InputInt("##MaxSuffixLayers", &(namingConventionModule->containerSettings[containerType].suffixLayers), 1);  
+                ImGui::PopItemWidth();
+                ImGui::Separator();
+                ImGui::NextColumn();
+
+                ImGui::PopID();
+                i++;
             }
             ImGui::EndColumns();
             ImGui::EndTabItem();
