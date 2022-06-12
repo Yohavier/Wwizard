@@ -127,6 +127,7 @@ void NamingConventionLayout::RenderLayout()
                 ImGui::PushItemWidth(100);
                 ImGui::InputInt("##MaxNumber", &(namingConventionModule->containerSettings[containerType].maxNumberAllowed),1);
                 ImGui::PopItemWidth();
+                ImGui::Separator();
                 ImGui::NextColumn();
 
                 ImGui::PopID();
