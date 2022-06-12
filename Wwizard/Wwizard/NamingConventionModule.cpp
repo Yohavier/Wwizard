@@ -531,6 +531,9 @@ bool NamingConventionModule::CheckSuffix(const std::string& fileName, const std:
 
 	if (setting.applyNumberSuffix)
 	{
+		if (fileName.length() < std::to_string(setting.maxNumberAllowed).length())
+			return false;
+
 		numberSuffix = fileName.substr(fileName.length() - std::to_string(setting.maxNumberAllowed).length(), std::to_string(setting.maxNumberAllowed).length());
 
 		for (const auto& digit : numberSuffix)
@@ -564,6 +567,9 @@ bool NamingConventionModule::CheckSuffix(const std::string& fileName, const std:
 
 		for (const auto& suffix : suffixes)
 		{
+			if (fileName.length() < suffix.length())
+				return false;
+
 			stringSuffix = suffixless.substr(suffixless.length() - suffix.length(), suffix.length());
 			if (stringSuffix == suffix)
 			{
@@ -605,6 +611,11 @@ bool NamingConventionModule::CheckSuffix(const std::string& fileName, const std:
 
 bool NamingConventionModule::IsOneUnderscorePerNewLayer(const std::string& fileName, const std::string& parentName)
 {
+	if (fileName == parentName)
+	{
+		return false;
+	}
+
 	std::string rest = fileName;
 	if (parentName != "")
 	{
