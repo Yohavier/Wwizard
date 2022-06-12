@@ -9,6 +9,7 @@
 #include <rapidjson/document.h>
 #include "rapidjson/RapidJsonUtils.h"
 #include <algorithm>
+#include "helper.h"
 
 
 NamingConventionModule::NamingConventionModule(const std::string& wwiseProjPath, std::unique_ptr<WwizardWwiseClient>& wwizardClient)
@@ -46,46 +47,20 @@ void NamingConventionModule::BeginNamingConventionProcess()
 {
 	ClearOldData();
 
-	FetchWwuDataInDirectory(projectPath);
+	FindTopPhysicalFolders(projectPath);
 
-	StartCheckingNamingConvention(projectPath, "");
+	for (const auto& legalFolder : legalTopFolderPaths)
+	{
+		IteratePhysicalFolder(legalFolder, legalFolder.filename().string(), "");
+	}
 
 	currentNamingConventionThread = nullptr;
-}
-
-void NamingConventionModule::FetchWwuDataInDirectory(const std::string& directory)
-{
-	for (const auto& entry : std::filesystem::directory_iterator(directory))
-	{
-		if (std::filesystem::is_directory(entry))
-		{ 
-			FetchWwuDataInDirectory(entry.path().u8string());
-		}
-		else
-		{
-			if (entry.path().extension() == ".wwu")
-			{
-				FetchSingleWwuData(entry.path().u8string());
-			}
-		}
-	}
-}
-
-void NamingConventionModule::FetchSingleWwuData(const std::string& path)
-{
-	pugi::xml_document doc;
-	pugi::xml_parse_result result = doc.load_file(path.c_str());
-	if (!result)
-		return;
-
-	pugi::xml_node data = doc.child("WwiseDocument").first_child().child("WorkUnit");
-	WwuLookUpData newWwuData = WwuLookUpData(data.attribute("Name").value(), data.attribute("ID").value(), data.attribute("PersistMode").value(), path, false);
-	prefetchedWwuData.emplace_back(newWwuData);
 }
 
 void NamingConventionModule::ClearOldData()
 {
 	namingIssueResults.clear();
+	legalTopFolderPaths.clear();
 }
 
 void NamingConventionModule::AddIssueToList(const std::string& guid, const std::string& name, const NamingIssue& issue)
@@ -137,313 +112,8 @@ const std::string& NamingConventionModule::GetStringToReplace(const std::string&
 void NamingConventionModule::OnConnectionStatusChange(const bool newConnectionStatus)
 {
 	namingIssueResults.clear();
-	prefetchedWwuData.clear();
-
-	if (newConnectionStatus)
-	{
-		FetchWwuDataInDirectory(projectPath);
-	}
 }
 
-void NamingConventionModule::StartCheckingNamingConvention(const std::string& folderPath, std::string constructedNamePath)
-{
-	for (const auto& entry : std::filesystem::directory_iterator(folderPath))
-	{
-		if (std::filesystem::is_directory(entry))
-		{
-			if (entry.path().filename().u8string() != ".cache" && entry.path().filename().u8string() != "GeneratedSoundBanks" && entry.path().filename().u8string() != "Originals" && entry.path().filename().u8string() != "Presets")
-			{
-				std::vector<std::string> optionList = { "id", "name", "type", "path" };
-				std::string relativeFolderPath = "\\" + entry.path().u8string().substr(projectPath.size(), entry.path().u8string().size() - projectPath.size());
-				AkJson obj = wwizardClient->GetObjectFromPath(relativeFolderPath, optionList);
-				
-				std::string lastAddedNameLayer = AddLastNamePathLayer(constructedNamePath, entry.path().filename().u8string(), "Folder");
-
-				if (wwiseWorkFoldersToWwuType.find(relativeFolderPath.substr(1)) != wwiseWorkFoldersToWwuType.end())
-				{
-					if (whitelistedWwuTypes.find(wwiseWorkFoldersToWwuType[relativeFolderPath.substr(1)]) != whitelistedWwuTypes.end())
-					{
-						ApplyPrefix(constructedNamePath, wwuSettings[wwiseWorkFoldersToWwuType[relativeFolderPath.substr(1)]]);
-					}
-				}
-				else
-				{
-					if (!RunChecks(obj["return"].GetArray()[0]["name"].GetVariant().GetString(), obj["return"].GetArray()[0]["id"].GetVariant().GetString(), "folder", lastAddedNameLayer, constructedNamePath, "Folder"))
-					{
-						break;
-					}
-				}
-
-				StartCheckingNamingConvention(entry.path().u8string(), constructedNamePath);
-			}
-		}
-		else if (entry.path().extension() == ".wwu")
-		{
-			ScanWorkUnitXMLByPath(entry.path().u8string(), constructedNamePath);
-		}
-	}
-}
-
-void NamingConventionModule::ApplyPrefix(std::string& constructedNamePath, const WwuSettings& currentWwuSettings)
-{
-	if (currentWwuSettings.applyPrefix)
-	{
-		constructedNamePath = currentWwuSettings.prefixToApply;
-	}
-	else
-	{
-		constructedNamePath = "";
-	}
-}
-
-void NamingConventionModule::ScanWorkUnitXMLByPath(const std::string& wwuPath, std::string& namePath)
-{
-	pugi::xml_document doc;
-	pugi::xml_parse_result result = doc.load_file(wwuPath.c_str());
-	if (!result)
-		return;
-
-	std::string wwuType = static_cast<std::string>(doc.child("WwiseDocument").first_child().name());
-
-	if (static_cast<std::string>(doc.child("WwiseDocument").child(wwuType.c_str()).child("WorkUnit").attribute("Name").value()) != "Default Work Unit")
-	{
-		if (static_cast<std::string>(doc.child("WwiseDocument").child(wwuType.c_str()).child("WorkUnit").attribute("PersistMode").value()) == "Standalone")
-		{
-			if (wwuSettings[wwuType].applyNamingConventionCheck)
-			{
-				IterateThroughWwu(doc.child("WwiseDocument").child(wwuType.c_str()), namePath, wwuType);
-			}
-		}
-	}
-}
-
-void NamingConventionModule::IterateThroughWwu(const pugi::xml_node& wwuNode, std::string namePath, const std::string& wwuType)
-{
-	for (auto& node : wwuNode)
-	{
-		if (static_cast<std::string>(node.name()) == "WorkUnit")
-		{
-			if (static_cast<std::string>(node.attribute("PersistMode").value()) == "Reference")
-			{
-				for (auto& data : prefetchedWwuData)
-				{
-					if (data.guid == static_cast<std::string>(node.attribute("ID").value()))
-					{
-						pugi::xml_document doc;
-						pugi::xml_parse_result result = doc.load_file(data.path.c_str());
-						if (!result)
-							return;
-
-						IterateThroughWwu(doc.child("WwiseDocument"), namePath, wwuType);
-					}
-				}
-			}
-			else
-			{
-				std::string lastAddedLayer = AddLastNamePathLayer(namePath, static_cast<std::string>(node.attribute("Name").value()), static_cast<std::string>(node.name()));
-
-				if (RunChecks(static_cast<std::string>(node.attribute("Name").value()), static_cast<std::string>(node.attribute("ID").value()), wwuType, lastAddedLayer, namePath, static_cast<std::string>(node.name())))
-				{
-					IterateThroughWwu(node, namePath, wwuType);
-				}	
-			}
-		}
-		else if (whitelistedContainers.find(static_cast<std::string>(node.name())) != whitelistedContainers.end())
-		{
-			std::string lastAddedLayer = AddLastNamePathLayer(namePath, static_cast<std::string>(node.attribute("Name").value()), static_cast<std::string>(node.name()));
-			
-			if(RunChecks(static_cast<std::string>(node.attribute("Name").value()), static_cast<std::string>(node.attribute("ID").value()), wwuType, lastAddedLayer, namePath, static_cast<std::string>(node.name())))
-			{
-				IterateThroughWwu(node, namePath, wwuType);
-			}
-		}
-		else
-		{
-			IterateThroughWwu(node, namePath, wwuType);
-		}
-	}
-}
-
-std::string NamingConventionModule::AddLastNamePathLayer(std::string& currentNamePath, const std::string& newName, const std::string& containerName)
-{
-	std::string newNodeName = newName;
-	if (currentNamePath == "")
-	{
-		currentNamePath = newNodeName;
-		return newNodeName;
-	}
-	else
-	{
-		if (newNodeName.find(levelSeparator) != std::string::npos)
-		{
-			newNodeName.erase(0, currentNamePath.size() + 1);
-		}
-		currentNamePath += levelSeparator + newNodeName;
-
-		return newNodeName;
-	}
-}
-
-bool NamingConventionModule::RunChecks(const std::string& nodeName, const std::string& nodeID, const std::string& wwuType, const std::string & lastAddedLayer, const std::string& reconstructedNamePath, const std::string& containerName)
-{
-	if (CheckRightPrefix(nodeName, nodeID, wwuType)
-		&& CheckNameForSpace(nodeName, nodeID, wwuSettings[wwuType].allowSpace)
-		&& CheckUppercaseRule(nodeName, nodeID, wwuSettings[wwuType].allowUpperCase)
-		&& CheckForMultipleSeparatorsPerLayer(nodeName, nodeID, lastAddedLayer, containerName)
-		&& CheckHierarchy(nodeName,reconstructedNamePath, nodeID))
-	{
-		return true;
-	}
-	return false;
-}
-
-bool NamingConventionModule::CheckNameForSpace(const std::string& nodeName, const std::string& nodeID, bool& allowSpace)
-{
-	std::string currentName = nodeName;
-	if (!allowSpace)
-	{
-		size_t loc = currentName.find(" ");
-		if (loc < currentName.size())
-		{
-			AddIssueToList(nodeID, nodeName, NamingIssue::SPACE);
-			return false;
-		}
-	}
-	return true;
-}
-
-bool NamingConventionModule::CheckForMultipleSeparatorsPerLayer(const std::string& nodeName, const std::string& nodeID, const std::string& newNameLayer, const std::string& containerName)
-{
-	std::string currentName = nodeName;
-	if (newNameLayer.find("_") != std::string::npos)
-	{
-		if (!IsCorrectSuffix(currentName, newNameLayer.substr(newNameLayer.find("_") + 1), containerName))
-		{
-			AddIssueToList(nodeID, nodeName, NamingIssue::SEPARATOR);
-			return false;
-		}
-	}
-	return true;
-}
-
-bool NamingConventionModule::IsCorrectSuffix(const std::string& currentName, const std::string& newNameLayer, const std::string& containerName)
-{
-	auto container = containerSettings.find(containerName);
-	if (container != containerSettings.end())
-	{
-		if (container->second.allowNumberSuffix || container->second.allowStringSuffix)
-		{
-			std::vector<int> separatorLocations;
-			bool numLayerAppeared = false;
-			for (int i = 0; i< newNameLayer.size(); i++)
-			{
-				if (newNameLayer.at(i) == '_')
-					separatorLocations.push_back(i);
-			}
-
-			if (container->second.IsSuffixCountInRange(static_cast<int>(separatorLocations.size())))
-			{
-				int readIndex = 0;
-				for (int sep = 0; sep < separatorLocations.size() + 1; sep++)
-				{
-					std::string layer;
-					if (sep >= separatorLocations.size())
-					{
-						layer = newNameLayer.substr(readIndex);
-					}
-					else
-					{
-						layer = newNameLayer.substr(readIndex, separatorLocations[sep] - readIndex);
-						readIndex = separatorLocations[sep] + 1;
-					}
-
-					if (container->second.IsNumber(layer) && !numLayerAppeared && container->second.allowNumberSuffix)
-					{
-						numLayerAppeared = true;
-						if (!container->second.IsNumberInRange(layer))
-						{
-							return false;
-						}
-					}
-					else if (container->second.IsStringInSuffixList(layer) && container->second.allowStringSuffix)
-					{
-						//passed test	
-					}
-					else
-					{
-						return false;
-					}
-				}
-			}
-			else
-			{
-				return false;
-			}
-		}
-		else
-		{
-			return false;
-		}
-	}
-	else
-	{
-		return false;
-	}
-	return true;
-}
-
-bool NamingConventionModule::CheckUppercaseRule(const std::string& nodeName, const std::string& nodeID, const bool& allowUpperCase)
-{
-	if (allowUpperCase)
-		return true;
-
-	std::string currentName = nodeName;
-	
-	if (std::any_of(currentName.begin(), currentName.end(), isupper))
-	{
-		AddIssueToList(nodeID, nodeName, NamingIssue::UPPERCASE);
-		return false;
-	}
-
-	return true;
-}
-
-bool NamingConventionModule::CheckRightPrefix(const std::string& nodeName, const std::string& nodeID, const std::string& wwuType)
-{
-	if (!wwuSettings[wwuType].applyPrefix)
-	{
-		return true;
-	}
-
-	std::string rightPrefix = wwuSettings[wwuType].prefixToApply;
-	std::string name = nodeName;
-
-	auto separatorPlace = name.find(levelSeparator);
-	if (separatorPlace != std::string::npos)
-	{
-		if (name.substr(0, separatorPlace) != rightPrefix)
-		{
-			AddIssueToList(nodeID, nodeName, NamingIssue::PREFIX);
-			return false;
-		}
-	}
-	else if (name != rightPrefix)
-	{
-		AddIssueToList(nodeID, nodeName, NamingIssue::PREFIX);
-		return false;
-	}
-	return true;
-}
-
-bool NamingConventionModule::CheckHierarchy(const std::string& currentName, const std::string& constructedName, const std::string& nameID)
-{
-	if (currentName != constructedName)
-	{
-		AddIssueToList(nameID, currentName, NamingIssue::HIERARCHY);
-		return false;
-	}
-	return true;
-}
 
 void NamingConventionModule::SaveNamingConventionSettings()
 {
@@ -460,10 +130,6 @@ void NamingConventionModule::SaveNamingConventionSettings()
 		name = rapidjson::StringRef(wwu.first.c_str());
 		settings.AddMember("name", name, d.GetAllocator());
 
-		rapidjson::Value apply;
-		apply.SetBool(wwu.second.applyNamingConventionCheck);
-		settings.AddMember("apply", apply, d.GetAllocator());
-
 		rapidjson::Value applyPrefix;
 		applyPrefix.SetBool(wwu.second.applyPrefix);
 		settings.AddMember("applyPrefix", applyPrefix, d.GetAllocator());
@@ -475,6 +141,10 @@ void NamingConventionModule::SaveNamingConventionSettings()
 		rapidjson::Value allowSpace;
 		allowSpace.SetBool(wwu.second.allowSpace);
 		settings.AddMember("allowSpace", allowSpace, d.GetAllocator());
+
+		rapidjson::Value allowUppercase;
+		allowUppercase.SetBool(wwu.second.allowUpperCase);
+		settings.AddMember("allowUppercase", allowUppercase, d.GetAllocator());
 
 		rapidjsonWwuSettings.AddMember(rapidjson::StringRef(wwu.first.c_str()), settings, d.GetAllocator());
 	}
@@ -491,16 +161,12 @@ void NamingConventionModule::SaveNamingConventionSettings()
 		cSettings.AddMember("name", name, d.GetAllocator());
 
 		rapidjson::Value allowNumberSuffix;
-		allowNumberSuffix.SetBool(container.second.allowNumberSuffix);
+		allowNumberSuffix.SetBool(container.second.applyNumberSuffix);
 		cSettings.AddMember("allowNumberSuffix", allowNumberSuffix, d.GetAllocator());
 
 		rapidjson::Value allowStringSuffix;
-		allowStringSuffix.SetBool(container.second.allowStringSuffix);
+		allowStringSuffix.SetBool(container.second.applyStringSuffix);
 		cSettings.AddMember("allowStringSuffix", allowStringSuffix, d.GetAllocator());
-
-		rapidjson::Value suffixLayers;
-		suffixLayers.SetInt(container.second.suffixLayers);
-		cSettings.AddMember("suffixLayers", suffixLayers, d.GetAllocator());
 
 		rapidjson::Value maxNumberAllowed;
 		maxNumberAllowed.SetInt(container.second.maxNumberAllowed);
@@ -547,12 +213,12 @@ void NamingConventionModule::LoadNamingConventionSettings()
 			{
 				if (d["WwuSettings"].HasMember(wwu.c_str()))
 				{
-					if (d["WwuSettings"][wwu.c_str()].HasMember("name") && d["WwuSettings"][wwu.c_str()].HasMember("prefixToApply") && d["WwuSettings"][wwu.c_str()].HasMember("applyPrefix") && d["WwuSettings"][wwu.c_str()].HasMember("apply") && d["WwuSettings"][wwu.c_str()].HasMember("allowSpace"))
+					if (d["WwuSettings"][wwu.c_str()].HasMember("name") && d["WwuSettings"][wwu.c_str()].HasMember("prefixToApply") && d["WwuSettings"][wwu.c_str()].HasMember("applyPrefix") && d["WwuSettings"][wwu.c_str()].HasMember("allowUppercase") && d["WwuSettings"][wwu.c_str()].HasMember("allowSpace"))
 					{
 						wwuSettings.emplace(d["WwuSettings"][wwu.c_str()]["name"].GetString(), WwuSettings(d["WwuSettings"][wwu.c_str()]["prefixToApply"].GetString(),
 							d["WwuSettings"][wwu.c_str()]["applyPrefix"].GetBool(),
-							d["WwuSettings"][wwu.c_str()]["apply"].GetBool(),
-							d["WwuSettings"][wwu.c_str()]["allowSpace"].GetBool()));
+							d["WwuSettings"][wwu.c_str()]["allowSpace"].GetBool(),
+							d["WwuSettings"][wwu.c_str()]["allowUppercase"].GetBool()));
 					}
 				}
 
@@ -564,11 +230,10 @@ void NamingConventionModule::LoadNamingConventionSettings()
 			{
 				if (d["ContainerSettings"].HasMember(container.c_str()))
 				{
-					if (d["ContainerSettings"][container.c_str()].HasMember("allowNumberSuffix") && d["ContainerSettings"][container.c_str()].HasMember("allowStringSuffix") && d["ContainerSettings"][container.c_str()].HasMember("suffixLayers") && d["ContainerSettings"][container.c_str()].HasMember("maxNumberAllowed") && d["ContainerSettings"][container.c_str()].HasMember("stringSuffixes"))
+					if (d["ContainerSettings"][container.c_str()].HasMember("allowNumberSuffix") && d["ContainerSettings"][container.c_str()].HasMember("allowStringSuffix") && d["ContainerSettings"][container.c_str()].HasMember("maxNumberAllowed") && d["ContainerSettings"][container.c_str()].HasMember("stringSuffixes"))
 					{
 						containerSettings.emplace(container.c_str(), ContainerSettings(d["ContainerSettings"][container.c_str()]["allowNumberSuffix"].GetBool(),
 							d["ContainerSettings"][container.c_str()]["allowStringSuffix"].GetBool(),
-							d["ContainerSettings"][container.c_str()]["suffixLayers"].GetInt(),
 							d["ContainerSettings"][container.c_str()]["maxNumberAllowed"].GetInt(),
 							d["ContainerSettings"][container.c_str()]["stringSuffixes"].GetString()));
 					}
@@ -580,6 +245,440 @@ void NamingConventionModule::LoadNamingConventionSettings()
 
 void NamingConventionModule::OnSettingsChange(const std::string projectPath, const std::string sdkPath)
 {
+	ClearOldData();
 	SetProjectPath(projectPath);
 }
 
+
+void NamingConventionModule::FindTopPhysicalFolders(const std::string& folderPath)
+{
+	for (const auto& entry : std::filesystem::directory_iterator(folderPath))
+	{
+		if (std::filesystem::is_directory(entry))
+		{
+			if (entry.path().filename().u8string() != ".cache" && entry.path().filename().u8string() != "GeneratedSoundBanks" && entry.path().filename().u8string() != "Originals" && entry.path().filename().u8string() != "Presets")
+			{
+				if (wwiseWorkFoldersToWwuType.find(entry.path().filename().string()) != wwiseWorkFoldersToWwuType.end())
+				{
+					legalTopFolderPaths.push_back(entry.path());
+				}		
+			}
+		}
+	}
+}
+
+void NamingConventionModule::IteratePhysicalFolder(const std::filesystem::path& folderPath, const std::string& wwuSettingKey, const std::string& parentContainerKey)
+{
+	for (const auto& entry : std::filesystem::directory_iterator(folderPath))
+	{
+		std::string passableParentName = folderPath.filename().string();
+		if (passableParentName == wwuSettingKey)
+		{
+			passableParentName = "";
+		}
+
+		std::string passableFileName = entry.path().filename().string();
+		if (entry.path().extension() == ".wwu")
+		{
+			passableFileName = passableFileName.substr(0, passableFileName.length() - 4);
+		}
+
+		if (entry.is_directory())
+		{
+			if (CheckNamingSettings(passableFileName, passableParentName, wwuSettingKey, "Folder", "Folder", GenerateGuid()))
+			{
+				IteratePhysicalFolder(entry.path().string(), wwuSettingKey, "Folder");
+			}
+		}
+		else if (entry.path().extension() == ".wwu")
+		{
+			std::string id = GetWorkUnitIDFromXML(entry.path().string());
+			if (id != "")
+			{
+				if (CheckNamingSettings(passableFileName, passableParentName, wwuSettingKey, "WorkUnit", "Folder", id))
+				{
+					IterateThroughWwu(id, passableFileName, wwuSettingKey, "WorkUnit");
+				}
+			}
+		}
+	}
+}
+
+std::string NamingConventionModule::GetWorkUnitIDFromXML(const std::string& wwuPath)
+{
+	pugi::xml_document doc;
+	pugi::xml_parse_result result = doc.load_file(wwuPath.c_str());
+	if (!result)
+		return "";
+
+	std::string wwuType = static_cast<std::string>(doc.child("WwiseDocument").first_child().name());
+
+	if (static_cast<std::string>(doc.child("WwiseDocument").child(wwuType.c_str()).child("WorkUnit").attribute("Name").value()) != "Default Work Unit")
+	{
+		if (static_cast<std::string>(doc.child("WwiseDocument").child(wwuType.c_str()).child("WorkUnit").attribute("PersistMode").value()) == "Standalone")
+		{
+			return static_cast<std::string>(doc.child("WwiseDocument").child(wwuType.c_str()).child("WorkUnit").attribute("ID").value());
+		}
+	}
+
+	return "";
+}
+
+void NamingConventionModule::IterateThroughWwu(const std::string id, const std::string parentName, const std::string& wwuSettingKey, const std::string& parentContainerKey)
+{
+	std::vector <std::string> optionList = { "id" , "name", "type"};
+	AkJson results = wwizardClient->GetChildrenFromGuid(id, optionList);
+
+	for (const auto& evt : results["return"].GetArray())
+	{
+		if (CheckNamingSettings(evt["name"].GetVariant().GetString(), parentName, wwuSettingKey, evt["type"].GetVariant().GetString(), parentContainerKey, evt["id"].GetVariant().GetString()))
+		{
+			IterateThroughWwu(evt["id"].GetVariant().GetString(), evt["name"].GetVariant().GetString(), wwuSettingKey, evt["type"].GetVariant().GetString());
+		}
+	}
+}
+
+
+bool NamingConventionModule::CheckNamingSettings(const std::string& currentFileName, const std::string& parentFileName, const std::string& wwuSettingKey, const std::string& containerKey, const std::string& parentContainerKey, const std::string& currentID)
+{
+	bool passingFlag = true;
+	std::string currentSuffix = "";
+
+	if (!wwuSettings[wwuSettingKey].allowSpace)
+	{
+		passingFlag = !IsSpaceInPath(currentFileName);
+		if (!passingFlag)
+		{
+			AddIssueToList(currentID, currentFileName, NamingIssue::SPACE);
+		}
+	}
+	if (!wwuSettings[wwuSettingKey].allowUpperCase && passingFlag)
+	{
+		passingFlag = !IsUppercaseInPath(currentFileName);
+		if (!passingFlag)
+		{
+			AddIssueToList(currentID, currentFileName, NamingIssue::UPPERCASE);
+		}
+	}
+	if (wwuSettings[wwuSettingKey].applyPrefix && passingFlag)
+	{
+		passingFlag = IsPrefixRight(currentFileName, wwuSettings[wwuSettingKey].prefixToApply);
+		if (!passingFlag)
+		{
+			AddIssueToList(currentID, currentFileName, NamingIssue::PREFIX);
+		}
+	}
+	if (passingFlag)
+	{
+		passingFlag = IsContainerWhiteListed(containerKey);
+
+		if (passingFlag)
+		{
+			if (containerSettings[containerKey].applyNumberSuffix || containerSettings[containerKey].applyStringSuffix)
+			{
+				passingFlag = CheckSuffix(currentFileName, containerKey, currentSuffix);
+				if (!passingFlag)
+				{
+					AddIssueToList(currentID, currentFileName, NamingIssue::Suffix);
+				}
+			}
+		}
+	}
+
+	if (passingFlag)
+	{
+		if (wwuSettings[wwuSettingKey].applyPrefix)
+		{
+			passingFlag = IsParentHierarchyMatching(currentFileName, parentFileName, wwuSettings[wwuSettingKey].prefixToApply, currentSuffix, parentContainerKey);
+		}
+		else
+		{
+			passingFlag = IsParentHierarchyMatching(currentFileName, parentFileName, "", currentSuffix, parentContainerKey);
+		}
+
+		if (!passingFlag)
+		{
+			AddIssueToList(currentID, currentFileName, NamingIssue::HIERARCHY);
+		}
+	}
+	return passingFlag;
+}
+
+bool NamingConventionModule::IsParentHierarchyMatching(const std::string& fileName, const std::string& parentFileName, const std::string& prefix, const std::string& suffix, const std::string& parentContainerKey)
+{
+	std::string parentSuffix = "";
+	
+	
+	std::string cleanFileName = fileName;
+	if (prefix.length() > 0)
+	{
+		cleanFileName = fileName.substr(prefix.length() + 1, fileName.length() - prefix.length() - 1);
+	}
+	if (suffix.length() > 0)
+	{
+		cleanFileName = cleanFileName.substr(0, cleanFileName.length() - suffix.length() - 1);
+	}
+
+	if (fileName == parentFileName)
+	{
+		return false;
+	}
+
+	if (parentFileName == "")
+	{
+		for (auto it = cleanFileName.cbegin(); it != cleanFileName.cend(); ++it)
+		{
+			if (*it == '_')
+			{
+				return false;
+			}
+		}
+		return true;
+	}
+
+	CheckSuffix(parentFileName, parentContainerKey, parentSuffix);
+
+	std::string cleanParentName = parentFileName;
+	if (parentSuffix.length() > 0)
+	{
+		cleanParentName = cleanParentName.substr(0, cleanParentName.length() - parentSuffix.length() - 1);
+	}
+	if (prefix.length() > 0)
+	{
+		cleanParentName = cleanParentName.substr(prefix.length() + 1, cleanParentName.length() - prefix.length() - 1);
+	}
+
+	if (!IsOneUnderscorePerNewLayer(cleanFileName, cleanParentName))
+	{
+		return false;
+	}
+
+	auto foundLoc = cleanFileName.find(cleanParentName);
+	if (foundLoc != std::string::npos)
+	{
+		std::string rest = cleanFileName.substr(cleanParentName.length() + 1, cleanFileName.length() - cleanParentName.length());
+		if (rest.length() == 0)
+		{
+			return false;
+		}		
+
+		for (auto it = rest.cbegin(); it != rest.cend(); ++it)
+		{
+			if (*it == '_')
+			{
+				return false;
+			}		
+		}
+	}
+	else
+	{
+		return false;
+	}
+
+	return true;
+}
+
+bool NamingConventionModule::IsSpaceInPath(const std::string& fileName)
+{
+	for (auto it = fileName.cbegin(); it != fileName.cend(); ++it) 
+	{
+		if (isspace(*it))
+			return true;
+	}
+	return false;
+}
+
+bool NamingConventionModule::IsUppercaseInPath(const std::string& fileName)
+{
+	for (auto it = fileName.cbegin(); it != fileName.cend(); ++it)
+	{
+		if (isupper(*it))
+			return true;
+	}
+	return false;
+}
+
+bool NamingConventionModule::IsPrefixRight(const std::string& fileName, const std::string& prefix)
+{
+	std::string fileNameFront = fileName.substr(0, prefix.length());
+	if (fileNameFront == prefix)
+	{
+		return true;
+	}
+	else
+	{
+		return false;
+	}
+}
+
+
+bool NamingConventionModule::IsContainerWhiteListed(const std::string& containerType)
+{
+	auto it = whitelistedContainers.find(containerType);
+	if (it != whitelistedContainers.end())
+		return true;
+	else
+		return false;
+}
+
+bool NamingConventionModule::CheckSuffix(const std::string& fileName, const std::string& containerType, std::string& outSuffix)
+{
+	ContainerSettings setting = containerSettings[containerType];
+
+	std::string suffixless = fileName;
+	std::string stringSuffix = "";
+	std::string numberSuffix = "";
+
+	if (setting.applyNumberSuffix)
+	{
+		numberSuffix = fileName.substr(fileName.length() - std::to_string(setting.maxNumberAllowed).length(), std::to_string(setting.maxNumberAllowed).length());
+
+		for (const auto& digit : numberSuffix)
+		{
+			if (!isdigit(digit))
+			{
+				return false;
+			}
+
+		}
+
+		if (std::stoi(numberSuffix) > setting.maxNumberAllowed)
+		{
+			return false;
+		}
+
+		if (numberSuffix.length() != std::to_string(setting.maxNumberAllowed).length())
+		{
+			return false;
+		}
+
+		suffixless = fileName.substr(0, fileName.length() - numberSuffix.length() - 1);
+	}
+
+
+	std::string wholeSuffix = "";
+	if (setting.applyStringSuffix)
+	{
+		std::string stringSuffix = suffixless;
+		std::vector<std::string> suffixes = ConvertStringToVector(setting.stringSuffixes);
+
+		for (const auto& suffix : suffixes)
+		{
+			stringSuffix = suffixless.substr(suffixless.length() - suffix.length(), suffix.length());
+			if (stringSuffix == suffix)
+			{
+				if (suffixless.at(suffixless.length() - suffix.length() -1) != '_')
+				{
+					return false;
+				}
+				else
+				{
+					wholeSuffix = stringSuffix;
+				}
+			}
+		}
+	}
+
+	if (wholeSuffix == "" && setting.applyStringSuffix)
+	{
+		return false;
+	}
+
+	if (setting.applyNumberSuffix)
+	{
+		if (wholeSuffix != "")
+		{
+			wholeSuffix += '_' + numberSuffix;
+		}
+		else
+		{
+			wholeSuffix = numberSuffix;
+		}
+	}
+
+	outSuffix = wholeSuffix;
+	if (wholeSuffix == "")
+		return false;
+
+	return true;
+}
+
+bool NamingConventionModule::IsOneUnderscorePerNewLayer(const std::string& fileName, const std::string& parentName)
+{
+	std::string rest = fileName;
+	if (parentName != "")
+	{
+		rest = fileName.substr(parentName.length() + 1, fileName.length() - parentName.length() - 1);
+	}
+
+	for (const auto& cha : rest)
+	{
+		if (cha == '_')
+		{
+			return false;
+		}
+	}
+
+	return true;
+}
+
+std::string NamingConventionModule::RemovePrefixSuffix(const std::string& fileName, const std::string& wwuSettingKey, const std::string& containerSettingKey)
+{
+	std::string tempName = fileName;
+
+	if (wwuSettings[wwuSettingKey].applyPrefix)
+	{
+		tempName = RemovePrefixFromName(tempName, wwuSettingKey);
+	}
+	if (containerSettings[containerSettingKey].applyNumberSuffix || containerSettings[containerSettingKey].applyStringSuffix)
+	{
+		tempName = RemoveSuffixFromName(tempName, containerSettingKey);
+	}
+	return tempName;
+}
+
+std::string NamingConventionModule::RemovePrefixFromName(const std::string& fileName, const std::string& wwuSettingKey)
+{
+	if (fileName == "")
+	{
+		std::string emptyParentResponse = "";
+		return emptyParentResponse;
+	}
+	std::string prefix = wwuSettings[wwuSettingKey].prefixToApply;
+
+	std::string wPrefix = fileName.substr(prefix.length() + 1, fileName.length() - prefix.length() + 1);
+
+	return wPrefix;
+}
+
+std::string NamingConventionModule::RemoveSuffixFromName(const std::string& fileName, const std::string& containerSettingKey)
+{
+	ContainerSettings setting = containerSettings[containerSettingKey];
+	std::string withoutSuffix = "";
+	if (setting.applyNumberSuffix)
+	{
+		withoutSuffix = fileName.substr(0, fileName.length() - std::to_string(setting.maxNumberAllowed).length());
+	}
+	return fileName;
+}
+
+std::vector<std::string> NamingConventionModule::ConvertStringToVector(const std::string& inputSetting)
+{
+	std::string currentSuffix = "";
+	std::vector<std::string> suffixVector;
+
+	for (const auto& cha : inputSetting)
+	{
+		if (cha == ',')
+		{
+			suffixVector.emplace_back(currentSuffix);
+			currentSuffix = "";
+		}
+		else
+		{
+			currentSuffix += cha;
+		}
+	}
+	suffixVector.emplace_back(currentSuffix);
+	return suffixVector;
+}

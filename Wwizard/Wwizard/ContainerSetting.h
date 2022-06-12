@@ -4,19 +4,17 @@
 struct ContainerSettings
 {
 	ContainerSettings() = default;
-	ContainerSettings(bool allowNumberSuffix, bool allowStringSuffix, int suffixLayers, int maxNumberAllowed, std::string stringSuffixes)
-		: allowNumberSuffix(allowNumberSuffix)
-		, allowStringSuffix(allowStringSuffix)
-		, suffixLayers(suffixLayers)
+	ContainerSettings(bool allowNumberSuffix, bool allowStringSuffix, int maxNumberAllowed, std::string stringSuffixes)
+		: applyNumberSuffix(allowNumberSuffix)
+		, applyStringSuffix(allowStringSuffix)
 		, maxNumberAllowed(maxNumberAllowed)
 		, stringSuffixes(stringSuffixes)
 	{
 	}
 
-	bool allowNumberSuffix = false;
-	bool allowStringSuffix = false;
+	bool applyNumberSuffix = false;
+	bool applyStringSuffix = false;
 
-	int suffixLayers = 0;
 	int maxNumberAllowed = 0;
 
 	std::string stringSuffixes = "";

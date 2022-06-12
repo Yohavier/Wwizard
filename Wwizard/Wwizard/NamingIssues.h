@@ -5,5 +5,6 @@ enum class NamingIssue
 	SPACE,
 	UPPERCASE,
 	SEPARATOR,
-	PREFIX
+	PREFIX,
+	Suffix
 };

@@ -4,17 +4,16 @@
 struct WwuSettings
 {
 	WwuSettings() = default;
-	WwuSettings(std::string prefixToApply, bool applyPrefix, bool applyNamingConventionCheck, bool allowSpace)
+	WwuSettings(std::string prefixToApply, bool applyPrefix, bool allowSpace, bool allowUppercase)
 		: prefixToApply(prefixToApply)
 		, applyPrefix(applyPrefix)
-		, applyNamingConventionCheck(applyNamingConventionCheck)
 		, allowSpace(allowSpace)
+		, allowUpperCase(allowUppercase)
 	{}
 
 	std::string prefixToApply = "";
 
 	bool applyPrefix = false;
-	bool applyNamingConventionCheck = false;
 	bool allowSpace = false;
 	bool allowUpperCase = false;
 };

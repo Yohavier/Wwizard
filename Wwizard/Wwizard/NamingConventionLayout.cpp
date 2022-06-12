@@ -71,7 +71,7 @@ void NamingConventionLayout::RenderLayout()
             for (const auto& wwuType : namingConventionModule->GetWhiteListedWwuTypes())
             {
                 ImGui::PushID(i);
-                ImGui::Checkbox(namingConventionModule->GetStringToReplace(wwuType).substr(1).c_str(), &(namingConventionModule->wwuSettings[wwuType].applyNamingConventionCheck));
+                ImGui::Text(namingConventionModule->GetStringToReplace(wwuType).substr(1).c_str());
                 ImGui::NextColumn();
 
                 ImGui::Checkbox(("##allowSpace" + namingConventionModule->GetStringToReplace(wwuType).substr(1)).c_str(), &(namingConventionModule->wwuSettings[wwuType].allowSpace));
@@ -95,14 +95,12 @@ void NamingConventionLayout::RenderLayout()
         }
         if (ImGui::BeginTabItem("Container Settings"))
         {
-            ImGui::BeginColumns("suffix", 4);
+            ImGui::BeginColumns("suffix", 3);
             ColoredHeadline("Container");
             ImGui::NextColumn();
             ColoredHeadline("String suffix");
             ImGui::NextColumn();
             ColoredHeadline("Number suffix");
-            ImGui::NextColumn();
-            ColoredHeadline("Multiple suffix");
             ImGui::Separator();
             ImGui::NextColumn();
 
@@ -115,28 +113,20 @@ void NamingConventionLayout::RenderLayout()
                 ImGui::NextColumn();
 
 
-                ImGui::Checkbox("##ApplyString", &(namingConventionModule->containerSettings[containerType].allowStringSuffix));
+                ImGui::Checkbox("##ApplyString", &(namingConventionModule->containerSettings[containerType].applyStringSuffix));
                 ImGui::SameLine();
                 ImGui::PushItemWidth(100);
                 ImGui::InputText("##Layers", &(namingConventionModule->containerSettings[containerType].stringSuffixes));
                 ImGui::PopItemWidth();
                 ImGui::NextColumn();
 
-                ImGui::Checkbox("##ApplyNumber", &(namingConventionModule->containerSettings[containerType].allowNumberSuffix));
+                ImGui::Checkbox("##ApplyNumber", &(namingConventionModule->containerSettings[containerType].applyNumberSuffix));
                 ImGui::SameLine();
                 ImGui::Text("Max Number");
                 ImGui::SameLine();
                 ImGui::PushItemWidth(100);
                 ImGui::InputInt("##MaxNumber", &(namingConventionModule->containerSettings[containerType].maxNumberAllowed),1);
                 ImGui::PopItemWidth();
-                ImGui::NextColumn();
-
-                ImGui::Text("Max Layers");
-                ImGui::SameLine();
-                ImGui::PushItemWidth(100);
-                ImGui::InputInt("##MaxSuffixLayers", &(namingConventionModule->containerSettings[containerType].suffixLayers), 1);  
-                ImGui::PopItemWidth();
-                ImGui::Separator();
                 ImGui::NextColumn();
 
                 ImGui::PopID();

@@ -35,27 +35,35 @@ public:
 private:
 	void BeginNamingConventionProcess();
 
-	void FetchWwuDataInDirectory(const std::string& directory);
-	void FetchSingleWwuData(const std::string& path);
-	void ScanWorkUnitXMLByPath(const std::string& wwuPath, std::string& namePath);
-	void StartCheckingNamingConvention(const std::string& path, std::string reconstructedPath);
-	void IterateThroughWwu(const pugi::xml_node& wwuNode, std::string namePath, const std::string& wwuType);
-	
-	bool RunChecks(const std::string& nodeName, const std::string& nodeID, const std::string& wwuType, const std::string & lastAddedLayer, const std::string& reconstructedNamePath, const std::string& containerName);
-	std::string AddLastNamePathLayer(std::string& currentNamePath, const std::string& newName, const std::string& containerName);
-	bool CheckNameForSpace(const std::string& nodeName, const std::string& nodeID, bool& allowSpace);
-	bool CheckForMultipleSeparatorsPerLayer(const std::string& nodeName, const std::string& nodeID, const std::string& newNameLayer, const std::string& containerName);
-	bool IsCorrectSuffix(const std::string& currentName, const std::string& newNameLayer, const std::string& containerName);
-	void ApplyPrefix(std::string& constructedNamePath, const WwuSettings& newPrefix);
-	bool CheckUppercaseRule(const std::string& nodeName, const std::string& nodeID, const bool& allowUppercase);
-	bool CheckRightPrefix(const std::string& nodeName, const std::string& nodeID, const std::string& wwuType);
-	bool CheckHierarchy(const std::string& currentName, const std::string& constructedName, const std::string& nameID);
-
 	void ClearOldData();
 	void AddIssueToList(const std::string& guid, const std::string& name, const NamingIssue& issue);
 
 	void SaveNamingConventionSettings();
 	void LoadNamingConventionSettings();
+
+
+	void FindTopPhysicalFolders(const std::string& folderPath);
+	void IteratePhysicalFolder(const std::filesystem::path& folderPath, const std::string& wwuSettingKey, const std::string& parentContainerKey);
+	std::string GetWorkUnitIDFromXML(const std::string& wwuPath);
+	void IterateThroughWwu(const std::string id, const std::string parentName, const std::string& wwuSettingKey, const std::string& parentContainerKey);
+
+	bool CheckNamingSettings(const std::string& currentFileName, const std::string& parentFileName, const std::string& wwuSettingKey, const std::string& containerKey, const std::string& parentContainerKey, const std::string& currentID);
+	bool IsUppercaseInPath(const std::string& fileName);
+	bool IsSpaceInPath(const std::string& fileName);
+	bool IsPrefixRight(const std::string& fileName, const std::string& prefix);
+	bool IsParentHierarchyMatching(const std::string& fileName, const std::string& parentFileName, const std::string& prefix, const std::string& suffix, const std::string& parentContainerKey);
+	bool IsOneUnderscorePerNewLayer(const std::string& fileName, const std::string& parentName);
+
+	std::string RemovePrefixSuffix(const std::string& fileName, const std::string& wwuSettingKey, const std::string& containerSettingKey);
+	std::string RemovePrefixFromName(const std::string& fileName, const std::string& wwuSettingKey);
+	std::string RemoveSuffixFromName(const std::string& fileName, const std::string& containerSettingKey);
+
+	bool IsContainerWhiteListed(const std::string& containerType);
+	bool CheckSuffix(const std::string& fileName, const std::string& containerType, std::string& outSuffix);
+
+	std::vector<std::string> ConvertStringToVector(const std::string& inputSetting);
+
+
 
 public:
 	std::map<std::string, WwuSettings> wwuSettings;
@@ -65,21 +73,20 @@ private:
 	std::unique_ptr<WwizardWwiseClient>& wwizardClient;
 
 	std::map<std::string, NamingResultFile> namingIssueResults;
-	std::string levelSeparator = "_";
+	std::vector<std::filesystem::path> legalTopFolderPaths;
 
 	std::string projectPath;
-	std::vector<WwuLookUpData> prefetchedWwuData;
 
 	std::thread* currentNamingConventionThread = nullptr;
 
 	std::map<NamingIssue, std::string> issueMessages = { {NamingIssue::HIERARCHY, "Hierarchy doesnt match"},
 		{NamingIssue::SEPARATOR, "Multiple Separators or suffix is wrong"}, {NamingIssue::SPACE, "Space is not allowed"},
-		{NamingIssue::UPPERCASE, "Uppercase is not allowed"}, {NamingIssue::PREFIX, "Wrong Prefix"} };
+		{NamingIssue::UPPERCASE, "Uppercase is not allowed"}, {NamingIssue::PREFIX, "Wrong Prefix"}, {NamingIssue::Suffix, "Wrong Suffix"}};
 
 	std::set<std::string> whitelistedContainers = { "Folder", "Switch", "AudioDevice", "SwitchGroup",
 		"SoundBank", "Event", "DialogueEvent", "Bus", "AuxBus", "MusicSegment", "MusicTrack", "MusicSwitchContainer",
 		"MusicPlaylistContainer", "ActorMixer", "BlendContainer", "RandomSequenceContainer",
-		"SwitchContainer", "Sound", "AcousticTexture", "Trigger", "State", "StateGroup", "Query" };
+		"SwitchContainer", "Sound", "AcousticTexture", "Trigger", "State", "StateGroup", "Query", "WorkUnit"};
 
 	std::set<std::string> whitelistedWwuTypes = { "AudioObjects", "Attenuations", "AudioDevices",
 		"ControlSurfaceSessions", "Conversions", "DynamicDialogue", "Effects", "Events", "GameParameters",
