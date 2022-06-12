@@ -95,6 +95,8 @@ void NamingConventionLayout::RenderLayout()
         }
         if (ImGui::BeginTabItem("Container Settings"))
         {
+            static std::string newSuffix = "";
+
             ImGui::BeginColumns("suffix", 3);
             ColoredHeadline("Container");
             ImGui::NextColumn();
@@ -115,9 +117,47 @@ void NamingConventionLayout::RenderLayout()
 
                 ImGui::Checkbox("##ApplyString", &(namingConventionModule->containerSettings[containerType].applyStringSuffix));
                 ImGui::SameLine();
-                ImGui::PushItemWidth(100);
-                ImGui::InputText("##Layers", &(namingConventionModule->containerSettings[containerType].stringSuffixes));
-                ImGui::PopItemWidth();
+
+                if (ImGui::BeginPopupModal("Create new suffix"))
+                {
+                    ImGui::Text("Enter new suffix :");
+                    ImGui::SameLine();
+                    ImGui::PushItemWidth(100);
+                    ImGui::InputText("##NewSuffix", &newSuffix);
+                    ImGui::PopItemWidth();
+                    if (ImGui::Button("Close", ImVec2(ImGui::GetWindowSize().x * 0.5f, 0.0f)))
+                    {
+                        ImGui::CloseCurrentPopup();
+                    }
+                    ImGui::SameLine();
+                    if (ImGui::Button("Create", ImVec2(ImGui::GetWindowSize().x * 0.5f, 0.0f)))
+                    {
+                        namingConventionModule->containerSettings[containerType].AddNewSuffix(newSuffix);
+                        ImGui::CloseCurrentPopup();
+                    }
+
+                    ImGui::EndPopup();
+                }
+
+                if (ImGui::Button("+"))
+                {
+                    newSuffix = "";
+                    ImGui::OpenPopup("Create new suffix"); 
+                }
+
+                for (const auto& suffix : namingConventionModule->containerSettings[containerType].stringSuffixVector)
+                {
+                    ImGui::SameLine();
+                    if (ImGui::Button(suffix.c_str()))
+                    {
+                        namingConventionModule->containerSettings[containerType].RemoveSuffix(suffix);
+                    }
+                }
+
+
+                //ImGui::PushItemWidth(100);
+                //ImGui::InputText("##Layers", &(namingConventionModule->containerSettings[containerType].stringSuffixes));
+                //ImGui::PopItemWidth();
                 ImGui::NextColumn();
 
                 ImGui::Checkbox("##ApplyNumber", &(namingConventionModule->containerSettings[containerType].applyNumberSuffix));

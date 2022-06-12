@@ -173,9 +173,14 @@ void NamingConventionModule::SaveNamingConventionSettings()
 		cSettings.AddMember("maxNumberAllowed", maxNumberAllowed, d.GetAllocator());
 
 		rapidjson::Value stringSuffixes;
-		stringSuffixes = rapidjson::StringRef(container.second.stringSuffixes.c_str());
-		cSettings.AddMember("stringSuffixes", stringSuffixes, d.GetAllocator());
-
+		stringSuffixes.SetArray();
+		for (const auto& suffix : container.second.stringSuffixVector)
+		{
+			rapidjson::Value newSuffix;
+			newSuffix = rapidjson::StringRef(suffix.c_str());
+			stringSuffixes.PushBack(newSuffix, d.GetAllocator());
+		}
+		cSettings.AddMember("suffixes", stringSuffixes, d.GetAllocator());
 		rapidjsonContainerSettings.AddMember(rapidjson::StringRef(container.first.c_str()), cSettings, d.GetAllocator());
 	}
 	d.AddMember("ContainerSettings", rapidjsonContainerSettings, d.GetAllocator());
@@ -230,12 +235,19 @@ void NamingConventionModule::LoadNamingConventionSettings()
 			{
 				if (d["ContainerSettings"].HasMember(container.c_str()))
 				{
-					if (d["ContainerSettings"][container.c_str()].HasMember("allowNumberSuffix") && d["ContainerSettings"][container.c_str()].HasMember("allowStringSuffix") && d["ContainerSettings"][container.c_str()].HasMember("maxNumberAllowed") && d["ContainerSettings"][container.c_str()].HasMember("stringSuffixes"))
+					if (d["ContainerSettings"][container.c_str()].HasMember("allowNumberSuffix") && d["ContainerSettings"][container.c_str()].HasMember("allowStringSuffix") && d["ContainerSettings"][container.c_str()].HasMember("maxNumberAllowed"))
 					{
 						containerSettings.emplace(container.c_str(), ContainerSettings(d["ContainerSettings"][container.c_str()]["allowNumberSuffix"].GetBool(),
 							d["ContainerSettings"][container.c_str()]["allowStringSuffix"].GetBool(),
-							d["ContainerSettings"][container.c_str()]["maxNumberAllowed"].GetInt(),
-							d["ContainerSettings"][container.c_str()]["stringSuffixes"].GetString()));
+							d["ContainerSettings"][container.c_str()]["maxNumberAllowed"].GetInt()));
+					}
+					if (d["ContainerSettings"][container.c_str()].HasMember("suffixes"))
+					{
+						for (int i = 0; i < d["ContainerSettings"][container.c_str()]["suffixes"].Size(); i ++)
+						{
+							std::string newSuffix = d["ContainerSettings"][container.c_str()]["suffixes"][i].GetString();
+							containerSettings[container].AddNewSuffix(newSuffix);
+						}	
 					}
 				}
 			}
@@ -563,9 +575,8 @@ bool NamingConventionModule::CheckSuffix(const std::string& fileName, const std:
 	if (setting.applyStringSuffix)
 	{
 		std::string stringSuffix = suffixless;
-		std::vector<std::string> suffixes = ConvertStringToVector(setting.stringSuffixes);
 
-		for (const auto& suffix : suffixes)
+		for (const auto& suffix : setting.stringSuffixVector)
 		{
 			if (fileName.length() < suffix.length())
 				return false;

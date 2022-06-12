@@ -1,14 +1,14 @@
 #pragma once
 #include <string>
+#include <vector>
 
 struct ContainerSettings
 {
 	ContainerSettings() = default;
-	ContainerSettings(bool allowNumberSuffix, bool allowStringSuffix, int maxNumberAllowed, std::string stringSuffixes)
+	ContainerSettings(bool allowNumberSuffix, bool allowStringSuffix, int maxNumberAllowed)
 		: applyNumberSuffix(allowNumberSuffix)
 		, applyStringSuffix(allowStringSuffix)
 		, maxNumberAllowed(maxNumberAllowed)
-		, stringSuffixes(stringSuffixes)
 	{
 	}
 
@@ -17,67 +17,22 @@ struct ContainerSettings
 
 	int maxNumberAllowed = 0;
 
-	std::string stringSuffixes = "";
+	std::vector<std::string> stringSuffixVector;
 
-	bool IsStringInSuffixList(std::string layer)
+	void AddNewSuffix(std::string& newSuffix)
 	{
-		std::string newSuffix;
-		for (auto& c : stringSuffixes)
-		{
-			if (c != ' ')
-			{
-				if (c == ',')
-				{
-					if (newSuffix == layer)
-					{
-						return true;
-					}
-					newSuffix = "";
-				}
-				else
-				{
-					newSuffix += c;
-				}
-			}
-		}
-		if (newSuffix != "")
-		{
-			if (newSuffix == layer)
-			{
-				return true;
-			}
-		}
-
-		return false;
+		stringSuffixVector.emplace_back(newSuffix);
 	}
 
-	bool IsNumberInRange(std::string number)
+	void RemoveSuffix(const std::string& removeSuffix)
 	{
-
-		if (std::to_string(maxNumberAllowed).size() == number.size())
+		for (auto it = stringSuffixVector.begin(); it != stringSuffixVector.end(); ++it)
 		{
-			int numLayer = std::stoi(number);
-			if (numLayer <= maxNumberAllowed)
+			if (*it == removeSuffix)
 			{
-				return true;
+				stringSuffixVector.erase(it);
+				return;
 			}
 		}
-		return false;
-	}
-
-	bool IsSuffixCountInRange(int layerCount)
-	{
-		if (layerCount <= maxNumberAllowed)
-		{
-			return true;
-		}
-		return false;
-	}
-
-	bool IsNumber(const std::string& s)
-	{
-		std::string::const_iterator it = s.begin();
-		while (it != s.end() && std::isdigit(*it)) ++it;
-		return !s.empty() && it == s.end();
 	}
 };
