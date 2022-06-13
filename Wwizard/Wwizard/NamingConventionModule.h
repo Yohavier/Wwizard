@@ -10,8 +10,7 @@
 #include <thread>
 #include "WwizardWwiseClient.h"
 #include "BaseModule.h"
-#include "ContainerSetting.h"
-#include "WwuSetting.h"
+#include "NamingSetting.h"
 
 class NamingConventionModule : public BaseModule
 { 
@@ -31,6 +30,14 @@ public:
 	void SetProjectPath(std::string newProjectPath);
 	void OnConnectionStatusChange(const bool newConnectionStatus) override;
 	void OnSettingsChange(const std::string projectPath, const std::string sdkPath) override;
+	void LoadAllNamingSettingsInDir(const std::string path);
+	void SetDefaultActive();
+	void SaveSettings(const std::string settingToSaveName, NamingSetting& saveSetting);
+	void SaveAsNewSetting(const std::string settingToSaveName, NamingSetting& saveSetting);
+
+	void ChangeNamingSetting(const std::string newSetting);
+
+	bool NamingConventionNameAlreadyExists(const std::string newName);
 
 private:
 	void BeginNamingConventionProcess();
@@ -38,9 +45,7 @@ private:
 	void ClearOldData();
 	void AddIssueToList(const std::string& guid, const std::string& name, const NamingIssue& issue);
 
-	void SaveNamingConventionSettings();
-	void LoadNamingConventionSettings();
-
+	void LoadNamingConventionSettings(const std::filesystem::path settingPath);
 
 	void FindTopPhysicalFolders(const std::string& folderPath);
 	void IteratePhysicalFolder(const std::filesystem::path& folderPath, const std::string& wwuSettingKey, const std::string& parentContainerKey);
@@ -66,8 +71,9 @@ private:
 
 
 public:
-	std::map<std::string, WwuSettings> wwuSettings;
-	std::map<std::string, ContainerSettings> containerSettings;
+	NamingSetting* activeNamingSetting = nullptr;
+	std::vector<std::string> allSettings;
+	std::string activeSettingName;
 
 private:
 	std::unique_ptr<WwizardWwiseClient>& wwizardClient;
@@ -76,6 +82,11 @@ private:
 	std::vector<std::filesystem::path> legalTopFolderPaths;
 
 	std::string projectPath;
+	std::string openedNamingConventionSetting;
+
+
+
+	std::map<std::string, NamingSetting> loadedNamingConventions;
 
 	std::thread* currentNamingConventionThread = nullptr;
 

@@ -16,12 +16,25 @@ NamingConventionModule::NamingConventionModule(const std::string& wwiseProjPath,
 	:wwizardClient(wwizardClient)
 {
 	SetProjectPath(wwiseProjPath);
-	LoadNamingConventionSettings();
+	LoadAllNamingSettingsInDir(static_cast<std::string>(SOLUTION_DIR) + "/Wwizard/SavedData/NamingConventions");
+	SetDefaultActive();
 }
 
 NamingConventionModule::~NamingConventionModule()
 {
-	SaveNamingConventionSettings();
+}
+
+void NamingConventionModule::LoadAllNamingSettingsInDir(const std::string path)
+{
+	allSettings.clear();
+	for (auto& entry : std::filesystem::directory_iterator(path))
+	{
+		if (entry.path().extension() == ".json")
+		{
+			LoadNamingConventionSettings(entry.path());
+		}
+	}
+	activeSettingName = allSettings.front();
 }
 
 void NamingConventionModule::SetProjectPath(std::string newProjectPath)
@@ -51,7 +64,7 @@ void NamingConventionModule::BeginNamingConventionProcess()
 
 	for (const auto& legalFolder : legalTopFolderPaths)
 	{
-		IteratePhysicalFolder(legalFolder, legalFolder.filename().string(), "");
+		IteratePhysicalFolder(legalFolder, wwiseWorkFoldersToWwuType[legalFolder.filename().string()], "");
 	}
 
 	currentNamingConventionThread = nullptr;
@@ -109,20 +122,94 @@ const std::string& NamingConventionModule::GetStringToReplace(const std::string&
 	return stringToReplace[wwuType];
 }
 
+
 void NamingConventionModule::OnConnectionStatusChange(const bool newConnectionStatus)
 {
 	namingIssueResults.clear();
 }
 
-
-void NamingConventionModule::SaveNamingConventionSettings()
+void NamingConventionModule::LoadNamingConventionSettings(std::filesystem::path settingPath)
 {
+	FILE* fp = fopen(settingPath.string().c_str(), "rb");
+	if (fp != 0)
+	{
+		openedNamingConventionSetting = settingPath.string();
+		char* readBuffer = new char[65536];
+		rapidjson::FileReadStream is(fp, readBuffer, sizeof(readBuffer));
+
+		rapidjson::Document d;
+		d.ParseStream(is);
+		fclose(fp);
+
+		NamingSetting newNamingSetting = NamingSetting();
+
+
+		for (const auto& wwu : whitelistedWwuTypes)
+		{
+			if (d.HasMember("WwuSettings"))
+			{
+				if (d["WwuSettings"].HasMember(wwu.c_str()))
+				{
+					if (d["WwuSettings"][wwu.c_str()].HasMember("name") && d["WwuSettings"][wwu.c_str()].HasMember("prefixToApply") && d["WwuSettings"][wwu.c_str()].HasMember("applyPrefix") && d["WwuSettings"][wwu.c_str()].HasMember("allowUppercase") && d["WwuSettings"][wwu.c_str()].HasMember("allowSpace"))
+					{
+						newNamingSetting.wwuSettings.emplace(d["WwuSettings"][wwu.c_str()]["name"].GetString(), WwuSetting(d["WwuSettings"][wwu.c_str()]["prefixToApply"].GetString(),
+							d["WwuSettings"][wwu.c_str()]["applyPrefix"].GetBool(),
+							d["WwuSettings"][wwu.c_str()]["allowSpace"].GetBool(),
+							d["WwuSettings"][wwu.c_str()]["allowUppercase"].GetBool()));
+					}
+				}
+
+			}
+		}
+		for (const auto& container : whitelistedContainers)
+		{
+			if (d.HasMember("ContainerSettings"))
+			{
+				if (d["ContainerSettings"].HasMember(container.c_str()))
+				{
+					if (d["ContainerSettings"][container.c_str()].HasMember("allowNumberSuffix") && d["ContainerSettings"][container.c_str()].HasMember("allowStringSuffix") && d["ContainerSettings"][container.c_str()].HasMember("maxNumberAllowed"))
+					{
+						newNamingSetting.containerSettings.emplace(container.c_str(), ContainerSetting(d["ContainerSettings"][container.c_str()]["allowNumberSuffix"].GetBool(),
+							d["ContainerSettings"][container.c_str()]["allowStringSuffix"].GetBool(),
+							d["ContainerSettings"][container.c_str()]["maxNumberAllowed"].GetInt()));
+					}
+					if (d["ContainerSettings"][container.c_str()].HasMember("suffixes"))
+					{
+						for (int i = 0; i < d["ContainerSettings"][container.c_str()]["suffixes"].Size(); i ++)
+						{
+							std::string newSuffix = d["ContainerSettings"][container.c_str()]["suffixes"][i].GetString();
+							newNamingSetting.containerSettings[container].AddNewSuffix(newSuffix);
+						}	
+					}
+				}
+			}
+		}
+		loadedNamingConventions.emplace(settingPath.filename().string(), newNamingSetting);
+		allSettings.push_back(settingPath.filename().string());
+	}
+}
+
+void NamingConventionModule::ChangeNamingSetting(const std::string newSetting)
+{
+	activeSettingName = newSetting;
+	activeNamingSetting = &loadedNamingConventions[newSetting];
+}
+
+void NamingConventionModule::SetDefaultActive()
+{
+	activeNamingSetting = &loadedNamingConventions["DefaultNamingConventionSettings.json"];
+}
+
+void NamingConventionModule::SaveSettings(const std::string settingToSaveName, NamingSetting& saveSetting)
+{
+	if (settingToSaveName == "DefaultNamingConventionSettings.json")
+		return;
+
 	rapidjson::Document d;
 	d.SetObject();
 
-	//wwu settings
 	rapidjson::Value rapidjsonWwuSettings(rapidjson::kObjectType);
-	for (const auto& wwu : wwuSettings)
+	for (const auto& wwu : saveSetting.wwuSettings)
 	{
 		rapidjson::Value settings(rapidjson::kObjectType);
 
@@ -152,7 +239,7 @@ void NamingConventionModule::SaveNamingConventionSettings()
 
 	//container settings
 	rapidjson::Value rapidjsonContainerSettings(rapidjson::kObjectType);
-	for (const auto& container : containerSettings)
+	for (const auto& container : saveSetting.containerSettings)
 	{
 		rapidjson::Value cSettings(rapidjson::kObjectType);
 
@@ -185,8 +272,7 @@ void NamingConventionModule::SaveNamingConventionSettings()
 	}
 	d.AddMember("ContainerSettings", rapidjsonContainerSettings, d.GetAllocator());
 
-	auto path = static_cast<std::string>(SOLUTION_DIR) + "/Wwizard/SavedData/NamingConventionSettings.json";
-	FILE* fp = fopen(path.c_str(), "wb");
+	FILE* fp = fopen((static_cast<std::string>(SOLUTION_DIR) + "/Wwizard/SavedData/NamingConventions/" + settingToSaveName + ".json").c_str(), "wb");
 	if (fp != 0)
 	{
 		char* writeBuffer = new char[65536];
@@ -199,60 +285,10 @@ void NamingConventionModule::SaveNamingConventionSettings()
 	}
 }
 
-void NamingConventionModule::LoadNamingConventionSettings()
+void NamingConventionModule::SaveAsNewSetting(const std::string settingToSaveName, NamingSetting& saveSetting)
 {
-	auto path = static_cast<std::string>(SOLUTION_DIR) + "/Wwizard/SavedData/NamingConventionSettings.json";
-	FILE* fp = fopen(path.c_str(), "rb");
-	if (fp != 0)
-	{
-		char* readBuffer = new char[65536];
-		rapidjson::FileReadStream is(fp, readBuffer, sizeof(readBuffer));
-
-		rapidjson::Document d;
-		d.ParseStream(is);
-		fclose(fp);
-
-		for (const auto& wwu : whitelistedWwuTypes)
-		{
-			if (d.HasMember("WwuSettings"))
-			{
-				if (d["WwuSettings"].HasMember(wwu.c_str()))
-				{
-					if (d["WwuSettings"][wwu.c_str()].HasMember("name") && d["WwuSettings"][wwu.c_str()].HasMember("prefixToApply") && d["WwuSettings"][wwu.c_str()].HasMember("applyPrefix") && d["WwuSettings"][wwu.c_str()].HasMember("allowUppercase") && d["WwuSettings"][wwu.c_str()].HasMember("allowSpace"))
-					{
-						wwuSettings.emplace(d["WwuSettings"][wwu.c_str()]["name"].GetString(), WwuSettings(d["WwuSettings"][wwu.c_str()]["prefixToApply"].GetString(),
-							d["WwuSettings"][wwu.c_str()]["applyPrefix"].GetBool(),
-							d["WwuSettings"][wwu.c_str()]["allowSpace"].GetBool(),
-							d["WwuSettings"][wwu.c_str()]["allowUppercase"].GetBool()));
-					}
-				}
-
-			}
-		}
-		for (const auto& container : whitelistedContainers)
-		{
-			if (d.HasMember("ContainerSettings"))
-			{
-				if (d["ContainerSettings"].HasMember(container.c_str()))
-				{
-					if (d["ContainerSettings"][container.c_str()].HasMember("allowNumberSuffix") && d["ContainerSettings"][container.c_str()].HasMember("allowStringSuffix") && d["ContainerSettings"][container.c_str()].HasMember("maxNumberAllowed"))
-					{
-						containerSettings.emplace(container.c_str(), ContainerSettings(d["ContainerSettings"][container.c_str()]["allowNumberSuffix"].GetBool(),
-							d["ContainerSettings"][container.c_str()]["allowStringSuffix"].GetBool(),
-							d["ContainerSettings"][container.c_str()]["maxNumberAllowed"].GetInt()));
-					}
-					if (d["ContainerSettings"][container.c_str()].HasMember("suffixes"))
-					{
-						for (int i = 0; i < d["ContainerSettings"][container.c_str()]["suffixes"].Size(); i ++)
-						{
-							std::string newSuffix = d["ContainerSettings"][container.c_str()]["suffixes"][i].GetString();
-							containerSettings[container].AddNewSuffix(newSuffix);
-						}	
-					}
-				}
-			}
-		}
-	}
+	SaveSettings(settingToSaveName, saveSetting);
+	LoadNamingConventionSettings(static_cast<std::string>(SOLUTION_DIR) + "/Wwizard/SavedData/NamingConventions/" + settingToSaveName + ".json");
 }
 
 void NamingConventionModule::OnSettingsChange(const std::string projectPath, const std::string sdkPath)
@@ -261,6 +297,18 @@ void NamingConventionModule::OnSettingsChange(const std::string projectPath, con
 	SetProjectPath(projectPath);
 }
 
+bool NamingConventionModule::NamingConventionNameAlreadyExists(const std::string newName)
+{
+	auto path = static_cast<std::string>(SOLUTION_DIR) + "/Wwizard/SavedData/NamingConventions";
+	for (auto& entry : std::filesystem::directory_iterator(path))
+	{
+		if (entry.path().filename().string() == newName + ".json")
+		{
+			return true;
+		}
+	}
+	return false;
+}
 
 void NamingConventionModule::FindTopPhysicalFolders(const std::string& folderPath)
 {
@@ -356,7 +404,7 @@ bool NamingConventionModule::CheckNamingSettings(const std::string& currentFileN
 	bool passingFlag = true;
 	std::string currentSuffix = "";
 
-	if (!wwuSettings[wwuSettingKey].allowSpace)
+	if (!activeNamingSetting->wwuSettings[wwuSettingKey].allowSpace)
 	{
 		passingFlag = !IsSpaceInPath(currentFileName);
 		if (!passingFlag)
@@ -364,7 +412,7 @@ bool NamingConventionModule::CheckNamingSettings(const std::string& currentFileN
 			AddIssueToList(currentID, currentFileName, NamingIssue::SPACE);
 		}
 	}
-	if (!wwuSettings[wwuSettingKey].allowUpperCase && passingFlag)
+	if (!activeNamingSetting->wwuSettings[wwuSettingKey].allowUpperCase && passingFlag)
 	{
 		passingFlag = !IsUppercaseInPath(currentFileName);
 		if (!passingFlag)
@@ -372,9 +420,9 @@ bool NamingConventionModule::CheckNamingSettings(const std::string& currentFileN
 			AddIssueToList(currentID, currentFileName, NamingIssue::UPPERCASE);
 		}
 	}
-	if (wwuSettings[wwuSettingKey].applyPrefix && passingFlag)
+	if (activeNamingSetting->wwuSettings[wwuSettingKey].applyPrefix && passingFlag)
 	{
-		passingFlag = IsPrefixRight(currentFileName, wwuSettings[wwuSettingKey].prefixToApply);
+		passingFlag = IsPrefixRight(currentFileName, activeNamingSetting->wwuSettings[wwuSettingKey].prefixToApply);
 		if (!passingFlag)
 		{
 			AddIssueToList(currentID, currentFileName, NamingIssue::PREFIX);
@@ -386,7 +434,7 @@ bool NamingConventionModule::CheckNamingSettings(const std::string& currentFileN
 
 		if (passingFlag)
 		{
-			if (containerSettings[containerKey].applyNumberSuffix || containerSettings[containerKey].applyStringSuffix)
+			if (activeNamingSetting->containerSettings[containerKey].applyNumberSuffix || activeNamingSetting->containerSettings[containerKey].applyStringSuffix)
 			{
 				passingFlag = CheckSuffix(currentFileName, containerKey, currentSuffix);
 				if (!passingFlag)
@@ -399,9 +447,9 @@ bool NamingConventionModule::CheckNamingSettings(const std::string& currentFileN
 
 	if (passingFlag)
 	{
-		if (wwuSettings[wwuSettingKey].applyPrefix)
+		if (activeNamingSetting->wwuSettings[wwuSettingKey].applyPrefix)
 		{
-			passingFlag = IsParentHierarchyMatching(currentFileName, parentFileName, wwuSettings[wwuSettingKey].prefixToApply, currentSuffix, parentContainerKey);
+			passingFlag = IsParentHierarchyMatching(currentFileName, parentFileName, activeNamingSetting->wwuSettings[wwuSettingKey].prefixToApply, currentSuffix, parentContainerKey);
 		}
 		else
 		{
@@ -424,11 +472,22 @@ bool NamingConventionModule::IsParentHierarchyMatching(const std::string& fileNa
 	std::string cleanFileName = fileName;
 	if (prefix.length() > 0)
 	{
+		if (prefix.length() >= fileName.length())
+			return false;
 		cleanFileName = fileName.substr(prefix.length() + 1, fileName.length() - prefix.length() - 1);
 	}
+
 	if (suffix.length() > 0)
 	{
+		if (suffix.length() >= cleanFileName.length())
+			return false;
+
 		cleanFileName = cleanFileName.substr(0, cleanFileName.length() - suffix.length() - 1);
+	}
+
+	if (cleanFileName == "")
+	{
+		return false;
 	}
 
 	if (fileName == parentFileName)
@@ -458,6 +517,11 @@ bool NamingConventionModule::IsParentHierarchyMatching(const std::string& fileNa
 	if (prefix.length() > 0)
 	{
 		cleanParentName = cleanParentName.substr(prefix.length() + 1, cleanParentName.length() - prefix.length() - 1);
+	}
+
+	if (cleanParentName < cleanFileName)
+	{
+		return false;
 	}
 
 	if (!IsOneUnderscorePerNewLayer(cleanFileName, cleanParentName))
@@ -535,7 +599,7 @@ bool NamingConventionModule::IsContainerWhiteListed(const std::string& container
 
 bool NamingConventionModule::CheckSuffix(const std::string& fileName, const std::string& containerType, std::string& outSuffix)
 {
-	ContainerSettings setting = containerSettings[containerType];
+	ContainerSetting setting = activeNamingSetting->containerSettings[containerType];
 
 	std::string suffixless = fileName;
 	std::string stringSuffix = "";
@@ -648,11 +712,11 @@ std::string NamingConventionModule::RemovePrefixSuffix(const std::string& fileNa
 {
 	std::string tempName = fileName;
 
-	if (wwuSettings[wwuSettingKey].applyPrefix)
+	if (activeNamingSetting->wwuSettings[wwuSettingKey].applyPrefix)
 	{
 		tempName = RemovePrefixFromName(tempName, wwuSettingKey);
 	}
-	if (containerSettings[containerSettingKey].applyNumberSuffix || containerSettings[containerSettingKey].applyStringSuffix)
+	if (activeNamingSetting->containerSettings[containerSettingKey].applyNumberSuffix || activeNamingSetting->containerSettings[containerSettingKey].applyStringSuffix)
 	{
 		tempName = RemoveSuffixFromName(tempName, containerSettingKey);
 	}
@@ -666,7 +730,7 @@ std::string NamingConventionModule::RemovePrefixFromName(const std::string& file
 		std::string emptyParentResponse = "";
 		return emptyParentResponse;
 	}
-	std::string prefix = wwuSettings[wwuSettingKey].prefixToApply;
+	std::string prefix = activeNamingSetting->wwuSettings[wwuSettingKey].prefixToApply;
 
 	std::string wPrefix = fileName.substr(prefix.length() + 1, fileName.length() - prefix.length() + 1);
 
@@ -675,7 +739,7 @@ std::string NamingConventionModule::RemovePrefixFromName(const std::string& file
 
 std::string NamingConventionModule::RemoveSuffixFromName(const std::string& fileName, const std::string& containerSettingKey)
 {
-	ContainerSettings setting = containerSettings[containerSettingKey];
+	ContainerSetting setting = activeNamingSetting->containerSettings[containerSettingKey];
 	std::string withoutSuffix = "";
 	if (setting.applyNumberSuffix)
 	{

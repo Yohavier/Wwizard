@@ -20,6 +20,64 @@ void NamingConventionLayout::RenderLayout()
     {
         if (ImGui::BeginTabItem("Execute"))
         {
+            static std::string saveAsName = "";
+            static bool existsFlag = false;
+            if (ImGui::BeginPopupModal("Save As"))
+            {
+                ImGui::InputText("##save", &saveAsName);
+                if (ImGui::Button("Abort"))
+                {
+                    ImGui::CloseCurrentPopup();
+                }
+                ImGui::SameLine();
+                if (ImGui::Button("Save As"))
+                {
+                    if (!namingConventionModule->NamingConventionNameAlreadyExists(saveAsName))
+                    {
+                        namingConventionModule->SaveAsNewSetting(saveAsName, *namingConventionModule->activeNamingSetting);
+                        ImGui::CloseCurrentPopup();
+                    }
+                    else
+                    {
+                        existsFlag = true;
+                    }
+                }
+                if (existsFlag)
+                {
+                    ImGui::Text("Settingname already exists!");
+                }
+                ImGui::EndPopup();
+            }
+
+            if (ImGui::BeginCombo("##LoadedSettings", namingConventionModule->activeSettingName.c_str()))
+            {
+                for (int n = 0; n < namingConventionModule->allSettings.size(); n++)
+                {
+                    bool is_selected = (namingConventionModule->activeSettingName == namingConventionModule->allSettings.at(n));
+                    if (ImGui::Selectable(namingConventionModule->allSettings.at(n).c_str(), is_selected))
+                    {
+                        namingConventionModule->ChangeNamingSetting(namingConventionModule->allSettings.at(n).c_str());
+                    }               
+                    if (is_selected)
+                    {
+                        ImGui::SetItemDefaultFocus();
+                    }
+                }
+                ImGui::EndCombo();
+            }
+            ImGui::SameLine();
+            if (ImGui::Button("Save"))
+            {
+                namingConventionModule->SaveSettings(namingConventionModule->activeSettingName, *namingConventionModule->activeNamingSetting);
+            }
+            ImGui::SameLine();
+            if (ImGui::Button("Save As"))
+            {
+                saveAsName = "";
+                existsFlag = false;
+                ImGui::OpenPopup("Save As");
+            }
+
             if (ImGui::Button("Check Naming"))
             {
                 namingConventionModule->StartCheckNamingConventionThread();
@@ -74,16 +132,16 @@ void NamingConventionLayout::RenderLayout()
                 ImGui::Text(namingConventionModule->GetStringToReplace(wwuType).substr(1).c_str());
                 ImGui::NextColumn();
 
-                ImGui::Checkbox(("##allowSpace" + namingConventionModule->GetStringToReplace(wwuType).substr(1)).c_str(), &(namingConventionModule->wwuSettings[wwuType].allowSpace));
+                ImGui::Checkbox(("##allowSpace" + namingConventionModule->GetStringToReplace(wwuType).substr(1)).c_str(), &(namingConventionModule->activeNamingSetting->wwuSettings[wwuType].allowSpace));
                 ImGui::NextColumn();
 
-                ImGui::Checkbox(("##allowUpperCase" + namingConventionModule->GetStringToReplace(wwuType).substr(1)).c_str(), &(namingConventionModule->wwuSettings[wwuType].allowUpperCase));
+                ImGui::Checkbox(("##allowUpperCase" + namingConventionModule->GetStringToReplace(wwuType).substr(1)).c_str(), &(namingConventionModule->activeNamingSetting->wwuSettings[wwuType].allowUpperCase));
                 ImGui::NextColumn();
 
-                ImGui::Checkbox("##Prefix", &(namingConventionModule->wwuSettings[wwuType].applyPrefix));
+                ImGui::Checkbox("##Prefix", &(namingConventionModule->activeNamingSetting->wwuSettings[wwuType].applyPrefix));
                 ImGui::SameLine();
                 ImGui::PushItemWidth(100);
-                ImGui::InputText("##PrefixInput", &(namingConventionModule->wwuSettings[wwuType].prefixToApply));
+                ImGui::InputText("##PrefixInput", &(namingConventionModule->activeNamingSetting->wwuSettings[wwuType].prefixToApply));
                 ImGui::PopItemWidth();
                 ImGui::Separator();
                 ImGui::NextColumn();
@@ -115,7 +173,7 @@ void NamingConventionLayout::RenderLayout()
                 ImGui::NextColumn();
 
 
-                ImGui::Checkbox("##ApplyString", &(namingConventionModule->containerSettings[containerType].applyStringSuffix));
+                ImGui::Checkbox("##ApplyString", &(namingConventionModule->activeNamingSetting->containerSettings[containerType].applyStringSuffix));
                 ImGui::SameLine();
 
                 if (ImGui::BeginPopupModal("Create new suffix"))
@@ -132,7 +190,7 @@ void NamingConventionLayout::RenderLayout()
                     ImGui::SameLine();
                     if (ImGui::Button("Create", ImVec2(ImGui::GetWindowSize().x * 0.5f, 0.0f)))
                     {
-                        namingConventionModule->containerSettings[containerType].AddNewSuffix(newSuffix);
+                        namingConventionModule->activeNamingSetting->containerSettings[containerType].AddNewSuffix(newSuffix);
                         ImGui::CloseCurrentPopup();
                     }
 
@@ -145,12 +203,12 @@ void NamingConventionLayout::RenderLayout()
                     ImGui::OpenPopup("Create new suffix"); 
                 }
 
-                for (const auto& suffix : namingConventionModule->containerSettings[containerType].stringSuffixVector)
+                for (const auto& suffix : namingConventionModule->activeNamingSetting->containerSettings[containerType].stringSuffixVector)
                 {
                     ImGui::SameLine();
                     if (ImGui::Button(suffix.c_str()))
                     {
-                        namingConventionModule->containerSettings[containerType].RemoveSuffix(suffix);
+                        namingConventionModule->activeNamingSetting->containerSettings[containerType].RemoveSuffix(suffix);
                     }
                 }
 
@@ -160,12 +218,12 @@ void NamingConventionLayout::RenderLayout()
                 //ImGui::PopItemWidth();
                 ImGui::NextColumn();
 
-                ImGui::Checkbox("##ApplyNumber", &(namingConventionModule->containerSettings[containerType].applyNumberSuffix));
+                ImGui::Checkbox("##ApplyNumber", &(namingConventionModule->activeNamingSetting->containerSettings[containerType].applyNumberSuffix));
                 ImGui::SameLine();
                 ImGui::Text("Max Number");
                 ImGui::SameLine();
                 ImGui::PushItemWidth(100);
-                ImGui::InputInt("##MaxNumber", &(namingConventionModule->containerSettings[containerType].maxNumberAllowed),1);
+                ImGui::InputInt("##MaxNumber", &(namingConventionModule->activeNamingSetting->containerSettings[containerType].maxNumberAllowed),1);
                 ImGui::PopItemWidth();
                 ImGui::Separator();
                 ImGui::NextColumn();
