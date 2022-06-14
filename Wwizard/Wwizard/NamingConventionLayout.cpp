@@ -1,6 +1,7 @@
 #pragma once
 #include "NamingConventionLayout.h"
 #include "GuiHelper.h"
+#include "helper.h"
 
 NamingConventionLayout::NamingConventionLayout(std::unique_ptr<WwizardWwiseClient>& wwizardWwiseClient, std::unique_ptr<NamingConventionModule>& namingConventionModule)
     : BaseLayout(wwizardWwiseClient)
@@ -21,7 +22,7 @@ void NamingConventionLayout::RenderLayout()
         if (ImGui::BeginTabItem("Execute"))
         {
             static std::string saveAsName = "";
-            static bool existsFlag = false;
+            static std::string errorMsg = "";
             if (ImGui::BeginPopupModal("Save As"))
             {
                 ImGui::InputText("##save", &saveAsName);
@@ -34,18 +35,23 @@ void NamingConventionLayout::RenderLayout()
                 {
                     if (!namingConventionModule->NamingConventionNameAlreadyExists(saveAsName))
                     {
-                        namingConventionModule->SaveAsNewSetting(saveAsName, *namingConventionModule->activeNamingSetting);
-                        ImGui::CloseCurrentPopup();
+                        if (!ContainsSpecialCharacters(saveAsName))
+                        {
+                            namingConventionModule->SaveAsNewSetting(saveAsName, *namingConventionModule->activeNamingSetting);
+                            ImGui::CloseCurrentPopup();
+                        }
+                        else
+                        {
+                            errorMsg = "Contains invalid characters for paths!";
+                        }
+                       
                     }
                     else
                     {
-                        existsFlag = true;
+                        errorMsg = "Name already exists!";
                     }
                 }
-                if (existsFlag)
-                {
-                    ImGui::Text("Settingname already exists!");
-                }
+                ImGui::Text(errorMsg.c_str());
                 ImGui::EndPopup();
             }
 
@@ -74,7 +80,7 @@ void NamingConventionLayout::RenderLayout()
             if (ImGui::Button("Save As"))
             {
                 saveAsName = "";
-                existsFlag = false;
+                errorMsg = "";
                 ImGui::OpenPopup("Save As");
             }
 
