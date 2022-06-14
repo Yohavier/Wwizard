@@ -102,16 +102,16 @@ file(GLOB_RECURSE HEADER_MODULES_COLORCODING
 	source_group("Header Files/Modules/ColorCodingModule" FILES ${HEADER_MODULES_COLORCODING})
 
 file(GLOB_RECURSE HEADER_MODULES_HELPER
+	Wwizard/Wwizard/GuiHelper.h
 	Wwizard/Wwizard/helper.h
 	Wwizard/Wwizard/ResultFile.h
 	Wwizard/Wwizard/WwiseColors.h)
 source_group("Header Files/Modules/Helper" FILES ${HEADER_MODULES_HELPER})
 
 file(GLOB_RECURSE HEADER_MODULES_NAMINGCONVENTION
-	Wwizard/Wwizard/ContainerSetting.h
 	Wwizard/Wwizard/NamingConventionModule.h
 	Wwizard/Wwizard/NamingIssues.h
-	Wwizard/Wwizard/WwuSetting.h)
+	Wwizard/Wwizard/NamingSetting.h)
 	source_group("Header Files/Modules/NamingConventionModule" FILES ${HEADER_MODULES_NAMINGCONVENTION})
 
 file(GLOB_RECURSE HEADER_MODULES_QUERYEDITOR
