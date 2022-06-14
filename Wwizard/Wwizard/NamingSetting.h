@@ -55,10 +55,30 @@ struct ContainerSetting
 	}
 };
 
-struct NamingSetting
+class NamingSetting
 {
+public:
 	NamingSetting() = default;
 
 	std::map<std::string, WwuSetting> wwuSettings;
 	std::map<std::string, ContainerSetting> containerSettings;
+
+	void Reset()
+	{
+		for (auto& wwu : wwuSettings)
+		{
+			wwu.second.allowSpace = false;
+			wwu.second.allowUpperCase = false;
+			wwu.second.applyPrefix = false;
+			wwu.second.prefixToApply = "";
+		}
+
+		for (auto& container : containerSettings)
+		{
+			container.second.applyNumberSuffix = false;
+			container.second.applyStringSuffix = false;
+			container.second.maxNumberAllowed = 0;
+			container.second.stringSuffixVector.clear();
+		}
+	}
 };

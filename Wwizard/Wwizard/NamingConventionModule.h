@@ -39,6 +39,17 @@ public:
 
 	bool NamingConventionNameAlreadyExists(const std::string newName);
 
+	bool IsDefaultSetting(const std::string settingName)
+	{
+		if (settingName == "Default.json")
+		{
+			return true;
+		}
+		return false;
+	}
+
+	void ClearSetting(const std::string& settingName);
+
 private:
 	void BeginNamingConventionProcess();
 

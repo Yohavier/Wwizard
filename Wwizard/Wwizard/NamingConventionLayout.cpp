@@ -23,6 +23,7 @@ void NamingConventionLayout::RenderLayout()
         {
             static std::string saveAsName = "";
             static std::string errorMsg = "";
+            static bool isDefault = namingConventionModule->IsDefaultSetting(namingConventionModule->activeSettingName);
             if (ImGui::BeginPopupModal("Save As"))
             {
                 ImGui::InputText("##save", &saveAsName);
@@ -63,6 +64,7 @@ void NamingConventionLayout::RenderLayout()
                     if (ImGui::Selectable(namingConventionModule->allSettings.at(n).c_str(), is_selected))
                     {
                         namingConventionModule->ChangeNamingSetting(namingConventionModule->allSettings.at(n).c_str());
+                        isDefault = namingConventionModule->IsDefaultSetting(namingConventionModule->activeSettingName);
                     }               
                     if (is_selected)
                     {
@@ -72,10 +74,27 @@ void NamingConventionLayout::RenderLayout()
                 ImGui::EndCombo();
             }
             ImGui::SameLine();
+
+            if (isDefault)
+            {
+                ImGui::PushItemFlag(ImGuiItemFlags_Disabled, true);
+            }
+
+            if (ImGui::Button("Clear"))
+            {
+                namingConventionModule->ClearSetting(namingConventionModule->activeSettingName);
+            }
+            ImGui::SameLine();
             if (ImGui::Button("Save"))
             {
                 namingConventionModule->SaveSettings(namingConventionModule->activeSettingName, *namingConventionModule->activeNamingSetting);
             }
+
+            if (isDefault)
+            {
+                ImGui::PopItemFlag();
+            }
+
             ImGui::SameLine();
             if (ImGui::Button("Save As"))
             {

@@ -122,6 +122,13 @@ const std::string& NamingConventionModule::GetStringToReplace(const std::string&
 	return stringToReplace[wwuType];
 }
 
+void NamingConventionModule::ClearSetting(const std::string& settingName)
+{
+	NamingSetting* setting = &loadedNamingConventions[settingName];
+	
+	setting->Reset();
+}
+
 
 void NamingConventionModule::OnConnectionStatusChange(const bool newConnectionStatus)
 {
@@ -197,12 +204,12 @@ void NamingConventionModule::ChangeNamingSetting(const std::string newSetting)
 
 void NamingConventionModule::SetDefaultActive()
 {
-	activeNamingSetting = &loadedNamingConventions["DefaultNamingConventionSettings.json"];
+	activeNamingSetting = &loadedNamingConventions["Default.json"];
 }
 
 void NamingConventionModule::SaveSettings(const std::string settingToSaveName, NamingSetting& saveSetting)
 {
-	if (settingToSaveName == "DefaultNamingConventionSettings.json")
+	if (IsDefaultSetting(settingToSaveName))
 		return;
 
 	rapidjson::Document d;
