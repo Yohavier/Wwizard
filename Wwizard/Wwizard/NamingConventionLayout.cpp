@@ -78,6 +78,7 @@ void NamingConventionLayout::RenderLayout()
             if (isDefault)
             {
                 ImGui::PushItemFlag(ImGuiItemFlags_Disabled, true);
+                ImGui::PushStyleColor(ImGuiCol_Text, IM_COL32(255, 0, 0, 255));
             }
 
             if (ImGui::Button("Clear"))
@@ -93,6 +94,7 @@ void NamingConventionLayout::RenderLayout()
             if (isDefault)
             {
                 ImGui::PopItemFlag();
+                ImGui::PopStyleColor();
             }
 
             ImGui::SameLine();
