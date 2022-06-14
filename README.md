@@ -61,26 +61,21 @@ The rule is single is always stronger than hierarchy and hard is stronger than s
 you can also define colors, that can never change, for example red to mark errors and not change them.
 
 This is the colorpicker that opens everytime you click on one of the colored boxes.</br>
-<img src="https://user-images.githubusercontent.com/40822700/172857025-8594a42e-662f-4f18-bb2b-a6c332bf201f.PNG" width="300">
+<img src="https://user-images.githubusercontent.com/40822700/173699501-bbc1b23f-0ad5-409b-8d46-8e5763a61437.PNG" width="300">
+
 
 ## Naming Convention
 Define a naming convention in the following setting tabs and check for it. This module doesnt correct anything, but outputs a little error message on what is wrong. It only displays the first wrong name in a hierarchy.
+You also have the option to define multiple naming conventions and save them. You can also switch through them with the drop down menu, save new ones and clear existing ones if you need a fresh start.
+![NamingConvention](https://user-images.githubusercontent.com/40822700/173699218-ea8aa88b-84f4-444d-b764-bb6664fdf64f.PNG)
 
-![naming convention](https://user-images.githubusercontent.com/40822700/172955558-cdf05809-62fa-44bb-8b80-feda90b3a642.PNG)
+Work Unit Setttings let you define rules for each section with its own kind of work units. For example Axtor-Mixer Hierarchy or Events. There you can define a prefix for all containers, if uppercase should be allowed and if spaces in the name are ok. 
+![wwuSettings](https://user-images.githubusercontent.com/40822700/173699277-bbf60849-af12-4ed7-badf-83136728899e.PNG)
 
-In the activation tab you can set the in which work tab the naming convention should be checked. </br>
-![activation](https://user-images.githubusercontent.com/40822700/172955527-5be5df7d-08c7-4da1-ba5f-f64c9bcd48f4.PNG)
-
-Lets you allow space and UpperCase</br>
-<img src="https://user-images.githubusercontent.com/40822700/172955532-e117fb13-2b2e-4162-a275-91218c28913e.PNG" width="600">
-
-Define a Prefix for each work tab.</br>
-<img src="https://user-images.githubusercontent.com/40822700/172955542-c5984f10-8b44-44e5-a68d-4f6421e5a025.PNG" width="600">
-
-Defining a suffix is a bit more complex. You can allow strings and numbers and also multiple suffixes. 
-separate multiple suffixes with a ",". Max number defines the max number of the suffix. Furthermore Max Layers allows you howmany suffixes you like.
-
-![suffix](https://user-images.githubusercontent.com/40822700/172955547-22c045ad-0a8e-44c3-af55-c05fd4d686a8.PNG)
+Container Settings are a bit more granular and only count for one type of container. Like that you can define a suffix for any type of container there is. 
+At max you can have one string suffix and one number suffix. String always comes before number.
+You can also set a variation of string suffixes, where the system checks if one of them is matching. Like that you can have, for example, events with the suffix _lp and _os.
+![containerSettings](https://user-images.githubusercontent.com/40822700/173699284-0fc8ead1-e8dc-41bb-aa1d-d1e9bee1a3bf.PNG)
 
 
 ## Sort Originals
@@ -116,7 +111,7 @@ You can also create new queries with Waapi or Waql and save them. Currently it i
 
 ## Toolbox
 ### Remove invalid events
-![toolbox events](https://user-images.githubusercontent.com/40822700/172851032-e3de799e-1a79-408f-b92b-95536e505f2d.PNG)
+![toolboxEvents](https://user-images.githubusercontent.com/40822700/173699312-ce327571-d875-42e4-b8b5-8e6345734915.PNG)
 This one has 2 modes either you use it on all events by ticking the checkbox or if you have an open Wwise instance and the checkbox is unchecked, you can also remove the empty events in the selected hierarchy.
 
 ### Reset faders
