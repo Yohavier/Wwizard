@@ -23,15 +23,16 @@ void ToolboxLayout::RenderLayout()
     ImGui::PushStyleColor(ImGuiCol_HeaderHovered, ImVec4(ConvertWwiseColorToRGB(15)));
     ImGui::PushStyleColor(ImGuiCol_HeaderActive, ImVec4(ConvertWwiseColorToRGB(16)));
 
+    ImGui::Text("Selected Item: ");
+    ImGui::SameLine();
+    ImGui::Text(wwizardWwiseClient->GetSelectedObjectNameInWwise().c_str());
+
     if (ImGui::CollapsingHeader("Invalid Events"))
     {
         ImGui::BeginColumns("events", 2);
         ImGui::Text("Controls");
-        ImGui::Text("Selected Item: ");
-        ImGui::SameLine();
-        ImGui::Text(wwizardWwiseClient->GetSelectedObjectNameInWwise().c_str());
+        
         ImGui::Dummy(ImVec2(0, 10));
-
 
         if (toolboxModule->deleteEmptyEventsForAllEvents)
         {

@@ -24,6 +24,8 @@ void NamingConventionLayout::RenderLayout()
             static std::string saveAsName = "";
             static std::string errorMsg = "";
             static bool isDefault = namingConventionModule->IsDefaultSetting(namingConventionModule->activeSettingName);
+
+
             if (ImGui::BeginPopupModal("Save As"))
             {
                 ImGui::InputText("##save", &saveAsName);
@@ -45,7 +47,7 @@ void NamingConventionLayout::RenderLayout()
                         {
                             errorMsg = "Contains invalid characters for paths!";
                         }
-                       
+
                     }
                     else
                     {
@@ -56,6 +58,8 @@ void NamingConventionLayout::RenderLayout()
                 ImGui::EndPopup();
             }
 
+
+            ImGui::BeginColumns("executePanel", 2);
             if (ImGui::BeginCombo("##LoadedSettings", namingConventionModule->activeSettingName.c_str()))
             {
                 for (int n = 0; n < namingConventionModule->allSettings.size(); n++)
@@ -104,7 +108,14 @@ void NamingConventionLayout::RenderLayout()
                 errorMsg = "";
                 ImGui::OpenPopup("Save As");
             }
+            ImGui::Text("Info:");
+            if (ImGui::Button("View Default Naming Convention"))
+            {
+                OpenURL("https://github.com/Yohavier/Wwizard/tree/main/Naming-Convention");
+            }
 
+
+            ImGui::NextColumn();
             if (ImGui::Button("Check Naming"))
             {
                 namingConventionModule->StartCheckNamingConventionThread();
@@ -137,6 +148,8 @@ void NamingConventionLayout::RenderLayout()
                 }
                 ImGui::EndTable();
             }
+
+            ImGui::EndColumns();
             ImGui::EndTabItem();
         }
         if (ImGui::BeginTabItem("Workunit Settings"))

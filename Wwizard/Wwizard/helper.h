@@ -1,6 +1,8 @@
 #pragma once
 #include <string> 
 #include <set>
+#include <Windows.h>
+
 static const std::string GenerateGuid()
 {
     return std::to_string(((long long)rand() << 32) | rand());
@@ -21,4 +23,9 @@ static bool ContainsSpecialCharacters(const std::string& check)
         }
     }
     return false;
+}
+
+static void OpenURL(const std::string url)
+{
+    ShellExecute(NULL, "open", url.c_str(), NULL, NULL, SW_SHOWNORMAL);
 }
