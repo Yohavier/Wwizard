@@ -11,12 +11,19 @@ QueryEditorLayout::QueryEditorLayout(std::unique_ptr<WwizardWwiseClient>& wwizar
     outputNode = outputNodeCreator->second();
     nodes.insert({ outputNode->nodeGuid, outputNode });
     outputNode->Pos = ImVec2(500,200);
+    intelliSense = new WaqlIntelliSense(wwizardWwiseClient);
 }
 
+static bool runOnce;
 void QueryEditorLayout::RenderLayout()
 {
     if (!wwizardWwiseClient->IsConnected())
         return;
+    else if (!runOnce)
+    {
+        runOnce = true;
+        intelliSense->OnConnected();
+    }
 
     SettingWidget();
 
@@ -441,29 +448,47 @@ void QueryEditorLayout::ShowQueryResults()
 
 void QueryEditorLayout::ShowQueryCreator()
 {
-    static char argText[124] = "pls enter your query text here....";
-    static char nameText[64] = "pls enter your query name here....";
+    static char argText[124] = "";
+    static char nameText[64] = "";
     static bool waql = false;
     static bool waapi = false;
+ 
+    ImGui::SetNextWindowPos(ImVec2(ImGui::GetWindowPos().x + ImGui::GetWindowWidth(), ImGui::GetWindowPos().y + ImGui::GetTextLineHeight() * 7));
+    if (ImGui::BeginPopup("IntelliSense", ImGuiWindowFlags_NoFocusOnAppearing))
+    {
+        for (auto& const command : intelliSense->fittingCommands)
+        {
+            ImGui::Selectable(command.c_str());
+        }
+        ImGui::EndPopup();
+    }
 
     if (ImGui::Checkbox("Waapi", &waapi))
     {
         waql = false;
     }
+    ImGui::SameLine();
     if (ImGui::Checkbox("Waql", &waql))
     {
         waapi = false;
     }
 
-    ImGui::Text("label");
+
+    ImGui::Text("Name: ");
     ImGui::SameLine();
     ImGui::InputText("##", nameText, IM_ARRAYSIZE(nameText));
 
-    ImGui::Text("MultiArg");
+    ImGui::Text("Argument: ");
     ImGui::SameLine();
-    ImGui::InputTextMultiline("###", argText, IM_ARRAYSIZE(argText));
 
-    if (ImGui::BeginPopup("Options"))
+    if (ImGui::InputText("###", argText, IM_ARRAYSIZE(argText), ImGuiInputTextFlags_CallbackEdit, HandleArgInput, (void*)&argText))
+    {
+        ImGui::SetKeyboardFocusHere(-1);
+        intelliSense->FindFittingCommands(static_cast<std::string>(argText));
+        ImGui::OpenPopup("IntelliSense");
+    }
+
+    if (ImGui::BeginPopup("Error"))
     {
         ImGui::Text("Please select if its a Waapi or Waql Query!");
         if (ImGui::Button("Close"))
@@ -472,7 +497,9 @@ void QueryEditorLayout::ShowQueryCreator()
         }
         ImGui::EndPopup();
     }
-    if (ImGui::Button("Submit Query", ImVec2(-FLT_MIN, 0.0f)))
+
+    ImGui::PushItemWidth(150);
+    if (ImGui::Button("Submit Query"))
     {
         if (waapi)
         {
@@ -486,13 +513,20 @@ void QueryEditorLayout::ShowQueryCreator()
         }
         else
         {
-            ImGui::OpenPopup("Options");
+            ImGui::OpenPopup("Error");
         }
     }
-    if (ImGui::Button("Close"))
+    ImGui::SameLine();
+    if (ImGui::Button("Abort"))
     {
         ImGui::CloseCurrentPopup();
     }
+    ImGui::PopItemWidth();
+}
+
+int QueryEditorLayout::HandleArgInput(ImGuiInputTextCallbackData* data)
+{
+    return 0;
 }
 
 void QueryEditorLayout::ShowQueryNodeEditor()

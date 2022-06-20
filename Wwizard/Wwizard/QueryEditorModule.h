@@ -68,6 +68,8 @@ private:
 	void SaveCustomQueriesToJson();
 	void AddQueryToAllQueriesMap(BaseQueryStructure& newQuery);
 
+	std::unique_ptr<WwizardWwiseClient>& wwizardClient;
+
 private:
 	std::map<std::string, BaseQueryStructure> allQueries;
 	std::map<std::string, const BaseQueryStructure&> waapiQueries;
@@ -84,7 +86,5 @@ private:
 	const std::map<const QueryType, const std::string> queryTypeAsString = { {QueryType::WAAPIQUERY, "Waapi"},
 																				{QueryType::WAQLQUERY, "Waql"},
 																				{QueryType::WWISEQUERY, "Wwise"} };
-
-	const std::unique_ptr<WwizardWwiseClient>& wwizardClient;
 };
 

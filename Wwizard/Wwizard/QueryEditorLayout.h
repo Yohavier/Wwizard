@@ -13,6 +13,7 @@
 #include <imgui_internal.h>
 #include "MyNode.h"
 #include "helper.h"
+#include "WaqlIntelliSense.h"
 
 class QueryEditorLayout : public BaseLayout
 {
@@ -39,6 +40,8 @@ private:
     void SetUseQueryNodeEditor(bool newState);
     void UpdateSelectedNode(MyNode* newSelectedNode);
 
+    static int HandleArgInput(ImGuiInputTextCallbackData* data);
+
 public:
     std::map<std::string, std::function<MyNode* ()>> available_nodes
     {
@@ -56,7 +59,8 @@ public:
 private:
 	bool useQueryNodeEditor = true;
 	const std::unique_ptr<QueryEditorModule>& queryEditorModule;
-   
+    WaqlIntelliSense* intelliSense;
+
     MyNode* outputNode;
     MyNode* currentSelectedNode = nullptr;
 

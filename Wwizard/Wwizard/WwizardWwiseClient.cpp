@@ -331,3 +331,25 @@ void WwizardWwiseClient::SaveCurrentProject()
 
     wwiseClient.Call(ak::wwise::core::project::save, empty, empty, empty);
 }
+
+const std::set<std::string> WwizardWwiseClient::GetAllWwiseProperties()
+{
+    std::set<std::string> properties;
+    AkJson waapiOption(AkJson::Map{});
+
+    for (const auto& wwiseClass : wwiseClassIDs)
+    {
+        AkJson waapiArg(AkJson::Map{ {{"classId", AkVariant(wwiseClass)}} });
+
+        AkJson waapiResult;
+
+
+        wwiseClient.Call(ak::wwise::core::object::getPropertyAndReferenceNames, waapiArg, waapiOption, waapiResult);
+
+        for (auto& a : waapiResult["return"].GetArray())
+        {
+            properties.insert(a.GetVariant().GetString());
+        }
+    }
+    return properties;
+}
