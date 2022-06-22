@@ -13,7 +13,6 @@
 #include <imgui_internal.h>
 #include "MyNode.h"
 #include "helper.h"
-#include "WaqlIntelliSense.h"
 
 class QueryEditorLayout : public BaseLayout
 {
@@ -59,7 +58,6 @@ public:
 private:
 	bool useQueryNodeEditor = true;
 	const std::unique_ptr<QueryEditorModule>& queryEditorModule;
-    WaqlIntelliSense* intelliSense;
 
     MyNode* outputNode;
     MyNode* currentSelectedNode = nullptr;

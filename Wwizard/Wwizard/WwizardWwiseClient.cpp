@@ -334,7 +334,7 @@ void WwizardWwiseClient::SaveCurrentProject()
 
 const std::set<std::string> WwizardWwiseClient::GetAllWwiseProperties()
 {
-    std::set<std::string> properties;
+    std::set<std::string> valueProperties;
     AkJson waapiOption(AkJson::Map{});
 
     for (const auto& wwiseClass : wwiseClassIDs)
@@ -348,8 +348,8 @@ const std::set<std::string> WwizardWwiseClient::GetAllWwiseProperties()
 
         for (auto& a : waapiResult["return"].GetArray())
         {
-            properties.insert(a.GetVariant().GetString());
+            valueProperties.insert(a.GetVariant().GetString());
         }
     }
-    return properties;
+    return valueProperties;
 }

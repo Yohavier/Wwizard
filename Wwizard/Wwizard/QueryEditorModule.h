@@ -2,7 +2,7 @@
 #include <vector>
 #include <string>
 #include <map>
-
+#include "WaqlIntelliSense.h"
 #include "WwizardWwiseClient.h"
 #include "ResultFile.h"
 #include "BaseModule.h"
@@ -10,6 +10,7 @@
 #include "MyNode.h"
 #include "QueryType.h"
 #include "BaseQueryStructure.h"
+
 
 class QueryEditorModule : public BaseModule
 {
@@ -58,6 +59,7 @@ public:
 	void RunNodeGraph(MyNode* node);
 	std::map<std::string, QueryResultFile> CalculateNode(MyNode* node);
 
+
 private:
 	void FetchWwiseQueries();
 	void FetchWwiseFolderchildren(BaseQueryStructure& parentStructureFolder, const std::vector<std::string>& optionList);
@@ -68,9 +70,12 @@ private:
 	void SaveCustomQueriesToJson();
 	void AddQueryToAllQueriesMap(BaseQueryStructure& newQuery);
 
-	std::unique_ptr<WwizardWwiseClient>& wwizardClient;
+
+public:
+	std::unique_ptr<WaqlIntelliSense> waqlIntelliSense = nullptr;
 
 private:
+	std::unique_ptr<WwizardWwiseClient>& wwizardClient;
 	std::map<std::string, BaseQueryStructure> allQueries;
 	std::map<std::string, const BaseQueryStructure&> waapiQueries;
 	std::map<std::string, const BaseQueryStructure&> waqlQueries;

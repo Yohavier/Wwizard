@@ -7,6 +7,7 @@
 #include "SortOriginalsModule.h"
 #include "ToolboxModule.h"
 #include "ColorCodingModule.h"
+#include "WaqlIntelliSense.h"
 
 #include <memory>
 

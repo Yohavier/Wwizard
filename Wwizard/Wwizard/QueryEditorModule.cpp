@@ -22,6 +22,7 @@ QueryEditorModule::~QueryEditorModule()
 QueryEditorModule::QueryEditorModule(std::unique_ptr<WwizardWwiseClient>& wwizardClient)
     : wwizardClient(wwizardClient)
 {
+    waqlIntelliSense.reset(new WaqlIntelliSense(wwizardClient));
     if (wwizardClient->IsConnected())
     {
         wwiseQueryHierarchy.reset( new BaseQueryStructure());
@@ -410,6 +411,7 @@ void QueryEditorModule::OnConnectionStatusChange(const bool newConnectionStatus)
     if (newConnectionStatus)
     {
         ResetQueryModule();
+        waqlIntelliSense->OnConnected();
     } 
 }
 

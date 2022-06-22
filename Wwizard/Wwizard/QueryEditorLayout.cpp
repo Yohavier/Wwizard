@@ -11,18 +11,14 @@ QueryEditorLayout::QueryEditorLayout(std::unique_ptr<WwizardWwiseClient>& wwizar
     outputNode = outputNodeCreator->second();
     nodes.insert({ outputNode->nodeGuid, outputNode });
     outputNode->Pos = ImVec2(500,200);
-    intelliSense = new WaqlIntelliSense(wwizardWwiseClient);
 }
 
 static bool runOnce;
 void QueryEditorLayout::RenderLayout()
 {
     if (!wwizardWwiseClient->IsConnected())
-        return;
-    else if (!runOnce)
     {
-        runOnce = true;
-        intelliSense->OnConnected();
+        return;
     }
 
     SettingWidget();
@@ -456,10 +452,16 @@ void QueryEditorLayout::ShowQueryCreator()
     ImGui::SetNextWindowPos(ImVec2(ImGui::GetWindowPos().x + ImGui::GetWindowWidth(), ImGui::GetWindowPos().y + ImGui::GetTextLineHeight() * 7));
     if (ImGui::BeginPopup("IntelliSense", ImGuiWindowFlags_NoFocusOnAppearing))
     {
-        for (auto& const command : intelliSense->fittingCommands)
+        for (const auto& command : queryEditorModule->waqlIntelliSense->fittingCommands)
         {
             ImGui::Selectable(command.c_str());
         }
+        ImGui::PushStyleColor(ImGuiCol_Text, IM_COL32(0, 255, 0, 255));      
+        for (const auto& suggestion : queryEditorModule->waqlIntelliSense->suggestions)
+        {
+            ImGui::Selectable(suggestion.c_str());
+        }
+        ImGui::PopStyleColor();
         ImGui::EndPopup();
     }
 
@@ -484,7 +486,7 @@ void QueryEditorLayout::ShowQueryCreator()
     if (ImGui::InputText("###", argText, IM_ARRAYSIZE(argText), ImGuiInputTextFlags_CallbackEdit, HandleArgInput, (void*)&argText))
     {
         ImGui::SetKeyboardFocusHere(-1);
-        intelliSense->FindFittingCommands(static_cast<std::string>(argText));
+        queryEditorModule->waqlIntelliSense->FindFittingCommands(static_cast<std::string>(argText));
         ImGui::OpenPopup("IntelliSense");
     }
 
