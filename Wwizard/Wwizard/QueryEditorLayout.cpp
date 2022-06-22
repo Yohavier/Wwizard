@@ -524,6 +524,7 @@ void QueryEditorLayout::ShowQueryCreator()
         ImGui::CloseCurrentPopup();
     }
     ImGui::PopItemWidth();
+    ImGui::Text("Info: If you use Waql, skip the $ sign at the start.");
 }
 
 int QueryEditorLayout::HandleArgInput(ImGuiInputTextCallbackData* data)
