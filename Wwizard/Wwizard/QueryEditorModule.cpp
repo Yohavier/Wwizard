@@ -342,7 +342,7 @@ void QueryEditorModule::CreateNewQuery(const std::string name, const QueryType t
     } 
     else if (type == QueryType::WAQLQUERY)
     {
-        AkJson argJson(AkJson::Map{ {{"waql", AkVariant(arg)}}});
+        AkJson argJson(AkJson::Map{ {{"waql", AkVariant("$" + arg)}}});
         BaseQueryStructure newQuery = BaseQueryStructure(name, guid, "", type, argJson);
         AddQueryToAllQueriesMap(newQuery);
 
