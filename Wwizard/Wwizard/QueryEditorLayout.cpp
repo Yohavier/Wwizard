@@ -13,10 +13,13 @@ QueryEditorLayout::QueryEditorLayout(std::unique_ptr<WwizardWwiseClient>& wwizar
     outputNode->Pos = ImVec2(500,200);
 }
 
+static bool runOnce;
 void QueryEditorLayout::RenderLayout()
 {
     if (!wwizardWwiseClient->IsConnected())
+    {
         return;
+    }
 
     SettingWidget();
 
@@ -441,58 +444,97 @@ void QueryEditorLayout::ShowQueryResults()
 
 void QueryEditorLayout::ShowQueryCreator()
 {
-    static char argText[124] = "pls enter your query text here....";
-    static char nameText[64] = "pls enter your query name here....";
-    static bool waql = false;
-    static bool waapi = false;
-
-    if (ImGui::Checkbox("Waapi", &waapi))
+    static char argText[124] = "";
+    static char nameText[64] = "";
+    static bool waql = false;           //true = waql, false = waapi
+ 
+    ImGui::SetNextWindowPos(ImVec2(ImGui::GetWindowPos().x + ImGui::GetWindowWidth(), ImGui::GetWindowPos().y + ImGui::GetTextLineHeight() * 7));
+    if (ImGui::BeginPopup("IntelliSense", ImGuiWindowFlags_NoFocusOnAppearing))
     {
-        waql = false;
-    }
-    if (ImGui::Checkbox("Waql", &waql))
-    {
-        waapi = false;
+        for (const auto& command : queryEditorModule->waqlIntelliSense->fittingCommands)
+        {
+            ImGui::Selectable(command.c_str());
+        }
+        ImGui::PushStyleColor(ImGuiCol_Text, IM_COL32(0, 255, 0, 255));      
+        for (const auto& suggestion : queryEditorModule->waqlIntelliSense->suggestions)
+        {
+            ImGui::Selectable(suggestion.c_str());
+        }
+        ImGui::PopStyleColor();
+        ImGui::EndPopup();
     }
 
-    ImGui::Text("label");
+    if (waql)
+    {
+        ImGui::PushStyleColor(ImGuiCol_Text, IM_COL32(153, 0, 0, 255));
+    }
+    else
+    {
+        ImGui::PushStyleColor(ImGuiCol_Text, IM_COL32(0, 153, 0, 255));
+    }
+    ImGui::Text("Waapi");
+    ImGui::PopStyleColor();
+    ImGui::SameLine();
+    ImGui::Checkbox("##Waql", &waql);
+    ImGui::SameLine();
+    if (!waql)
+    {
+        ImGui::PushStyleColor(ImGuiCol_Text, IM_COL32(153, 0, 0, 255));
+    }
+    else
+    {
+        ImGui::PushStyleColor(ImGuiCol_Text, IM_COL32(0, 153, 0, 255));
+    }
+    ImGui::Text("Waql");
+    ImGui::PopStyleColor();
+
+    ImGui::Text("Name: ");
     ImGui::SameLine();
     ImGui::InputText("##", nameText, IM_ARRAYSIZE(nameText));
 
-    ImGui::Text("MultiArg");
+    ImGui::Text("Argument: ");
     ImGui::SameLine();
-    ImGui::InputTextMultiline("###", argText, IM_ARRAYSIZE(argText));
 
-    if (ImGui::BeginPopup("Options"))
+    if (ImGui::InputText("###", argText, IM_ARRAYSIZE(argText), ImGuiInputTextFlags_CallbackEdit, HandleArgInput, (void*)&argText))
     {
-        ImGui::Text("Please select if its a Waapi or Waql Query!");
-        if (ImGui::Button("Close"))
-        {
-            ImGui::CloseCurrentPopup();
-        }
-        ImGui::EndPopup();
+        ImGui::SetKeyboardFocusHere(-1);
+        if(waql)
+            queryEditorModule->waqlIntelliSense->FindFittingCommands(static_cast<std::string>(argText));
+        ImGui::OpenPopup("IntelliSense");
     }
-    if (ImGui::Button("Submit Query", ImVec2(-FLT_MIN, 0.0f)))
+
+    ImGui::PushItemWidth(150);
+    if (ImGui::Button("Submit Query"))
     {
-        if (waapi)
-        {
-            queryEditorModule->CreateNewQuery(nameText, QueryType::WAAPIQUERY, argText);
-            ImGui::CloseCurrentPopup();
-        }
-        else if (waql)
+        if (waql)
         {
             queryEditorModule->CreateNewQuery(nameText, QueryType::WAQLQUERY, argText);
             ImGui::CloseCurrentPopup();
         }
         else
         {
-            ImGui::OpenPopup("Options");
+            queryEditorModule->CreateNewQuery(nameText, QueryType::WAAPIQUERY, argText);
+            ImGui::CloseCurrentPopup();
         }
     }
-    if (ImGui::Button("Close"))
+    ImGui::SameLine();
+    if (ImGui::Button("Abort"))
     {
         ImGui::CloseCurrentPopup();
     }
+    ImGui::PopItemWidth();
+    ImGui::Dummy(ImVec2(0, 50));
+    ImGui::Separator();
+    ImGui::Text("Info: If you use Waql, skip the $ sign at the start.");
+    if (ImGui::Button("Waql Documentation"))
+    {
+        OpenURL("https://www.audiokinetic.com/library/edge/?source=SDK&id=waql_introduction.html");
+    }
+}
+
+int QueryEditorLayout::HandleArgInput(ImGuiInputTextCallbackData* data)
+{
+    return 0;
 }
 
 void QueryEditorLayout::ShowQueryNodeEditor()

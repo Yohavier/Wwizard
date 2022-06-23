@@ -39,6 +39,8 @@ private:
     void SetUseQueryNodeEditor(bool newState);
     void UpdateSelectedNode(MyNode* newSelectedNode);
 
+    static int HandleArgInput(ImGuiInputTextCallbackData* data);
+
 public:
     std::map<std::string, std::function<MyNode* ()>> available_nodes
     {
@@ -56,7 +58,7 @@ public:
 private:
 	bool useQueryNodeEditor = true;
 	const std::unique_ptr<QueryEditorModule>& queryEditorModule;
-   
+
     MyNode* outputNode;
     MyNode* currentSelectedNode = nullptr;
 

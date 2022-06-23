@@ -22,26 +22,25 @@ QueryEditorModule::~QueryEditorModule()
 QueryEditorModule::QueryEditorModule(std::unique_ptr<WwizardWwiseClient>& wwizardClient)
     : wwizardClient(wwizardClient)
 {
-    if (wwizardClient->IsConnected())
-    {
-        wwiseQueryHierarchy.reset( new BaseQueryStructure());
-        FetchWwiseQueries();
-        LoadWaapiQueriesFromJson();
-        LoadWaqlQueriesFromJson();
-    }
+    waqlIntelliSense.reset(new WaqlIntelliSense(wwizardClient));
+    LoadWaapiQueriesFromJson();
+    LoadWaqlQueriesFromJson();
 }
 
 void QueryEditorModule::FetchWwiseQueries()
 {
     std::vector<std::string> optionList = { "id", "name", "type", "path" };
     AkJson parentObject = wwizardClient->GetObjectFromPath("\\Queries", optionList);
-    BaseQueryStructure parentStructureFolder = BaseQueryStructure(parentObject["return"].GetArray()[0]["name"].GetVariant().GetString(), parentObject["return"].GetArray()[0]["id"].GetVariant().GetString(), parentObject["return"].GetArray()[0]["path"].GetVariant().GetString(), QueryType::FOLDER);
+    if (!parentObject["return"].IsEmpty())
+    {
+        BaseQueryStructure parentStructureFolder = BaseQueryStructure(parentObject["return"].GetArray()[0]["name"].GetVariant().GetString(), parentObject["return"].GetArray()[0]["id"].GetVariant().GetString(), parentObject["return"].GetArray()[0]["path"].GetVariant().GetString(), QueryType::FOLDER);
 
-    wwiseQueryHierarchy->guid = parentStructureFolder.guid;
-    wwiseQueryHierarchy->name = parentStructureFolder.name;
-    wwiseQueryHierarchy->path = parentStructureFolder.path;
+        wwiseQueryHierarchy->guid = parentStructureFolder.guid;
+        wwiseQueryHierarchy->name = parentStructureFolder.name;
+        wwiseQueryHierarchy->path = parentStructureFolder.path;
 
-    FetchWwiseFolderchildren(*wwiseQueryHierarchy, optionList);
+        FetchWwiseFolderchildren(*wwiseQueryHierarchy, optionList);
+    }
 }
 
 void QueryEditorModule::FetchWwiseFolderchildren(BaseQueryStructure& parentStructureFolder, const std::vector<std::string>& optionList)
@@ -303,7 +302,7 @@ void QueryEditorModule::SaveCustomQueriesToJson()
     }
     d.AddMember("WaqlQueries", waqlQueries, d.GetAllocator());
 
-    auto path = static_cast<std::string>(SOLUTION_DIR) + "SavedData/CustomQueries.json";
+    auto path = static_cast<std::string>(SOLUTION_DIR) + "/Wwizard/SavedData/CustomQueries.json";
     FILE* fp = fopen(path.c_str(), "wb");
     if (fp != 0)
     {
@@ -341,7 +340,7 @@ void QueryEditorModule::CreateNewQuery(const std::string name, const QueryType t
     } 
     else if (type == QueryType::WAQLQUERY)
     {
-        AkJson argJson(AkJson::Map{ {{"waql", AkVariant(arg)}}});
+        AkJson argJson(AkJson::Map{ {{"waql", AkVariant("$" + arg)}}});
         BaseQueryStructure newQuery = BaseQueryStructure(name, guid, "", type, argJson);
         AddQueryToAllQueriesMap(newQuery);
 
@@ -410,6 +409,7 @@ void QueryEditorModule::OnConnectionStatusChange(const bool newConnectionStatus)
     if (newConnectionStatus)
     {
         ResetQueryModule();
+        waqlIntelliSense->OnConnected();
     } 
 }
 
