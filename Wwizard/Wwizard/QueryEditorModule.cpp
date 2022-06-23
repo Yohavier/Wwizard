@@ -23,26 +23,24 @@ QueryEditorModule::QueryEditorModule(std::unique_ptr<WwizardWwiseClient>& wwizar
     : wwizardClient(wwizardClient)
 {
     waqlIntelliSense.reset(new WaqlIntelliSense(wwizardClient));
-    if (wwizardClient->IsConnected())
-    {
-        wwiseQueryHierarchy.reset( new BaseQueryStructure());
-        FetchWwiseQueries();
-        LoadWaapiQueriesFromJson();
-        LoadWaqlQueriesFromJson();
-    }
+    LoadWaapiQueriesFromJson();
+    LoadWaqlQueriesFromJson();
 }
 
 void QueryEditorModule::FetchWwiseQueries()
 {
     std::vector<std::string> optionList = { "id", "name", "type", "path" };
     AkJson parentObject = wwizardClient->GetObjectFromPath("\\Queries", optionList);
-    BaseQueryStructure parentStructureFolder = BaseQueryStructure(parentObject["return"].GetArray()[0]["name"].GetVariant().GetString(), parentObject["return"].GetArray()[0]["id"].GetVariant().GetString(), parentObject["return"].GetArray()[0]["path"].GetVariant().GetString(), QueryType::FOLDER);
+    if (!parentObject["return"].IsEmpty())
+    {
+        BaseQueryStructure parentStructureFolder = BaseQueryStructure(parentObject["return"].GetArray()[0]["name"].GetVariant().GetString(), parentObject["return"].GetArray()[0]["id"].GetVariant().GetString(), parentObject["return"].GetArray()[0]["path"].GetVariant().GetString(), QueryType::FOLDER);
 
-    wwiseQueryHierarchy->guid = parentStructureFolder.guid;
-    wwiseQueryHierarchy->name = parentStructureFolder.name;
-    wwiseQueryHierarchy->path = parentStructureFolder.path;
+        wwiseQueryHierarchy->guid = parentStructureFolder.guid;
+        wwiseQueryHierarchy->name = parentStructureFolder.name;
+        wwiseQueryHierarchy->path = parentStructureFolder.path;
 
-    FetchWwiseFolderchildren(*wwiseQueryHierarchy, optionList);
+        FetchWwiseFolderchildren(*wwiseQueryHierarchy, optionList);
+    }
 }
 
 void QueryEditorModule::FetchWwiseFolderchildren(BaseQueryStructure& parentStructureFolder, const std::vector<std::string>& optionList)
