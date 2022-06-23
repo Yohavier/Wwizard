@@ -1,1 +1,1 @@
-{"WaapiQueries":[],"WaqlQueries":[]}
+{"WaapiQueries":[{"name":"asd","guid":"1655986926943","path":"","arg":null}],"WaqlQueries":[{"name":"asdasd","guid":"1655986919452","path":"","arg":{"waql":"$asd"}}]}

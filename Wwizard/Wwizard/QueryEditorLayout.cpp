@@ -446,8 +446,7 @@ void QueryEditorLayout::ShowQueryCreator()
 {
     static char argText[124] = "";
     static char nameText[64] = "";
-    static bool waql = false;
-    static bool waapi = false;
+    static bool waql = false;           //true = waql, false = waapi
  
     ImGui::SetNextWindowPos(ImVec2(ImGui::GetWindowPos().x + ImGui::GetWindowWidth(), ImGui::GetWindowPos().y + ImGui::GetTextLineHeight() * 7));
     if (ImGui::BeginPopup("IntelliSense", ImGuiWindowFlags_NoFocusOnAppearing))
@@ -465,16 +464,29 @@ void QueryEditorLayout::ShowQueryCreator()
         ImGui::EndPopup();
     }
 
-    if (ImGui::Checkbox("Waapi", &waapi))
+    if (waql)
     {
-        waql = false;
+        ImGui::PushStyleColor(ImGuiCol_Text, IM_COL32(153, 0, 0, 255));
     }
+    else
+    {
+        ImGui::PushStyleColor(ImGuiCol_Text, IM_COL32(0, 153, 0, 255));
+    }
+    ImGui::Text("Waapi");
+    ImGui::PopStyleColor();
     ImGui::SameLine();
-    if (ImGui::Checkbox("Waql", &waql))
+    ImGui::Checkbox("##Waql", &waql);
+    ImGui::SameLine();
+    if (!waql)
     {
-        waapi = false;
+        ImGui::PushStyleColor(ImGuiCol_Text, IM_COL32(153, 0, 0, 255));
     }
-
+    else
+    {
+        ImGui::PushStyleColor(ImGuiCol_Text, IM_COL32(0, 153, 0, 255));
+    }
+    ImGui::Text("Waql");
+    ImGui::PopStyleColor();
 
     ImGui::Text("Name: ");
     ImGui::SameLine();
@@ -486,7 +498,8 @@ void QueryEditorLayout::ShowQueryCreator()
     if (ImGui::InputText("###", argText, IM_ARRAYSIZE(argText), ImGuiInputTextFlags_CallbackEdit, HandleArgInput, (void*)&argText))
     {
         ImGui::SetKeyboardFocusHere(-1);
-        queryEditorModule->waqlIntelliSense->FindFittingCommands(static_cast<std::string>(argText));
+        if(waql)
+            queryEditorModule->waqlIntelliSense->FindFittingCommands(static_cast<std::string>(argText));
         ImGui::OpenPopup("IntelliSense");
     }
 
@@ -503,19 +516,15 @@ void QueryEditorLayout::ShowQueryCreator()
     ImGui::PushItemWidth(150);
     if (ImGui::Button("Submit Query"))
     {
-        if (waapi)
-        {
-            queryEditorModule->CreateNewQuery(nameText, QueryType::WAAPIQUERY, argText);
-            ImGui::CloseCurrentPopup();
-        }
-        else if (waql)
+        if (waql)
         {
             queryEditorModule->CreateNewQuery(nameText, QueryType::WAQLQUERY, argText);
             ImGui::CloseCurrentPopup();
         }
         else
         {
-            ImGui::OpenPopup("Error");
+            queryEditorModule->CreateNewQuery(nameText, QueryType::WAAPIQUERY, argText);
+            ImGui::CloseCurrentPopup();
         }
     }
     ImGui::SameLine();
