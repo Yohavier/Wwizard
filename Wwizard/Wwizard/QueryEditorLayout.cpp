@@ -503,16 +503,6 @@ void QueryEditorLayout::ShowQueryCreator()
         ImGui::OpenPopup("IntelliSense");
     }
 
-    if (ImGui::BeginPopup("Error"))
-    {
-        ImGui::Text("Please select if its a Waapi or Waql Query!");
-        if (ImGui::Button("Close"))
-        {
-            ImGui::CloseCurrentPopup();
-        }
-        ImGui::EndPopup();
-    }
-
     ImGui::PushItemWidth(150);
     if (ImGui::Button("Submit Query"))
     {
@@ -533,7 +523,13 @@ void QueryEditorLayout::ShowQueryCreator()
         ImGui::CloseCurrentPopup();
     }
     ImGui::PopItemWidth();
+    ImGui::Dummy(ImVec2(0, 50));
+    ImGui::Separator();
     ImGui::Text("Info: If you use Waql, skip the $ sign at the start.");
+    if (ImGui::Button("Waql Documentation"))
+    {
+        OpenURL("https://www.audiokinetic.com/library/edge/?source=SDK&id=waql_introduction.html");
+    }
 }
 
 int QueryEditorLayout::HandleArgInput(ImGuiInputTextCallbackData* data)
