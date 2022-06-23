@@ -15,7 +15,8 @@ file(GLOB_RECURSE SRC_MODULES
 	Wwizard/Wwizard/NamingConventionModule.cpp
 	Wwizard/Wwizard/ToolboxModule.cpp
 	Wwizard/Wwizard/SortOriginalsModule.cpp
-	Wwizard/Wwizard/QueryEditorModule.cpp)
+	Wwizard/Wwizard/QueryEditorModule.cpp
+	Wwizard/Wwizard/WaqlIntelliSense.cpp)
 
 file(GLOB_RECURSE SRC_IMGUI_IMNODES
 Wwizard/ThirdParty/ImNodes/ImNodes.cpp
@@ -118,7 +119,8 @@ file(GLOB_RECURSE HEADER_MODULES_QUERYEDITOR
 	Wwizard/Wwizard/BaseQueryStructure.h
 	Wwizard/Wwizard/MyNode.h
 	Wwizard/Wwizard/QueryEditorModule.h
-	Wwizard/Wwizard/QueryType.h)
+	Wwizard/Wwizard/QueryType.h
+	Wwizard/Wwizard/WaqlIntelliSense.h)
 source_group("Header Files/Modules/QueryEditorModule" FILES ${HEADER_MODULES_QUERYEDITOR})
 
 file(GLOB_RECURSE HEADER
