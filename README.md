@@ -105,9 +105,10 @@ And: Only files that are found in every query will be displayed in the results.
 ![nodegraph](https://user-images.githubusercontent.com/40822700/172952233-9732aee3-c718-4973-bd97-a9037d74cac8.PNG)
 
 ### Create a new query
-You can also create new queries with Waapi or Waql and save them. Currently it is a bit hard to create new ones, because there is no help/IntelliSense and one needs to know about Waapi or Waql. 
+You can also create new queries with Waapi or Waql and save them.
+For Waql there is IntelliSense in place that help you creating new Queries.
 
-![create query](https://user-images.githubusercontent.com/40822700/172952210-41513759-1a39-4afe-8b6b-11171f68d725.PNG)
+![CreateQuery](https://user-images.githubusercontent.com/40822700/175394535-218badda-02a2-4392-bc9a-47c112a332ee.PNG)
 
 ## Toolbox
 ### Remove invalid events
