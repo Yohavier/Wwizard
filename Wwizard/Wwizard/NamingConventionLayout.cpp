@@ -195,12 +195,14 @@ void NamingConventionLayout::RenderLayout()
         {
             static std::string newSuffix = "";
 
-            ImGui::BeginColumns("suffix", 3);
+            ImGui::BeginColumns("suffix", 4);
             ColoredHeadline("Container");
             ImGui::NextColumn();
             ColoredHeadline("String suffix");
             ImGui::NextColumn();
             ColoredHeadline("Number suffix");
+            ImGui::NextColumn();
+            ColoredHeadline("Allow Container to be enumaration of previous");
             ImGui::Separator();
             ImGui::NextColumn();
 
@@ -252,10 +254,6 @@ void NamingConventionLayout::RenderLayout()
                     }
                 }
 
-
-                //ImGui::PushItemWidth(100);
-                //ImGui::InputText("##Layers", &(namingConventionModule->containerSettings[containerType].stringSuffixes));
-                //ImGui::PopItemWidth();
                 ImGui::NextColumn();
 
                 ImGui::Checkbox("##ApplyNumber", &(namingConventionModule->activeNamingSetting->containerSettings[containerType].applyNumberSuffix));
@@ -265,6 +263,9 @@ void NamingConventionLayout::RenderLayout()
                 ImGui::PushItemWidth(100);
                 ImGui::InputInt("##MaxNumber", &(namingConventionModule->activeNamingSetting->containerSettings[containerType].maxNumberAllowed),1);
                 ImGui::PopItemWidth();
+                
+                ImGui::NextColumn();
+                ImGui::Checkbox("##allowEnumeration", &(namingConventionModule->activeNamingSetting->containerSettings[containerType].allowUseContainerAsEnumeration));
                 ImGui::Separator();
                 ImGui::NextColumn();
 

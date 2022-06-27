@@ -174,11 +174,12 @@ void NamingConventionModule::LoadNamingConventionSettings(std::filesystem::path 
 			{
 				if (d["ContainerSettings"].HasMember(container.c_str()))
 				{
-					if (d["ContainerSettings"][container.c_str()].HasMember("allowNumberSuffix") && d["ContainerSettings"][container.c_str()].HasMember("allowStringSuffix") && d["ContainerSettings"][container.c_str()].HasMember("maxNumberAllowed"))
+					if (d["ContainerSettings"][container.c_str()].HasMember("allowNumberSuffix") && d["ContainerSettings"][container.c_str()].HasMember("allowStringSuffix") && d["ContainerSettings"][container.c_str()].HasMember("maxNumberAllowed") && d["ContainerSettings"][container.c_str()].HasMember("allowUseContainerAsEnumeration"))
 					{
 						newNamingSetting.containerSettings.emplace(container.c_str(), ContainerSetting(d["ContainerSettings"][container.c_str()]["allowNumberSuffix"].GetBool(),
 							d["ContainerSettings"][container.c_str()]["allowStringSuffix"].GetBool(),
-							d["ContainerSettings"][container.c_str()]["maxNumberAllowed"].GetInt()));
+							d["ContainerSettings"][container.c_str()]["maxNumberAllowed"].GetInt(),
+							d["ContainerSettings"][container.c_str()]["allowUseContainerAsEnumeration"].GetBool()));
 					}
 					if (d["ContainerSettings"][container.c_str()].HasMember("suffixes"))
 					{
@@ -265,6 +266,10 @@ void NamingConventionModule::SaveSettings(const std::string settingToSaveName, N
 		rapidjson::Value maxNumberAllowed;
 		maxNumberAllowed.SetInt(container.second.maxNumberAllowed);
 		cSettings.AddMember("maxNumberAllowed", maxNumberAllowed, d.GetAllocator());
+
+		rapidjson::Value allowUseEnumeration;
+		allowUseEnumeration.SetBool(container.second.allowUseContainerAsEnumeration);
+		cSettings.AddMember("allowUseContainerAsEnumeration", allowUseEnumeration, d.GetAllocator());
 
 		rapidjson::Value stringSuffixes;
 		stringSuffixes.SetArray();
@@ -410,6 +415,16 @@ bool NamingConventionModule::CheckNamingSettings(const std::string& currentFileN
 {
 	bool passingFlag = true;
 	std::string currentSuffix = "";
+	std::string checkedParentFileName = parentFileName;
+
+	for (const auto& keyName : wwiseWorkFoldersToWwuType)
+	{
+		if (keyName.first == parentFileName)
+		{
+			checkedParentFileName = "";
+			break;
+		}
+	}
 
 	if (!activeNamingSetting->wwuSettings[wwuSettingKey].allowSpace)
 	{
@@ -454,13 +469,13 @@ bool NamingConventionModule::CheckNamingSettings(const std::string& currentFileN
 
 	if (passingFlag)
 	{
-		if (activeNamingSetting->wwuSettings[wwuSettingKey].applyPrefix)
+ 		if (activeNamingSetting->wwuSettings[wwuSettingKey].applyPrefix)
 		{
-			passingFlag = IsParentHierarchyMatching(currentFileName, parentFileName, activeNamingSetting->wwuSettings[wwuSettingKey].prefixToApply, currentSuffix, parentContainerKey);
+			passingFlag = IsParentHierarchyMatching(currentFileName, checkedParentFileName, activeNamingSetting->wwuSettings[wwuSettingKey].prefixToApply, currentSuffix, parentContainerKey, containerKey);
 		}
 		else
 		{
-			passingFlag = IsParentHierarchyMatching(currentFileName, parentFileName, "", currentSuffix, parentContainerKey);
+			passingFlag = IsParentHierarchyMatching(currentFileName, checkedParentFileName, "", currentSuffix, parentContainerKey, containerKey);
 		}
 
 		if (!passingFlag)
@@ -471,7 +486,7 @@ bool NamingConventionModule::CheckNamingSettings(const std::string& currentFileN
 	return passingFlag;
 }
 
-bool NamingConventionModule::IsParentHierarchyMatching(const std::string& fileName, const std::string& parentFileName, const std::string& prefix, const std::string& suffix, const std::string& parentContainerKey)
+bool NamingConventionModule::IsParentHierarchyMatching(const std::string& fileName, const std::string& parentFileName, const std::string& prefix, const std::string& suffix, const std::string& parentContainerKey, const std::string& currentContainerKey)
 {
 	std::string parentSuffix = "";
 	
@@ -526,9 +541,9 @@ bool NamingConventionModule::IsParentHierarchyMatching(const std::string& fileNa
 		cleanParentName = cleanParentName.substr(prefix.length() + 1, cleanParentName.length() - prefix.length() - 1);
 	}
 
-	if (cleanParentName < cleanFileName)
+	if (cleanFileName == parentFileName && activeNamingSetting->containerSettings[currentContainerKey].allowUseContainerAsEnumeration && activeNamingSetting->containerSettings[currentContainerKey].applyNumberSuffix)
 	{
-		return false;
+		return true;
 	}
 
 	if (!IsOneUnderscorePerNewLayer(cleanFileName, cleanParentName))

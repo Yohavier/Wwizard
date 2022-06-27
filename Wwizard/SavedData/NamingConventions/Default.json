@@ -153,6 +153,7 @@
       "name": "AcousticTexture",
       "allowNumberSuffix": false,
       "allowStringSuffix": false,
+      "allowUseContainerAsEnumeration": false,
       "maxNumberAllowed": 0,
       "suffixes": []
     },
@@ -160,6 +161,7 @@
       "name": "ActorMixer",
       "allowNumberSuffix": false,
       "allowStringSuffix": false,
+      "allowUseContainerAsEnumeration": false,
       "maxNumberAllowed": 0,
       "suffixes": []
     },
@@ -167,6 +169,7 @@
       "name": "AudioDevice",
       "allowNumberSuffix": false,
       "allowStringSuffix": false,
+      "allowUseContainerAsEnumeration": false,
       "maxNumberAllowed": 0,
       "suffixes": []
     },
@@ -174,6 +177,7 @@
       "name": "AuxBus",
       "allowNumberSuffix": false,
       "allowStringSuffix": false,
+      "allowUseContainerAsEnumeration": false,
       "maxNumberAllowed": 0,
       "suffixes": []
     },
@@ -181,6 +185,7 @@
       "name": "BlendContainer",
       "allowNumberSuffix": false,
       "allowStringSuffix": false,
+      "allowUseContainerAsEnumeration": false,
       "maxNumberAllowed": 0,
       "suffixes": []
     },
@@ -188,6 +193,7 @@
       "name": "Bus",
       "allowNumberSuffix": false,
       "allowStringSuffix": false,
+      "allowUseContainerAsEnumeration": false,
       "maxNumberAllowed": 0,
       "suffixes": []
     },
@@ -195,6 +201,7 @@
       "name": "DialogueEvent",
       "allowNumberSuffix": false,
       "allowStringSuffix": false,
+      "allowUseContainerAsEnumeration": false,
       "maxNumberAllowed": 0,
       "suffixes": []
     },
@@ -202,6 +209,7 @@
       "name": "Event",
       "allowNumberSuffix": true,
       "allowStringSuffix": true,
+      "allowUseContainerAsEnumeration": false,
       "maxNumberAllowed": 99,
       "suffixes": [ "lp", "os" ]
     },
@@ -209,6 +217,7 @@
       "name": "Folder",
       "allowNumberSuffix": false,
       "allowStringSuffix": false,
+      "allowUseContainerAsEnumeration": false,
       "maxNumberAllowed": 0,
       "suffixes": []
     },
@@ -216,6 +225,7 @@
       "name": "MusicPlaylistContainer",
       "allowNumberSuffix": false,
       "allowStringSuffix": false,
+      "allowUseContainerAsEnumeration": false,
       "maxNumberAllowed": 0,
       "suffixes": []
     },
@@ -223,6 +233,7 @@
       "name": "MusicSegment",
       "allowNumberSuffix": false,
       "allowStringSuffix": false,
+      "allowUseContainerAsEnumeration": false,
       "maxNumberAllowed": 0,
       "suffixes": []
     },
@@ -230,6 +241,7 @@
       "name": "MusicSwitchContainer",
       "allowNumberSuffix": false,
       "allowStringSuffix": false,
+      "allowUseContainerAsEnumeration": false,
       "maxNumberAllowed": 0,
       "suffixes": []
     },
@@ -237,6 +249,7 @@
       "name": "MusicTrack",
       "allowNumberSuffix": false,
       "allowStringSuffix": false,
+      "allowUseContainerAsEnumeration": true,
       "maxNumberAllowed": 0,
       "suffixes": []
     },
@@ -244,6 +257,7 @@
       "name": "Query",
       "allowNumberSuffix": false,
       "allowStringSuffix": false,
+      "allowUseContainerAsEnumeration": false,
       "maxNumberAllowed": 0,
       "suffixes": []
     },
@@ -251,6 +265,7 @@
       "name": "RandomSequenceContainer",
       "allowNumberSuffix": false,
       "allowStringSuffix": false,
+      "allowUseContainerAsEnumeration": false,
       "maxNumberAllowed": 0,
       "suffixes": []
     },
@@ -258,6 +273,7 @@
       "name": "Sound",
       "allowNumberSuffix": true,
       "allowStringSuffix": false,
+      "allowUseContainerAsEnumeration": true,
       "maxNumberAllowed": 99,
       "suffixes": []
     },
@@ -265,6 +281,7 @@
       "name": "SoundBank",
       "allowNumberSuffix": false,
       "allowStringSuffix": false,
+      "allowUseContainerAsEnumeration": false,
       "maxNumberAllowed": 0,
       "suffixes": []
     },
@@ -272,6 +289,7 @@
       "name": "State",
       "allowNumberSuffix": false,
       "allowStringSuffix": false,
+      "allowUseContainerAsEnumeration": false,
       "maxNumberAllowed": 0,
       "suffixes": []
     },
@@ -279,6 +297,7 @@
       "name": "StateGroup",
       "allowNumberSuffix": false,
       "allowStringSuffix": false,
+      "allowUseContainerAsEnumeration": false,
       "maxNumberAllowed": 0,
       "suffixes": []
     },
@@ -286,6 +305,7 @@
       "name": "Switch",
       "allowNumberSuffix": false,
       "allowStringSuffix": false,
+      "allowUseContainerAsEnumeration": false,
       "maxNumberAllowed": 0,
       "suffixes": []
     },
@@ -293,6 +313,7 @@
       "name": "SwitchContainer",
       "allowNumberSuffix": false,
       "allowStringSuffix": false,
+      "allowUseContainerAsEnumeration": false,
       "maxNumberAllowed": 0,
       "suffixes": []
     },
@@ -300,6 +321,7 @@
       "name": "SwitchGroup",
       "allowNumberSuffix": false,
       "allowStringSuffix": false,
+      "allowUseContainerAsEnumeration": false,
       "maxNumberAllowed": 0,
       "suffixes": []
     },
@@ -307,6 +329,7 @@
       "name": "Trigger",
       "allowNumberSuffix": false,
       "allowStringSuffix": false,
+      "allowUseContainerAsEnumeration": false,
       "maxNumberAllowed": 0,
       "suffixes": []
     },
@@ -314,6 +337,7 @@
       "name": "WorkUnit",
       "allowNumberSuffix": false,
       "allowStringSuffix": false,
+      "allowUseContainerAsEnumeration": false,
       "maxNumberAllowed": 0,
       "suffixes": []
     }

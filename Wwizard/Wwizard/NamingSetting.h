@@ -23,10 +23,11 @@ struct WwuSetting
 struct ContainerSetting
 {
 	ContainerSetting() = default;
-	ContainerSetting(bool allowNumberSuffix, bool allowStringSuffix, int maxNumberAllowed)
+	ContainerSetting(bool allowNumberSuffix, bool allowStringSuffix, int maxNumberAllowed, bool allowUseContainerAsEnumeration)
 		: applyNumberSuffix(allowNumberSuffix)
 		, applyStringSuffix(allowStringSuffix)
 		, maxNumberAllowed(maxNumberAllowed)
+		, allowUseContainerAsEnumeration(allowUseContainerAsEnumeration)
 	{
 	}
 
@@ -34,7 +35,7 @@ struct ContainerSetting
 	bool applyStringSuffix = false;
 
 	int maxNumberAllowed = 0;
-
+	bool allowUseContainerAsEnumeration = false;
 	std::vector<std::string> stringSuffixVector;
 
 	void AddNewSuffix(std::string& newSuffix)

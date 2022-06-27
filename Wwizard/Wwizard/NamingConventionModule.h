@@ -67,7 +67,7 @@ private:
 	bool IsUppercaseInPath(const std::string& fileName);
 	bool IsSpaceInPath(const std::string& fileName);
 	bool IsPrefixRight(const std::string& fileName, const std::string& prefix);
-	bool IsParentHierarchyMatching(const std::string& fileName, const std::string& parentFileName, const std::string& prefix, const std::string& suffix, const std::string& parentContainerKey);
+	bool IsParentHierarchyMatching(const std::string& fileName, const std::string& parentFileName, const std::string& prefix, const std::string& suffix, const std::string& parentContainerKey, const std::string& currentContainerKey);
 	bool IsOneUnderscorePerNewLayer(const std::string& fileName, const std::string& parentName);
 
 	std::string RemovePrefixSuffix(const std::string& fileName, const std::string& wwuSettingKey, const std::string& containerSettingKey);
